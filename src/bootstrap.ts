@@ -1,4 +1,4 @@
-import { getClientMode, installSecureFetch, secureUrl } from './secure-assets';
+import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';
 
 installSecureFetch();
 
@@ -16,13 +16,43 @@ const setBootDebug = (message: string) =>
 
 setBootDebug('boot: secure fetch installed');
 
+const deployBaseUrl = (): string =>
+{
+    try
+    {
+        const loaderBase = (window as any).__nitroLoaderBase;
+        if(typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
+    }
+    catch {}
+
+    try
+    {
+        const moduleUrl = (import.meta as any).url;
+        if(typeof moduleUrl === 'string' && moduleUrl.length) return new URL('..', new URL('.', moduleUrl)).toString();
+    }
+    catch {}
+
+    try
+    {
+        const base = (import.meta as any).env?.BASE_URL;
+        if(typeof base === 'string' && base.length)
+        {
+            const trimmed = base.replace(/^\/+/, '').replace(/\/+$/, '');
+            return trimmed ? `${ window.location.origin }/${ trimmed }/` : `${ window.location.origin }/`;
+        }
+    }
+    catch {}
+
+    return `${ window.location.origin }/`;
+};
+
 const loadClientMode = async () =>
 {
     try
     {
         if((window as any).__nitroClientMode) return;
 
-        const url = new URL('configuration/client-mode.json', `${ window.location.origin }/`);
+        const url = new URL('configuration/client-mode.json', deployBaseUrl());
         url.searchParams.set('v', Date.now().toString(36));
 
         const response = await fetch(url.toString());
@@ -42,21 +72,13 @@ await loadClientMode();
 
 const search = new URLSearchParams(window.location.search);
 const clientMode = getClientMode();
-const cacheBustUrl = (path: string): string =>
-{
-    const url = new URL(path.replace(/^\/+/, ''), `${ window.location.origin }/`);
-
-    url.searchParams.set('v', Date.now().toString(36));
-
-    return url.toString();
-};
 
 (window as any).NitroSecureApiUrl = clientMode.apiBaseUrl || window.location.origin;
 (window as any).NitroClientMode = clientMode;
 (window as any).NitroConfig = {
     'config.urls': [
-        clientMode.secureAssetsEnabled ? secureUrl('config', 'renderer-config.json', true) : cacheBustUrl('configuration/renderer-config.json'),
-        clientMode.secureAssetsEnabled ? secureUrl('config', 'ui-config.json', true) : cacheBustUrl('configuration/ui-config.json')
+        configFileUrl('renderer-config.json', true),
+        configFileUrl('ui-config.json', true)
     ],
     'sso.ticket': search.get('sso') || null,
     'forward.type': search.get('room') ? 2 : -1,

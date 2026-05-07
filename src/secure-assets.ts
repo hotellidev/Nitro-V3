@@ -19,6 +19,36 @@ const CLIENT_MODE_DEFAULTS: NitroClientMode = {
     secureApiEnabled: true
 };
 
+const getDeployBaseUrl = (): string =>
+{
+    try
+    {
+        const loaderBase = (window as any).__nitroLoaderBase;
+        if(typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
+    }
+    catch {}
+
+    try
+    {
+        const moduleUrl = (import.meta as any).url;
+        if(typeof moduleUrl === 'string' && moduleUrl.length) return new URL('..', new URL('.', moduleUrl)).toString();
+    }
+    catch {}
+
+    try
+    {
+        const base = (import.meta as any).env?.BASE_URL;
+        if(typeof base === 'string' && base.length)
+        {
+            const trimmed = base.replace(/^\/+/, '').replace(/\/+$/, '');
+            return trimmed ? `${ window.location.origin }/${ trimmed }/` : `${ window.location.origin }/`;
+        }
+    }
+    catch {}
+
+    return `${ window.location.origin }/`;
+};
+
 const isDebugEnabled = (): boolean =>
 {
     try
@@ -204,7 +234,7 @@ const getPlainAssetBase = (kind: 'config' | 'gamedata'): string =>
 
     if(typeof configured === 'string' && configured.length) return configured.endsWith('/') ? configured : `${ configured }/`;
 
-    if(kind === 'config') return `${ window.location.origin }/configuration/`;
+    if(kind === 'config') return new URL('configuration/', getDeployBaseUrl()).toString();
 
     return `${ window.location.origin }/nitro/gamedata/`;
 };
@@ -226,7 +256,7 @@ export const secureUrl = (kind: 'config' | 'gamedata', file: string, cacheBust =
 {
     if(!getClientMode().secureAssetsEnabled)
     {
-        const plainUrl = new URL(file.replace(/^\/+/, ''), `${ window.location.origin }/`);
+        const plainUrl = new URL(file.replace(/^\/+/, ''), getPlainAssetBase(kind));
 
         if(cacheBust) plainUrl.searchParams.set('v', Date.now().toString(36));
 
@@ -243,7 +273,7 @@ export const configFileUrl = (file: string, cacheBust = false): string =>
 {
     if(getClientMode().secureAssetsEnabled) return secureUrl('config', file, cacheBust);
 
-    const plainUrl = new URL(`configuration/${ file.replace(/^\/+/, '') }`, `${ window.location.origin }/`);
+    const plainUrl = new URL(file.replace(/^\/+/, ''), getPlainAssetBase('config'));
 
     if(cacheBust) plainUrl.searchParams.set('v', Date.now().toString(36));
 

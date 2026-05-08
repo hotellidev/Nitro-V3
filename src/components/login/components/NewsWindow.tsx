@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { t } from '../utils/i18n';
+import { interpolate, t } from '../utils/i18n';
 import { resolveNewsImage, resolveNewsLink } from '../utils/news';
 
 interface NewsItem
@@ -11,6 +11,26 @@ interface NewsItem
     linkText: string;
     linkUrl: string;
 }
+
+interface RawNewsItem
+{
+    id?: number;
+    title?: string;
+    body?: string;
+    image?: string | null;
+    link?: string;
+    linkUrl?: string;
+    linkText?: string;
+}
+
+const normalizeNewsItem = (raw: RawNewsItem, fallbackId: number): NewsItem => ({
+    id: typeof raw.id === 'number' ? raw.id : fallbackId,
+    title: typeof raw.title === 'string' ? raw.title : '',
+    body: typeof raw.body === 'string' ? raw.body : '',
+    image: typeof raw.image === 'string' && raw.image.length ? interpolate(raw.image) : null,
+    linkText: typeof raw.linkText === 'string' ? raw.linkText : '',
+    linkUrl: interpolate((typeof raw.linkUrl === 'string' && raw.linkUrl) || (typeof raw.link === 'string' ? raw.link : ''))
+});
 
 interface NewsWindowProps { newsUrl: string; }
 
@@ -38,10 +58,10 @@ export const NewsWindow: FC<NewsWindowProps> = ({ newsUrl }) =>
             .then((json: unknown) =>
             {
                 if(cancelled) return;
-                const list = Array.isArray((json as { news?: unknown })?.news)
-                    ? (json as { news: NewsItem[] }).news
-                    : [];
-                setItems(list);
+                const rawList = Array.isArray((json as { news?: unknown })?.news)
+                    ? (json as { news: RawNewsItem[] }).news
+                    : Array.isArray(json) ? (json as RawNewsItem[]) : [];
+                setItems(rawList.map((raw, idx) => normalizeNewsItem(raw, idx + 1)));
             })
             .catch(() => { if(!cancelled) setFailed(true); });
         return () =>

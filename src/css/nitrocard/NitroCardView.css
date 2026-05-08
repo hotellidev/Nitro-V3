@@ -153,16 +153,16 @@
     &.active {
         height: 100%;
         overflow: hidden;
-        background: rgba(#fff, 0.5);
-        border-bottom: 1px solid rgba(#000, 0.2);
+        background: rgba(255, 255, 255, 0.5);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     }
 
     .nitro-card-accordion-set-header {
-        border-bottom: 1px solid rgba(#000, 0.2);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     }
 }
 
-@include media-breakpoint-down(lg) {
+@media (max-width: 991.98px) {
     .nitro-card {
         resize: none !important;
         max-width: calc(100vw - 16px) !important;

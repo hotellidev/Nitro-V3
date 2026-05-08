@@ -1,9 +1,9 @@
 (() => {
   const ASSET_KEY = new TextEncoder().encode("slogga-dist-assets-2026");
   const MODE_DEFAULTS = {
-    distObfuscationEnabled: true,
-    secureAssetsEnabled: true,
-    secureApiEnabled: true
+    distObfuscationEnabled: false,
+    secureAssetsEnabled: false,
+    secureApiEnabled: false
   };
 
   const isDebug = () => {
@@ -37,6 +37,9 @@
   };
 
   const getBase = () => {
+    if(typeof window.__nitroLoaderBase === "string" && window.__nitroLoaderBase) {
+      try { return new URL(window.__nitroLoaderBase); } catch {}
+    }
     const source = document.currentScript?.src || location.href;
     return new URL(".", source);
   };
@@ -81,10 +84,17 @@
     return [...new Map(urls.map(url => [url.href, url])).values()];
   };
 
+  const expandAssetCandidates = (path) => {
+    const base = getBase();
+    if(/^https?:\/\//i.test(path)) return [new URL(path)];
+    if(path.startsWith("/")) return [new URL(path, base.origin + "/")];
+    return resolveAssetCandidates(path);
+  };
+
   const fetchBytes = async (path) => {
     let error = null;
     debug("loader: fetching " + path);
-    for(const candidate of resolveAssetCandidates(path)) {
+    for(const candidate of expandAssetCandidates(path)) {
       try {
         debug("loader: try " + candidate.href);
         const response = await fetch(withCacheBust(candidate), { cache: "no-store" });
@@ -110,9 +120,39 @@
     debug("loader: css injected from dat");
   };
 
+  const matchesContentType = (contentType, accepted) => {
+    if(!contentType) return true;
+    return accepted.some(token => contentType.indexOf(token) !== -1);
+  };
+
+  const probePlainAsset = async (path, accepted) => {
+    let lastError = null;
+    for(const candidate of expandAssetCandidates(path)) {
+      try {
+        debug("loader: probe " + candidate.href);
+        const response = await fetch(withCacheBust(candidate), { cache: "no-store" });
+        if(!response.ok) {
+          lastError = new Error("asset " + candidate.pathname + " " + response.status);
+          continue;
+        }
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        if(!matchesContentType(contentType, accepted)) {
+          lastError = new Error("asset " + candidate.pathname + " wrong type " + contentType);
+          continue;
+        }
+        debug("loader: probe ok " + candidate.href);
+        const url = new URL(candidate.href);
+        url.searchParams.set("v", Date.now().toString(36));
+        return url;
+      } catch(caught) {
+        lastError = caught;
+      }
+    }
+    throw lastError || new Error("asset " + path + " not found");
+  };
+
   const loadPlainCss = async (path) => {
-    const href = resolveAssetCandidates(path)[0];
-    href.searchParams.set("v", Date.now().toString(36));
+    const href = await probePlainAsset(path, ["text/css"]);
     await new Promise((resolve, reject) => {
       const link = document.createElement("link");
       link.rel = "stylesheet";
@@ -136,9 +176,8 @@
   };
 
   const importPlainJs = async (path) => {
-    const href = resolveAssetCandidates(path)[0];
-    href.searchParams.set("v", Date.now().toString(36));
-    debug("loader: importing plain js");
+    const href = await probePlainAsset(path, ["javascript", "ecmascript"]);
+    debug("loader: importing plain js " + href.href);
     await import(href.href);
     debug("loader: plain js imported");
   };
@@ -164,21 +203,132 @@
     }
   };
 
+  const fetchManifest = async () => {
+    const base = getBase();
+    const candidates = [
+      new URL(".vite/manifest.json", base.origin + "/"),
+      new URL("manifest.json", base.origin + "/"),
+      new URL(".vite/manifest.json", base),
+      new URL("manifest.json", base)
+    ];
+    const seen = new Set();
+    for(const candidate of candidates) {
+      if(seen.has(candidate.href)) continue;
+      seen.add(candidate.href);
+      try {
+        const response = await fetch(withCacheBust(new URL(candidate.href)), { cache: "no-store" });
+        if(!response.ok) continue;
+        const json = await response.json();
+        if(json && typeof json === "object") {
+          debug("loader: manifest from " + candidate.href);
+          return { manifest: json, base: new URL(".", candidate.href) };
+        }
+      } catch {}
+    }
+    return null;
+  };
+
+  const findEntryFromManifest = (manifest) => {
+    let bootstrap = null;
+    for(const key of Object.keys(manifest)) {
+      const entry = manifest[key];
+      if(!entry || typeof entry !== "object" || !entry.isEntry) continue;
+      if(/bootstrap\./.test(key) || /bootstrap\./.test(entry.file || "")) {
+        bootstrap = entry;
+        break;
+      }
+      if(!bootstrap) bootstrap = entry;
+    }
+    if(!bootstrap) return null;
+    const css = Array.isArray(bootstrap.css) ? bootstrap.css.slice() : [];
+    return { js: bootstrap.file, css };
+  };
+
+  const resolveManifestPath = (manifestBase, file) => {
+    if(/^https?:\/\//i.test(file)) return file;
+    if(file.startsWith("/")) return file;
+    return new URL(file, manifestBase.origin + "/").pathname;
+  };
+
+  const isLoaderUrl = (href) => /(?:^|\/)bootstrap\.js(?:$|\?|#)/i.test(href) || /(?:^|\/)asset-loader\.js(?:$|\?|#)/i.test(href);
+
+  const fetchEntryFromIndexHtml = async () => {
+    const base = getBase();
+    const candidates = [
+      new URL("/index.html", base.origin + "/"),
+      new URL("/", base.origin + "/")
+    ];
+    for(const candidate of candidates) {
+      try {
+        const response = await fetch(withCacheBust(new URL(candidate.href)), { cache: "no-store" });
+        if(!response.ok) continue;
+        const contentType = (response.headers.get("content-type") || "").toLowerCase();
+        if(contentType && contentType.indexOf("html") === -1) continue;
+        const html = await response.text();
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        if(!doc) continue;
+        const resolveAttr = (raw) => {
+          if(!raw) return "";
+          if(/^https?:\/\//i.test(raw)) return raw;
+          try { return new URL(raw, candidate.href).pathname; }
+          catch { return raw; }
+        };
+        const scriptNode = Array.from(doc.querySelectorAll('script[type="module"][src]'))
+          .map(node => node.getAttribute("src") || "")
+          .find(src => src && !isLoaderUrl(src));
+        if(!scriptNode) continue;
+        const cssNodes = Array.from(doc.querySelectorAll('link[rel="stylesheet"][href]'))
+          .map(node => node.getAttribute("href") || "")
+          .filter(href => href && !isLoaderUrl(href));
+        const jsAbs = resolveAttr(scriptNode);
+        const cssAbs = cssNodes.map(resolveAttr);
+        debug("loader: entry from index.html " + jsAbs);
+        return { js: jsAbs, css: cssAbs };
+      } catch {}
+    }
+    return null;
+  };
+
   (async () => {
     debug("loader: start");
     renderShell();
     const mode = await readClientMode();
+
+    let jsPath = null;
+    let cssPaths = [];
+    const manifestResult = await fetchManifest();
+    if(manifestResult) {
+      const entry = findEntryFromManifest(manifestResult.manifest);
+      if(entry) {
+        jsPath = resolveManifestPath(manifestResult.base, entry.js);
+        if(entry.css.length) cssPaths = entry.css.map(file => resolveManifestPath(manifestResult.base, file));
+        debug("loader: entry from manifest " + jsPath);
+      }
+    }
+    if(!jsPath) {
+      const indexEntry = await fetchEntryFromIndexHtml();
+      if(indexEntry) {
+        jsPath = indexEntry.js;
+        if(indexEntry.css.length) cssPaths = indexEntry.css;
+      }
+    }
+    if(!jsPath) {
+      jsPath = "./assets/app.js";
+      cssPaths = ["./assets/app.css"];
+      debug("loader: entry fallback to app.js/app.css");
+    }
+
     if(mode.distObfuscationEnabled) {
-      const [cssBytes, jsBytes] = await Promise.all([
-        loadDatAsset("./assets/app.css.dat"),
-        loadDatAsset("./assets/app.js.dat")
+      const [cssBytesList, jsBytes] = await Promise.all([
+        Promise.all(cssPaths.map(path => loadDatAsset(path + ".dat"))),
+        loadDatAsset(jsPath + ".dat")
       ]);
-      injectCssText(cssBytes);
+      cssBytesList.forEach(bytes => injectCssText(bytes));
       await importBytes(jsBytes);
       return;
     }
-    await loadPlainCss("./assets/app.css");
-    await importPlainJs("./assets/app.js");
+    for(const css of cssPaths) await loadPlainCss(css);
+    await importPlainJs(jsPath);
   })().catch(error => {
     console.error(error);
     debug("loader: failed " + (error?.message || error));

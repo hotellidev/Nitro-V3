@@ -1,6 +1,23 @@
-import { FC, useMemo } from 'react';
+import { FC, Fragment, ReactNode, useMemo } from 'react';
 import { GetNickIconUrl } from '../assets/images/user_custom/nick_icons';
-import { PREFIX_EFFECT_KEYFRAMES, getPrefixEffectStyle, getPrefixFontStyle, parsePrefixColors } from '../api';
+import { PREFIX_EFFECT_KEYFRAMES, getPrefixEffectStyle, getPrefixFontStyle, parseFontSegments, parsePrefixColors } from '../api';
+
+const renderInlineFontMarkup = (text: string): ReactNode =>
+{
+    if(!text) return text;
+    if(text.indexOf('<font') === -1) return text;
+
+    const segments = parseFontSegments(text);
+
+    if(!segments.length) return text;
+
+    return segments.map((segment, index) =>
+    {
+        if(segment.color) return <span key={ index } style={ { color: segment.color } }>{ segment.text }</span>;
+
+        return <Fragment key={ index }>{ segment.text }</Fragment>;
+    });
+};
 
 interface UserIdentityViewProps
 {
@@ -87,7 +104,7 @@ export const UserIdentityView: FC<UserIdentityViewProps> = ({
                     </span>
                 );
             case 'name':
-                return <span key="identity-name" className={ `${ nameClassName } whitespace-nowrap` }>{ username }{ showColon ? ':' : '' }{ showColon ? ' ' : '' }</span>;
+                return <span key="identity-name" className={ `${ nameClassName } whitespace-nowrap` }>{ renderInlineFontMarkup(username) }{ showColon ? ':' : '' }{ showColon ? ' ' : '' }</span>;
             default:
                 return null;
         }

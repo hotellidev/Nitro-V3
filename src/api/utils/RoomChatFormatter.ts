@@ -80,11 +80,97 @@ const applyWiredTextMarkup = (content: string) =>
     return result;
 };
 
+const FONT_NAMED_COLORS = new Set([
+    'red', 'green', 'blue', 'yellow', 'white', 'black',
+    'orange', 'cyan', 'brown', 'purple', 'pink', 'magenta',
+    'violet', 'gray', 'grey', 'lime', 'teal', 'gold',
+    'silver', 'navy', 'maroon', 'olive', 'indigo'
+]);
+
+export const sanitizeFontColor = (raw: string | null | undefined): string | null =>
+{
+    if(!raw) return null;
+    if(raw.length > 20) return null;
+
+    const value = raw.trim().toLowerCase();
+
+    if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/.test(value)) return value;
+    if(FONT_NAMED_COLORS.has(value)) return value;
+
+    return null;
+};
+
+export type FontSegment = { color: string | null; text: string };
+
+const FONT_COLOR_ATTR = /color\s*=\s*(?:"([^"]{1,32})"|'([^']{1,32})'|([^\s"'>]{1,32}))/i;
+
+export const parseFontSegments = (input: string): FontSegment[] =>
+{
+    if(!input) return [];
+
+    const pattern = /<font\b([^>]{0,200}?)>([\s\S]{0,200}?)<\/font>/gi;
+    const segments: FontSegment[] = [];
+
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while((match = pattern.exec(input)) !== null)
+    {
+        if(match.index > lastIndex)
+        {
+            segments.push({ color: null, text: input.slice(lastIndex, match.index) });
+        }
+
+        const colorMatch = FONT_COLOR_ATTR.exec(match[1] || '');
+        const rawColor = colorMatch ? (colorMatch[1] || colorMatch[2] || colorMatch[3]) : null;
+        const color = sanitizeFontColor(rawColor);
+
+        segments.push({ color, text: match[2] });
+        lastIndex = pattern.lastIndex;
+    }
+
+    if(lastIndex < input.length)
+    {
+        segments.push({ color: null, text: input.slice(lastIndex) });
+    }
+
+    return segments;
+};
+
+const applyFontMarkup = (content: string) =>
+{
+    const fontPattern = /&#60;font\b([^&]{0,200}?)&#62;([\s\S]{0,4000}?)&#60;\/font&#62;/gi;
+    const colorAttr = /color\s*=\s*(?:"([^"]{1,32})"|'([^']{1,32})'|([^\s"'>]{1,32}))/i;
+
+    let previous = '';
+    let next = content;
+    let guard = 0;
+
+    while((previous !== next) && (guard < 20))
+    {
+        previous = next;
+        next = next.replace(fontPattern, (_match, attrs: string, inner: string) =>
+        {
+            const colorMatch = colorAttr.exec(attrs || '');
+            const rawColor = colorMatch ? (colorMatch[1] || colorMatch[2] || colorMatch[3]) : null;
+            const color = sanitizeFontColor(rawColor);
+
+            if(!color) return inner;
+
+            return `<span style="color:${ color }">${ inner }</span>`;
+        });
+        guard++;
+    }
+
+    return next;
+};
+
 export const RoomChatFormatter = (content: string) =>
 {
     let result = '';
 
     content = encodeHTML(content);
+    content = applyFontMarkup(content);
     content = applyWiredTextMarkup(content);
     //content = (joypixels.shortnameToUnicode(content) as string)
 

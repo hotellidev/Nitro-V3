@@ -12,11 +12,15 @@
   };
 
   ensureMobileViewport();
+  const FALLBACK_API_BASE = "";
 
   const getBase = () => {
     const source = document.currentScript?.src || location.href;
     return new URL(".", source);
   };
+
+  const LOADER_BASE = getBase();
+  window.__nitroLoaderBase = LOADER_BASE.href;
 
   const withCacheBust = (url) => {
     url.searchParams.set("v", Date.now().toString(36));
@@ -81,18 +85,34 @@
     }
   };
 
+  const fetchPlainClientMode = async () => {
+    try {
+      const url = withCacheBust(new URL("./client-mode.json", LOADER_BASE));
+      const response = await fetch(url, { cache: "no-store" });
+      if(!response.ok) throw new Error("HTTP " + response.status);
+      const payload = await response.json();
+      if(payload && typeof payload === "object") {
+        window.__nitroClientMode = payload;
+        return payload;
+      }
+    } catch(error) {
+      console.warn("[Nitro] client-mode fetch failed:", error?.message || error);
+    }
+    return null;
+  };
+
   const loadPlainBootstrap = async () => {
-    const url = withCacheBust(new URL("./asset-loader.js", getBase()));
+    const url = withCacheBust(new URL("./asset-loader.js", LOADER_BASE));
     await import(url.href);
   };
 
-  const loadSecureBootstrap = async () => {
-    if(!API_BASE) throw new Error("Missing apiBaseUrl for secure bootstrap.");
+  const loadSecureBootstrap = async (apiBase) => {
+    if(!apiBase) throw new Error("Missing apiBaseUrl for secure bootstrap.");
 
     const pair = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
     const publicKeyBuffer = await crypto.subtle.exportKey("spki", pair.publicKey);
     const publicKey = bytesToBase64(publicKeyBuffer);
-    const base = API_BASE.replace(/\/$/, "");
+    const base = apiBase.replace(/\/$/, "");
     const bootstrapResponse = await fetch(base + "/nitro-sec/bootstrap", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -132,12 +152,20 @@
   };
 
   (async () => {
-    try {
-      await loadSecureBootstrap();
-    } catch(error) {
-      console.warn("[Nitro] Secure bootstrap fallback:", error?.message || error);
-      await loadPlainBootstrap();
+    const mode = await fetchPlainClientMode();
+    const wantsSecure = !!(mode && mode.secureAssetsEnabled);
+    const apiBase = (mode && typeof mode.apiBaseUrl === "string" && mode.apiBaseUrl) || FALLBACK_API_BASE;
+
+    if(wantsSecure) {
+      try {
+        await loadSecureBootstrap(apiBase);
+        return;
+      } catch(error) {
+        console.warn("[Nitro] Secure bootstrap fallback:", error?.message || error);
+      }
     }
+
+    await loadPlainBootstrap();
   })().catch(error => {
     console.error(error);
     document.body.textContent = "Unable to load client.";

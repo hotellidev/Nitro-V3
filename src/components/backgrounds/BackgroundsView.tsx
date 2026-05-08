@@ -1,7 +1,8 @@
-import { Dispatch, FC, SetStateAction, useCallback, useMemo, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { Base, Grid, Flex, NitroCardView, NitroCardHeaderView, NitroCardTabsView, NitroCardTabsItemView, NitroCardContentView, Text } from '../../common';
 import { useRoom } from '../../hooks';
-import { GetConfigurationValue } from '../../api';
+import { GetOptionalConfigurationValue } from '../../api';
+import { configFileUrl } from '../../secure-assets';
 
 interface ItemData {
     id: number;
@@ -22,6 +23,8 @@ interface BackgroundsViewProps {
 const TABS = ['backgrounds', 'stands', 'overlays', 'cards'] as const;
 type TabType = typeof TABS[number];
 
+type RemoteData = Partial<Record<'backgrounds.data' | 'stands.data' | 'overlays.data' | 'cards.data', any[]>>;
+
 export const BackgroundsView: FC<BackgroundsViewProps> = ({
     setIsVisible,
     selectedBackground,
@@ -34,20 +37,36 @@ export const BackgroundsView: FC<BackgroundsViewProps> = ({
     setSelectedCardBackground
 }) => {
     const [activeTab, setActiveTab] = useState<TabType>('backgrounds');
+    const [remoteData, setRemoteData] = useState<RemoteData | null>(null);
     const { roomSession } = useRoom();
+
+    useEffect(() => {
+        let cancelled = false;
+        fetch(configFileUrl('infostand_backgrounds.json'), { credentials: 'omit' })
+            .then(r => r.ok ? r.json() : null)
+            .then(json => { if(!cancelled && json && typeof json === 'object') setRemoteData(json as RemoteData); })
+            .catch(() => {});
+        return () => { cancelled = true; };
+    }, []);
 
     const processData = useCallback((configData: any[], idField: string): ItemData[] => {
         if (!configData?.length) return [];
 
-        return configData.map(item => ({ id: item[idField] }));
+        return configData.map(item => ({ id: typeof item === 'number' ? item : item[idField] }));
     }, []);
 
+    const readData = useCallback((key: 'backgrounds.data' | 'stands.data' | 'overlays.data' | 'cards.data'): any[] => {
+        const fromRemote = remoteData?.[key];
+        if(Array.isArray(fromRemote)) return fromRemote;
+        return GetOptionalConfigurationValue<any[]>(key, []) || [];
+    }, [remoteData]);
+
     const allData = useMemo(() => ({
-        backgrounds: processData(GetConfigurationValue('backgrounds.data'), 'backgroundId'),
-        stands: processData(GetConfigurationValue('stands.data'), 'standId'),
-        overlays: processData(GetConfigurationValue('overlays.data'), 'overlayId'),
-        cards: processData(GetConfigurationValue('cards.data') || GetConfigurationValue('backgrounds.data'), 'backgroundId')
-    }), [processData]);
+        backgrounds: processData(readData('backgrounds.data'), 'backgroundId'),
+        stands: processData(readData('stands.data'), 'standId'),
+        overlays: processData(readData('overlays.data'), 'overlayId'),
+        cards: processData(readData('cards.data').length ? readData('cards.data') : readData('backgrounds.data'), 'backgroundId')
+    }), [processData, readData]);
 
     const handleSelection = useCallback((id: number) => {
         if (!roomSession) return;

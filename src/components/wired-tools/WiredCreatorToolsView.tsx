@@ -9,6 +9,7 @@ import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedE
 import { DIRECTION_NAMES, EDITABLE_FURNI_VARIABLES, EDITABLE_USER_VARIABLES, INSPECTION_ELEMENTS, MONITOR_ERROR_INFO, MONITOR_LOG_ORDER, MONTH_NAMES, TABS, TEAM_COLOR_NAMES, VARIABLES_ELEMENTS, VARIABLE_DEFINITIONS, WEEKDAY_NAMES, WIRED_CLOCK_REFRESH_MS, WIRED_FREEZE_EFFECT_IDS, WIRED_INSPECTION_REFRESH_MS, WIRED_MONITOR_ACTION_CLEAR_LOGS, WIRED_MONITOR_ACTION_FETCH, WIRED_MONITOR_POLL_MS, WIRED_VARIABLES_POLL_MS } from './WiredCreatorTools.constants';
 import { createEmptyMonitorSnapshot, formatMonitorHistoryOccurrence, formatMonitorLatestOccurrence, formatMonitorSource, formatVariableTimestamp, getHotelDateTimeParts, getHotelTimeFormatter, normalizeMonitorReason } from './WiredCreatorTools.helpers';
 import { HotelDateTimeParts, InspectionElementButton, InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, InspectionUserTeamData, InspectionVariable, ManagedHolderVariableEntry, MonitorLog, MonitorLogDetails, MonitorSnapshot, MonitorStat, ParsedWallLocation, TeamEffectData, VariableDefinition, VariableHighlightOverlay, VariableHighlightTarget, VariableManageEntry, VariableTextValue, VariablesElementButton, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
+import { WiredInspectionTabView } from './WiredInspectionTabView';
 import { WiredToolsSettingsTabView } from './WiredToolsSettingsTabView';
 import { WiredVariablesTabView } from './WiredVariablesTabView';
 
@@ -3249,144 +3250,44 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                 </div> }
                         </div> }
                     { (activeTab === 'inspection') &&
-                        <div className="p-3 min-h-[360px] flex gap-4">
-                            <div className="w-[145px] shrink-0 flex flex-col gap-2">
-                                <div className="flex flex-col gap-1">
-                                    <Text bold>Element type:</Text>
-                                    <div className="flex gap-1">
-                                        { INSPECTION_ELEMENTS.map(element => (
-                                            <button
-                                                key={ element.key }
-                                                type="button"
-                                                className={ `w-[42px] h-[38px] rounded border flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,.7)] ${ (inspectionType === element.key) ? 'border-[#222] bg-[#d9d6cf]' : 'border-[#7f7f7f] bg-[#ece9e1]' }` }
-                                                onClick={ () => setInspectionType(element.key) }
-                                                title={ element.label }>
-                                                <img alt={ element.label } className="w-auto h-auto max-w-[22px] max-h-[22px] object-contain" src={ element.icon } />
-                                            </button>
-                                        )) }
-                                    </div>
-                                </div>
-                                <div className="flex flex-col gap-1">
-                                    <Text bold>Preview:</Text>
-                                    <div className="relative h-[224px] rounded border border-[#c0bdb4] bg-[#d7d7d7] overflow-hidden">
-                                        { (inspectionType === 'furni') && selectedFurni && roomSession &&
-                                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                                <LayoutRoomObjectImageView category={ selectedFurni.category } objectId={ selectedFurni.objectId } roomId={ roomSession.roomId } />
-                                            </div> }
-                                        { (inspectionType === 'user') && selectedUser &&
-                                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                                { (selectedUser.kind === 'pet')
-                                                    ? <LayoutPetImageView direction={ 2 } figure={ selectedUser.figure } posture={ selectedUser.posture } />
-                                                    : <LayoutAvatarImageView direction={ 2 } figure={ selectedUser.figure } /> }
-                                            </div> }
-                                        { (inspectionType === 'global') &&
-                                            <div className="absolute inset-0 flex items-center justify-center p-3">
-                                                <img alt="Global placeholder" className="max-w-full max-h-full object-contain" src={ wiredGlobalPlaceholderImage } />
-                                            </div> }
-                                        { (((inspectionType === 'furni') && !selectedFurni) || ((inspectionType === 'user') && !selectedUser) || (inspectionType === 'global')) &&
-                                            <div className={ `absolute inset-0 flex items-center justify-center px-3 text-center text-[#666] text-[12px] ${ (inspectionType === 'global') ? 'hidden' : '' }` }>
-                                                { previewPlaceholder }
-                                            </div> }
-                                    </div>
-                                </div>
-                                <label className="flex items-center gap-2 text-[12px] text-[#111]">
-                                    <input checked={ keepSelected } className="form-check-input mt-0" type="checkbox" onChange={ event => setKeepSelected(event.target.checked) } />
-                                    <span>Keep selected</span>
-                                </label>
-                            </div>
-                            <div className="min-w-0 grow flex flex-col gap-2">
-                                <div className="flex flex-col gap-1 grow min-h-0">
-                                    <Text bold>Variables:</Text>
-                                    <div className="grow rounded border border-[#bdb8ab] bg-white overflow-hidden">
-                                        <div className="grid grid-cols-[1fr_120px] border-b border-[#d8d4c8] bg-[#f5f2ea] px-3 py-2 text-[12px] text-[#666]">
-                                            <span>Variable</span>
-                                            <span>Value</span>
-                                        </div>
-                                        { !displayedVariables.length &&
-                                            <div className="h-[calc(100%-37px)] flex items-center justify-center text-[#b1aca2] text-[20px]">
-                                                <Text>Nothing to display</Text>
-                                            </div> }
-                                        { !!displayedVariables.length &&
-                                            <div className="max-h-[290px] overflow-y-auto">
-                                                <table className="w-full text-[12px]">
-                                                    <tbody>
-                                                        { displayedVariables.map((variable, index) => (
-                                                            <tr
-                                                                key={ variable.key }
-                                                                className={ `${ (selectedInspectionVariableKey === variable.key) ? 'bg-[#d7dfea]' : ((index % 2 === 0) ? 'bg-white' : 'bg-[#f3f3f3]') } ${ variable.editable ? 'cursor-pointer hover:bg-[#e8eefc]' : 'cursor-pointer' }` }
-                                                                onClick={ () =>
-                                                                {
-                                                                    setSelectedInspectionVariableKeys(prev => ({ ...prev, [inspectionType]: variable.key }));
-                                                                    beginVariableEdit(variable);
-                                                                } }>
-                                                                <td className="px-3 py-1 text-[#444]">{ variable.key }</td>
-                                                                <td className="px-3 py-1 text-right text-[#222]">
-                                                                    { (editingVariable === variable.key) &&
-                                                                        <input
-                                                                            autoFocus
-                                                                            className="w-[170px] rounded border border-[#8d8d8d] px-2 py-1 text-right text-[12px]"
-                                                                            spellCheck={ false }
-                                                                            type="text"
-                                                                            value={ editingValue }
-                                                                            onClick={ event => event.stopPropagation() }
-                                                                            onBlur={ cancelVariableEdit }
-                                                                            onChange={ event => setEditingValue(event.target.value) }
-                                                                            onKeyDownCapture={ onVariableInputKeyDown } /> }
-                                                                    { (editingVariable !== variable.key) && !variable.editable && <span className={ variable.valueClassName }>{ variable.value }</span> }
-                                                                    { (editingVariable !== variable.key) && variable.editable &&
-                                                                        <button
-                                                                            className={ `w-full cursor-pointer rounded px-1 text-right text-[#1b57b2] hover:underline ${ variable.valueClassName ?? '' }` }
-                                                                            type="button"
-                                                                            onClick={ event =>
-                                                                            {
-                                                                                event.stopPropagation();
-                                                                                setSelectedInspectionVariableKeys(prev => ({ ...prev, [inspectionType]: variable.key }));
-                                                                                beginVariableEdit(variable);
-                                                                            } }>
-                                                                            { variable.value }
-                                                                        </button> }
-                                                                </td>
-                                                            </tr>
-                                                        )) }
-                                                    </tbody>
-                                                </table>
-                                            </div> }
-                                    </div>
-                                </div>
-                                <div className="relative flex justify-between gap-2">
-                                    { isInspectionGiveOpen &&
-                                        <div className="absolute right-0 bottom-full mb-2 w-[210px] rounded border border-[#8d887a] bg-[#efede5] p-3 shadow-[0_2px_8px_rgba(0,0,0,.25)] z-10 flex flex-col gap-2">
-                                            <Text bold>Variable:</Text>
-                                            <select
-                                                className="rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px]"
-                                                value={ selectedInspectionGiveDefinition?.itemId ?? 0 }
-                                                onChange={ event => setInspectionGiveVariableItemId(Number(event.target.value)) }>
-                                                { !availableInspectionDefinitions.length && <option value={ 0 }>No variables available</option> }
-                                                { availableInspectionDefinitions.map(definition => (
-                                                    <option key={ definition.itemId } value={ definition.itemId }>
-                                                        { definition.name }
-                                                    </option>
-                                                )) }
-                                            </select>
-                                            <Text bold>Value:</Text>
-                                            <input
-                                                className="w-[96px] rounded border border-[#b8b2a4] bg-white px-2 py-[3px] text-[12px] disabled:opacity-60"
-                                                disabled={ !selectedInspectionGiveDefinition?.hasValue }
-                                                type="number"
-                                                value={ inspectionGiveValue }
-                                                onChange={ event => setInspectionGiveValue(event.target.value) } />
-                                            <Button disabled={ !canGiveInspectionVariable } variant="secondary" onClick={ () => giveInspectionVariable() }>Create</Button>
-                                        </div> }
-                                    <Button disabled={ !canRemoveInspectionVariable } variant="secondary" onClick={ () => removeInspectionVariable() }>Remove variable</Button>
-                                    <Button
-                                        disabled={ !canGiveInspectionVariable }
-                                        variant="secondary"
-                                        onClick={ () => setIsInspectionGiveOpen(value => !value) }>
-                                        Give variable
-                                    </Button>
-                                </div>
-                            </div>
-                        </div> }
+                        <WiredInspectionTabView
+                            inspectionType={ inspectionType }
+                            onInspectionTypeChange={ setInspectionType }
+                            selectedFurni={ selectedFurni }
+                            selectedUser={ selectedUser }
+                            roomId={ roomSession?.roomId ?? null }
+                            previewPlaceholder={ previewPlaceholder }
+                            keepSelected={ keepSelected }
+                            onKeepSelectedChange={ setKeepSelected }
+                            displayedVariables={ displayedVariables }
+                            selectedInspectionVariableKey={ selectedInspectionVariableKey }
+                            onSelectInspectionVariable={ variable =>
+                            {
+                                setSelectedInspectionVariableKeys(prev => ({ ...prev, [inspectionType]: variable.key }));
+                                beginVariableEdit(variable);
+                            } }
+                            editingVariable={ editingVariable }
+                            editingValue={ editingValue }
+                            onEditingValueChange={ setEditingValue }
+                            onCancelVariableEdit={ cancelVariableEdit }
+                            onVariableInputKeyDown={ onVariableInputKeyDown }
+                            onBeginVariableEdit={ variable =>
+                            {
+                                setSelectedInspectionVariableKeys(prev => ({ ...prev, [inspectionType]: variable.key }));
+                                beginVariableEdit(variable);
+                            } }
+                            isInspectionGiveOpen={ isInspectionGiveOpen }
+                            onToggleInspectionGive={ () => setIsInspectionGiveOpen(value => !value) }
+                            selectedInspectionGiveDefinition={ selectedInspectionGiveDefinition }
+                            onSelectGiveVariable={ setInspectionGiveVariableItemId }
+                            availableInspectionDefinitions={ availableInspectionDefinitions }
+                            inspectionGiveValue={ inspectionGiveValue }
+                            onInspectionGiveValueChange={ setInspectionGiveValue }
+                            canGiveInspectionVariable={ canGiveInspectionVariable }
+                            onGiveInspectionVariable={ () => giveInspectionVariable() }
+                            canRemoveInspectionVariable={ canRemoveInspectionVariable }
+                            onRemoveInspectionVariable={ () => removeInspectionVariable() }
+                        /> }
                     { (activeTab === 'variables') &&
                         <WiredVariablesTabView
                             variablesType={ variablesType }

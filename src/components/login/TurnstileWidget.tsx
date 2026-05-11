@@ -1,4 +1,4 @@
-import { FC, useEffect, useRef, useState } from 'react';
+import { FC, useEffect, useEffectEvent, useRef, useState } from 'react';
 
 declare global
 {
@@ -33,6 +33,10 @@ export const TurnstileWidget: FC<TurnstileWidgetProps> = props =>
     const widgetIdRef = useRef<string | null>(null);
     const [ scriptReady, setScriptReady ] = useState<boolean>(typeof window !== 'undefined' && !!window.turnstile);
 
+    const handleToken = useEffectEvent((token: string) => onToken(token));
+    const handleExpire = useEffectEvent(() => onExpire?.());
+    const handleError = useEffectEvent(() => onError?.());
+
     useEffect(() =>
     {
         if(scriptReady) return;
@@ -58,9 +62,9 @@ export const TurnstileWidget: FC<TurnstileWidgetProps> = props =>
             sitekey: siteKey,
             theme,
             size,
-            callback: (token: string) => onToken(token),
-            'expired-callback': () => onExpire?.(),
-            'error-callback': () => onError?.()
+            callback: handleToken,
+            'expired-callback': handleExpire,
+            'error-callback': handleError
         });
 
         return () =>

@@ -91,9 +91,9 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
             parentId: parentNode ? parentNode.pageId : -1,
         };
 
-        const success = await catalogAdmin.savePage(data);
+        catalogAdmin.savePage(data);
 
-        if(success) closeForm();
+        closeForm();
     };
 
     const handleDelete = async () =>
@@ -101,9 +101,9 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
         if(!catalogAdmin?.deletePage || isRoot) return;
         if(!confirm(LocalizeText('catalog.admin.delete.page.confirm', [ 'name' ], [ targetNode.localization ]))) return;
 
-        const success = await catalogAdmin.deletePage(targetPageId);
+        catalogAdmin.deletePage(targetPageId);
 
-        if(success) closeForm();
+        closeForm();
     };
 
     return (

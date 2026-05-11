@@ -91,9 +91,10 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
             orderNumber
         };
 
-        const success = isNew ? await createOffer(data) : await saveOffer(data);
+        if(isNew) createOffer(data);
+        else saveOffer(data);
 
-        if(success && setEditingOffer) setEditingOffer(null);
+        if(setEditingOffer) setEditingOffer(null);
     };
 
     const handleDelete = () =>

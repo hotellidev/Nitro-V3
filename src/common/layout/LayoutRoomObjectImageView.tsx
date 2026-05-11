@@ -21,7 +21,10 @@ export const LayoutRoomObjectImageView: FC<LayoutRoomObjectImageViewProps> = pro
     {
         isMounted.current = true;
 
-        return () => { isMounted.current = false; };
+        return () =>
+        {
+            isMounted.current = false;
+        };
     }, []);
 
     const getStyle = useMemo(() =>

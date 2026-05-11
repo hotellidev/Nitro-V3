@@ -14,8 +14,8 @@ export const RoomView: FC<{}> = (props) =>
 
     useEffect(() =>
     {
-		if(!roomSession) return;
-		
+        if(!roomSession) return;
+
         const canvas = GetRenderer().canvas;
 
         if(!canvas) return;
@@ -109,10 +109,10 @@ export const RoomView: FC<{}> = (props) =>
         };
     }, [roomSession]);
 
-	return (
+    return (
         <AnimatePresence>
             {
-				<motion.div
+                <motion.div
                     className="w-full h-full"
                     initial={ { opacity: 0 }}
                     animate={ { opacity: 1 }}

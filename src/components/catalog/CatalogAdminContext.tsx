@@ -97,7 +97,10 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
         {
             if(e.key === 'Escape')
             {
-                if(editingOffer) { setEditingOffer(null); e.preventDefault(); return; }
+                if(editingOffer)
+                {
+                    setEditingOffer(null); e.preventDefault(); return;
+                }
                 if(editingPageData || editingRootPage || editingPageNode)
                 {
                     setEditingPageData(false);

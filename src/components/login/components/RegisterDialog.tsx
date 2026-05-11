@@ -72,7 +72,10 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
             const ok = await onCheckServer();
             if(!cancelled) setServerReachable(ok);
         })();
-        return () => { cancelled = true; };
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ onCheckServer ]);
 
     const resetWidget = useCallback(() =>
@@ -81,7 +84,10 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
         setResetSignal(prev => prev + 1);
     }, []);
 
-    useEffect(() => { setLocalError(null); }, [ step ]);
+    useEffect(() =>
+    {
+        setLocalError(null);
+    }, [ step ]);
 
     const [ roomTemplates, setRoomTemplates ] = useState<RoomTemplate[] | null>(null);
     const [ roomTemplatesError, setRoomTemplatesError ] = useState<string | null>(null);
@@ -92,8 +98,14 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
     const figureDataUrl = useMemo(() =>
     {
         if(!figureDataUrlRaw) return '';
-        try { return GetConfiguration().interpolate(figureDataUrlRaw); }
-        catch { return figureDataUrlRaw; }
+        try
+        {
+            return GetConfiguration().interpolate(figureDataUrlRaw);
+        }
+        catch
+        {
+            return figureDataUrlRaw;
+        }
     }, [ figureDataUrlRaw ]);
 
     useEffect(() =>
@@ -102,9 +114,16 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
         let cancelled = false;
         fetch(figureDataUrl, { credentials: 'omit' })
             .then(r => r.ok ? r.json() : null)
-            .then(json => { if(!cancelled && json) setFigureData(json as FigureData); })
-            .catch(() => { });
-        return () => { cancelled = true; };
+            .then(json =>
+            {
+                if(!cancelled && json) setFigureData(json as FigureData);
+            })
+            .catch(() =>
+            { });
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ step, figureData, figureDataUrl ]);
 
     useEffect(() =>
@@ -113,23 +132,29 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
         let cancelled = false;
         setRoomTemplatesError(null);
         fetch(roomTemplatesUrl, { credentials: 'include' })
-            .then(async r => {
+            .then(async r =>
+            {
                 if(!r.ok) throw new Error(`status ${ r.status }`);
                 return r.json();
             })
-            .then(json => {
+            .then(json =>
+            {
                 if(cancelled) return;
                 const list = Array.isArray((json as { templates?: unknown })?.templates)
                     ? (json as { templates: RoomTemplate[] }).templates
                     : [];
                 setRoomTemplates(list);
             })
-            .catch(() => {
+            .catch(() =>
+            {
                 if(cancelled) return;
                 setRoomTemplates([]);
                 setRoomTemplatesError(t('nitro.login.register.room.error', 'Could not load room options. You can still skip this step.'));
             });
-        return () => { cancelled = true; };
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ step, roomTemplates, roomTemplatesUrl ]);
 
     const partOptions = useMemo(() =>
@@ -155,7 +180,10 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
         {
             if(!PART_ROWS.includes(st.type)) continue;
             const palette = figureData.palettes.find(p => p.id === st.paletteId);
-            if(!palette) { result[st.type] = []; continue; }
+            if(!palette)
+            {
+                result[st.type] = []; continue;
+            }
             result[st.type] = palette.colors
                 .filter(c => c.selectable && c.club === 0)
                 .map(c => ({ id: c.id, hex: '#' + c.hexCode.toUpperCase() }));
@@ -192,12 +220,16 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
                     const rawGender = typeof entry._gender === 'string' ? entry._gender.toUpperCase() : '';
                     const figure = typeof entry._figure === 'string' ? entry._figure : '';
                     if((rawGender !== 'M' && rawGender !== 'F') || !figure) continue;
-                    parsed.push({ gender: rawGender as GenderKey, figure });
+                    parsed.push({ gender: rawGender, figure });
                 }
                 if(parsed.length) setHotLooks(parsed);
             })
-            .catch(() => { });
-        return () => { cancelled = true; };
+            .catch(() =>
+            { });
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ step, hotLooks.length ]);
 
     const applyLook = useCallback((figure: string, lookGender: GenderKey) =>
@@ -499,14 +531,18 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
 
                             <div className="avatar-builder">
                                 <div className="avatar-part-col">
-                                    { PART_ROWS.map(setType => {
+                                    { PART_ROWS.map(setType =>
+                                    {
                                         const partPreviewSrc = buildPartPreviewUrl(imagingUrl, setType, selection, gender);
                                         return (
                                             <div className="avatar-part-row" key={ `part-${ setType }` }>
                                                 <button type="button" className="arrow-btn" aria-label={ `Previous ${ setType }` }
                                                     onClick={ () => cyclePart(setType, -1) }>&lsaquo;</button>
                                                 <div className={ `part-preview part-preview-${ setType }` }>
-                                                    <img src={ partPreviewSrc } alt={ `${ setType } preview` } onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } />
+                                                    <img src={ partPreviewSrc } alt={ `${ setType } preview` } onError={ e =>
+                                                    {
+                                                        (e.currentTarget).style.visibility = 'hidden';
+                                                    } } />
                                                 </div>
                                                 <button type="button" className="arrow-btn" aria-label={ `Next ${ setType }` }
                                                     onClick={ () => cyclePart(setType, 1) }>&rsaquo;</button>
@@ -516,11 +552,15 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
                                 </div>
 
                                 <div className="avatar-preview">
-                                    <img src={ previewSrc } alt="Habbo preview" onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } />
+                                    <img src={ previewSrc } alt="Habbo preview" onError={ e =>
+                                    {
+                                        (e.currentTarget).style.visibility = 'hidden';
+                                    } } />
                                 </div>
 
                                 <div className="avatar-color-col">
-                                    { PART_ROWS.map(setType => {
+                                    { PART_ROWS.map(setType =>
+                                    {
                                         const fallbackColor = FALLBACK_DEFAULTS[gender][setType]?.colors?.[0] ?? 0;
                                         const currentColor = selection[setType]?.colors?.[0] ?? fallbackColor;
                                         const swatchHex = hexFor(setType, currentColor);
@@ -603,7 +643,10 @@ export const RegisterDialog: FC<RegisterDialogProps> = props =>
                                             onChange={ () => setSelectedTemplateId(template.templateId) } />
                                         { template.thumbnail &&
                                             <img className="room-template-thumb" src={ template.thumbnail } alt={ template.title }
-                                                onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } /> }
+                                                onError={ e =>
+                                                {
+                                                    (e.currentTarget).style.visibility = 'hidden';
+                                                } } /> }
                                         <div className="room-template-body">
                                             <div className="room-template-title">{ template.title }</div>
                                             { template.description &&

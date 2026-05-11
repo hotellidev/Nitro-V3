@@ -13,7 +13,7 @@ const resolveUserType = (userType: number): string =>
         case 3: return 'Bot';
         default: return '-';
     }
-}
+};
 
 const useUserChooserWidgetState = () =>
 {

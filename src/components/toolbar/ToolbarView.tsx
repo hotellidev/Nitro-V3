@@ -203,7 +203,10 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                                 <ToolbarMeView setMeExpanded={ setMeExpanded } unseenAchievementCount={ getTotalUnseen } useGuideTool={ useGuideTool } />
                                             </motion.div> }
                                     </AnimatePresence>
-                                    <motion.div whileHover={ { scale: 1.08 } } whileTap={ { scale: 0.95 } } className="cursor-pointer" onClick={ event => { setMeExpanded(value => !value); event.stopPropagation(); } }>
+                                    <motion.div whileHover={ { scale: 1.08 } } whileTap={ { scale: 0.95 } } className="cursor-pointer" onClick={ event =>
+                                    {
+                                        setMeExpanded(value => !value); event.stopPropagation();
+                                    } }>
                                         <LayoutAvatarImageView headOnly={ true } direction={ 2 } figure={ userFigure } className="tb-icon !h-[44px] !w-[32px] !bg-center !bg-no-repeat" style={ { marginTop: '4px' } } />
                                     </motion.div>
                                     { (getTotalUnseen > 0) &&
@@ -239,20 +242,20 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                             exit={ { opacity: 0, x: 10 } }
                             transition={ { type: 'spring', stiffness: 300, damping: 28 } }
                             className={ `fixed bottom-0 z-40 h-[52px] max-w-[calc(50vw-242px)] items-center overflow-visible pr-3 pointer-events-auto ${ desktopFlexClasses } ${ isInRoom ? 'right-0' : 'right-3' }` }>
-                                <motion.div variants={ containerVariants } initial="hidden" animate="visible" exit="exit" className="tb-open-shell flex h-[52px] max-w-full items-center gap-3 overflow-visible bg-transparent px-[8px] pt-[10px] pb-[2px]">
-                                    <motion.div variants={ itemVariants } className="relative">
-                                        <ToolbarItemView icon="friendall" onClick={ () => CreateLinkEvent('friends/toggle') } className="tb-icon" />
-                                        { (requests.length > 0) &&
+                            <motion.div variants={ containerVariants } initial="hidden" animate="visible" exit="exit" className="tb-open-shell flex h-[52px] max-w-full items-center gap-3 overflow-visible bg-transparent px-[8px] pt-[10px] pb-[2px]">
+                                <motion.div variants={ itemVariants } className="relative">
+                                    <ToolbarItemView icon="friendall" onClick={ () => CreateLinkEvent('friends/toggle') } className="tb-icon" />
+                                    { (requests.length > 0) &&
                                             <LayoutItemCountView count={ requests.length } className="absolute -right-2 -top-1" /> }
-                                    </motion.div>
-                                    { ((iconState === MessengerIconState.SHOW) || (iconState === MessengerIconState.UNREAD)) &&
+                                </motion.div>
+                                { ((iconState === MessengerIconState.SHOW) || (iconState === MessengerIconState.UNREAD)) &&
                                         <motion.div variants={ itemVariants }>
                                             <ToolbarItemView className={ `tb-icon ${ iconState === MessengerIconState.UNREAD ? 'is-unseen animate-pulse' : '' }` } icon="message" onClick={ () => OpenMessengerChat() } />
                                         </motion.div> }
-                                    <div className={ `mx-1 h-5 w-[1px] bg-white/20 ${ desktopBlockClasses }` } />
-                                    <div className={ `h-full shrink-0 ${ desktopBlockClasses }` } id="toolbar-friend-bar-container-desktop" />
-                                </motion.div>
+                                <div className={ `mx-1 h-5 w-[1px] bg-white/20 ${ desktopBlockClasses }` } />
+                                <div className={ `h-full shrink-0 ${ desktopBlockClasses }` } id="toolbar-friend-bar-container-desktop" />
                             </motion.div>
+                        </motion.div>
 
                         <motion.div
                             key="mobile-nav"
@@ -297,13 +300,16 @@ export const ToolbarView: FC<{ isInRoom: boolean }> = props =>
                                             className="pointer-events-auto absolute bottom-[calc(100%+10px)] left-1/2 z-[70] -translate-x-1/2">
                                             <ToolbarMeView setMeExpanded={ setMeExpanded } unseenAchievementCount={ getTotalUnseen } useGuideTool={ useGuideTool } />
                                         </motion.div> }
-                                    </AnimatePresence>
-                                    <motion.div whileHover={ { scale: 1.08 } } whileTap={ { scale: 0.95 } } className="cursor-pointer" onClick={ event => { setMeExpanded(value => !value); event.stopPropagation(); } }>
-                                        <LayoutAvatarImageView headOnly={ true } direction={ 2 } figure={ userFigure } className="tb-icon !h-[44px] !w-[32px] !bg-center !bg-no-repeat" style={ { marginTop: '4px' } } />
-                                    </motion.div>
-                                    { (getTotalUnseen > 0) &&
-                                        <LayoutItemCountView count={ getTotalUnseen } className="pointer-events-none absolute -right-1 -top-1 z-10" /> }
+                                </AnimatePresence>
+                                <motion.div whileHover={ { scale: 1.08 } } whileTap={ { scale: 0.95 } } className="cursor-pointer" onClick={ event =>
+                                {
+                                    setMeExpanded(value => !value); event.stopPropagation();
+                                } }>
+                                    <LayoutAvatarImageView headOnly={ true } direction={ 2 } figure={ userFigure } className="tb-icon !h-[44px] !w-[32px] !bg-center !bg-no-repeat" style={ { marginTop: '4px' } } />
                                 </motion.div>
+                                { (getTotalUnseen > 0) &&
+                                        <LayoutItemCountView count={ getTotalUnseen } className="pointer-events-none absolute -right-1 -top-1 z-10" /> }
+                            </motion.div>
                             <motion.div variants={ containerVariants } initial="hidden" animate="visible" exit="exit" className="tb-bar-scroll flex h-full items-center gap-2 overflow-x-auto overflow-y-visible px-1">
                                 { (isInRoom && showToolbarButton) &&
                                     <motion.div variants={ itemVariants }>

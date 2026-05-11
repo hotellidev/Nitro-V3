@@ -133,7 +133,10 @@ export const CatalogGiftView: FC<{}> = props =>
                 if(isBuyingGift) return;
 
                 isBuyingGift = true;
-                setTimeout(() => { isBuyingGift = false; }, 10000);
+                setTimeout(() =>
+                {
+                    isBuyingGift = false;
+                }, 10000);
 
                 SendMessageComposer(new PurchaseFromCatalogAsGiftComposer(pageId, offerId, extraData, receiverName, message, colourId, selectedBoxIndex, selectedRibbonIndex, showMyFace));
                 return;

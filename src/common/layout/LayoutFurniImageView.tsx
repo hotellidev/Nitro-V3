@@ -22,7 +22,10 @@ export const LayoutFurniImageView: FC<LayoutFurniImageViewProps> = props =>
     {
         isMounted.current = true;
 
-        return () => { isMounted.current = false; };
+        return () =>
+        {
+            isMounted.current = false;
+        };
     }, []);
 
     const updateImage = useCallback(async (texture: any) =>

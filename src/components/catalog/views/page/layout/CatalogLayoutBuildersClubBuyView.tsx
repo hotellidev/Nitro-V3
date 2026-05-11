@@ -142,44 +142,45 @@ export const CatalogLayoutBuildersClubBuyView: FC<CatalogLayoutProps> = () =>
             { currentPage?.localization?.getImage(0) &&
                 <CatalogHeaderView imageUrl={ currentPage.localization.getImage(0) } /> }
             <Grid>
-            <Column fullHeight justifyContent="between" overflow="hidden" size={ 7 }>
-                <Column gap={ 1 } overflow="auto">
-                    { offers && (offers.length > 0) && offers.map((offer, index) =>
-                    {
-                        const meta = getOfferMeta(offer);
+                <Column fullHeight justifyContent="between" overflow="hidden" size={ 7 }>
+                    <Column gap={ 1 } overflow="auto">
+                        { offers && (offers.length > 0) && offers.map((offer, index) =>
+                        {
+                            const meta = getOfferMeta(offer);
 
-                        return (
-                            <LayoutGridItem key={ index } alignItems="center" center={ false } className="p-2" column={ false } itemActive={ pendingOffer?.offerId === offer.offerId } justifyContent="between" onClick={ () => {
-                                setPurchaseState(CatalogPurchaseState.NONE);
-                                setPendingOffer(offer);
-                            } }>
-                                <Column gap={ 0 }>
-                                    <Text fontWeight="bold">{ getOfferName(offer) }</Text>
-                                    { meta.length > 0 && <Text small>{ meta }</Text> }
-                                </Column>
-                                <div className="flex flex-col gap-1">
-                                    { (offer.priceCredits > 0) &&
+                            return (
+                                <LayoutGridItem key={ index } alignItems="center" center={ false } className="p-2" column={ false } itemActive={ pendingOffer?.offerId === offer.offerId } justifyContent="between" onClick={ () =>
+                                {
+                                    setPurchaseState(CatalogPurchaseState.NONE);
+                                    setPendingOffer(offer);
+                                } }>
+                                    <Column gap={ 0 }>
+                                        <Text fontWeight="bold">{ getOfferName(offer) }</Text>
+                                        { meta.length > 0 && <Text small>{ meta }</Text> }
+                                    </Column>
+                                    <div className="flex flex-col gap-1">
+                                        { (offer.priceCredits > 0) &&
                                         <Flex alignItems="center" gap={ 1 } justifyContent="end">
                                             <Text>{ offer.priceCredits }</Text>
                                             <LayoutCurrencyIcon type={ -1 } />
                                         </Flex> }
-                                    { (offer.priceActivityPoints > 0) &&
+                                        { (offer.priceActivityPoints > 0) &&
                                         <Flex alignItems="center" gap={ 1 } justifyContent="end">
                                             <Text>{ offer.priceActivityPoints }</Text>
                                             <LayoutCurrencyIcon type={ offer.priceActivityPointsType } />
                                         </Flex> }
-                                </div>
-                            </LayoutGridItem>
-                        );
-                    }) }
+                                    </div>
+                                </LayoutGridItem>
+                            );
+                        }) }
+                    </Column>
                 </Column>
-            </Column>
-            <Column gap={ 2 } overflow="hidden" size={ 5 }>
-                <Column center grow overflow="hidden">
-                    { currentPage?.localization.getImage(1) && <img alt="" src={ currentPage.localization.getImage(1) } /> }
-                    { pageDescription.length > 0 && <Text center dangerouslySetInnerHTML={ { __html: SanitizeHtml(pageDescription) } } overflow="auto" /> }
-                </Column>
-                { pendingOffer &&
+                <Column gap={ 2 } overflow="hidden" size={ 5 }>
+                    <Column center grow overflow="hidden">
+                        { currentPage?.localization.getImage(1) && <img alt="" src={ currentPage.localization.getImage(1) } /> }
+                        { pageDescription.length > 0 && <Text center dangerouslySetInnerHTML={ { __html: SanitizeHtml(pageDescription) } } overflow="auto" /> }
+                    </Column>
+                    { pendingOffer &&
                     <Column fullWidth gap={ 1 }>
                         <Text fontWeight="bold">{ getOfferName(pendingOffer) }</Text>
                         { getOfferMeta(pendingOffer).length > 0 && <Text>{ getOfferMeta(pendingOffer) }</Text> }
@@ -202,7 +203,7 @@ export const CatalogLayoutBuildersClubBuyView: FC<CatalogLayoutProps> = () =>
                         </Flex>
                         { getPurchaseButton() }
                     </Column> }
-            </Column>
+                </Column>
             </Grid>
         </div>
     );

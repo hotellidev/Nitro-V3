@@ -341,20 +341,20 @@ const VARIABLES_ELEMENTS: VariablesElementButton[] = [
 const EDITABLE_FURNI_VARIABLES: string[] = [ '@position_x', '@position_y', '@rotation', '@altitude', '@state', '@wallitem_offset' ];
 const EDITABLE_USER_VARIABLES: string[] = [ '@position_x', '@position_y', '@direction' ];
 const createVariableDefinition = (key: string, target: 'Furni' | 'User' | 'Global' | 'Context', availability: string = 'Always', canWriteTo = false): VariableDefinition =>
-({
-    key,
-    target,
-    type: 'Internal',
-    hasValue: true,
-    availability,
-    canWriteTo,
-    canCreateDelete: false,
-    canIntercept: false,
-    hasCreationTime: false,
-    hasUpdateTime: false,
-    isTextConnected: false,
-    isAlwaysAvailable: (availability === 'Always')
-});
+    ({
+        key,
+        target,
+        type: 'Internal',
+        hasValue: true,
+        availability,
+        canWriteTo,
+        canCreateDelete: false,
+        canIntercept: false,
+        hasCreationTime: false,
+        hasUpdateTime: false,
+        isTextConnected: false,
+        isAlwaysAvailable: (availability === 'Always')
+    });
 const VARIABLE_DEFINITIONS: Record<VariablesElementType, VariableDefinition[]> = {
     furni: [
         createVariableDefinition('~teleport.target_id', 'Furni', 'Conditional'),
@@ -461,27 +461,27 @@ const DIRECTION_NAMES: string[] = [ 'North', 'North-East', 'East', 'South-East',
 const HOTEL_TIME_FORMATTERS: Map<string, Intl.DateTimeFormat> = new Map();
 
 const createEmptyMonitorSnapshot = (): MonitorSnapshot =>
-({
-    usageCurrentWindow: 0,
-    usageLimitPerWindow: 0,
-    isHeavy: false,
-    delayedEventsPending: 0,
-    delayedEventsLimit: 0,
-    averageExecutionMs: 0,
-    peakExecutionMs: 0,
-    recursionDepthCurrent: 0,
-    recursionDepthLimit: 0,
-    killedRemainingSeconds: 0,
-    usageWindowMs: 0,
-    overloadAverageThresholdMs: 0,
-    overloadPeakThresholdMs: 0,
-    heavyUsageThresholdPercent: 0,
-    heavyConsecutiveWindowsThreshold: 0,
-    overloadConsecutiveWindowsThreshold: 0,
-    heavyDelayedThresholdPercent: 0,
-    logs: [],
-    history: []
-});
+    ({
+        usageCurrentWindow: 0,
+        usageLimitPerWindow: 0,
+        isHeavy: false,
+        delayedEventsPending: 0,
+        delayedEventsLimit: 0,
+        averageExecutionMs: 0,
+        peakExecutionMs: 0,
+        recursionDepthCurrent: 0,
+        recursionDepthLimit: 0,
+        killedRemainingSeconds: 0,
+        usageWindowMs: 0,
+        overloadAverageThresholdMs: 0,
+        overloadPeakThresholdMs: 0,
+        heavyUsageThresholdPercent: 0,
+        heavyConsecutiveWindowsThreshold: 0,
+        overloadConsecutiveWindowsThreshold: 0,
+        heavyDelayedThresholdPercent: 0,
+        logs: [],
+        history: []
+    });
 
 const getHotelTimeFormatter = (timeZone: string): Intl.DateTimeFormat =>
 {
@@ -3245,7 +3245,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
 
         switch(editingVariable)
         {
-                case '@position_x': {
+            case '@position_x': {
                 const parsed = parseInt(editingValue.trim(), 10);
 
                 if(Number.isNaN(parsed))
@@ -3257,7 +3257,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                 nextX = parsed;
                 break;
             }
-                case '@position_y': {
+            case '@position_y': {
                 const parsed = parseInt(editingValue.trim(), 10);
 
                 if(Number.isNaN(parsed))
@@ -3632,7 +3632,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
 
     return (
         <>
-        { isVariableHighlightActive && !!variableHighlightOverlays.length &&
+            { isVariableHighlightActive && !!variableHighlightOverlays.length &&
             <div className="pointer-events-none absolute left-0 top-0 z-30">
                 { variableHighlightOverlays.map(overlay => (
                     <div
@@ -3653,16 +3653,16 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                     </div>
                 )) }
             </div> }
-        <NitroCardView className="min-w-[520px] max-w-[520px]" theme="primary-slim" uniqueKey="wired-creator-tools" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
-            <NitroCardHeaderView headerText="Wired Creator Tools (:wired)" onCloseClick={ () => setIsVisible(false) } />
-            <NitroCardTabsView justifyContent="start">
-                { TABS.map(tab => (
-                    <NitroCardTabsItemView key={ tab.key } isActive={ (activeTab === tab.key) } onClick={ () => setActiveTab(tab.key) }>
-                        <Text>{ tab.label }</Text>
-                    </NitroCardTabsItemView>
-                )) }
-            </NitroCardTabsView>
-            <NitroCardContentView className="text-black bg-[#e9e6d9]" gap={ 3 }>
+            <NitroCardView className="min-w-[520px] max-w-[520px]" theme="primary-slim" uniqueKey="wired-creator-tools" windowPosition={ DraggableWindowPosition.TOP_LEFT }>
+                <NitroCardHeaderView headerText="Wired Creator Tools (:wired)" onCloseClick={ () => setIsVisible(false) } />
+                <NitroCardTabsView justifyContent="start">
+                    { TABS.map(tab => (
+                        <NitroCardTabsItemView key={ tab.key } isActive={ (activeTab === tab.key) } onClick={ () => setActiveTab(tab.key) }>
+                            <Text>{ tab.label }</Text>
+                        </NitroCardTabsItemView>
+                    )) }
+                </NitroCardTabsView>
+                <NitroCardContentView className="text-black bg-[#e9e6d9]" gap={ 3 }>
                     { (activeTab === 'monitor') &&
                         <div className="p-3 flex flex-col gap-3 relative">
                             <div className="grid grid-cols-[190px_1fr] gap-3">
@@ -3682,7 +3682,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                     <img alt="Monitor preview" className="max-w-full max-h-[180px] object-contain" src={ wiredMonitorImage } />
                                 </div>
                             </div>
-                                <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
+                            <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
                                 <Text bold>Logs:</Text>
                                 <div className="max-h-[180px] overflow-y-auto border border-[#d1ccbf] rounded">
                                     <table className="w-full text-[12px]">
@@ -3925,7 +3925,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                                                             onChange={ event => setEditingValue(event.target.value) }
                                                                             onKeyDownCapture={ onVariableInputKeyDown } /> }
                                                                     { (editingVariable !== variable.key) && !variable.editable && <span className={ variable.valueClassName }>{ variable.value }</span> }
-                                                                            { (editingVariable !== variable.key) && variable.editable &&
+                                                                    { (editingVariable !== variable.key) && variable.editable &&
                                                                         <button
                                                                             className={ `w-full cursor-pointer rounded px-1 text-right text-[#1b57b2] hover:underline ${ variable.valueClassName ?? '' }` }
                                                                             type="button"
@@ -4105,9 +4105,9 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                 </div>
                             </div>
                         </div> }
-            </NitroCardContentView>
-        </NitroCardView>
-        { isMonitorHistoryOpen &&
+                </NitroCardContentView>
+            </NitroCardView>
+            { isMonitorHistoryOpen &&
             <NitroCardView className="min-w-[760px] max-w-[760px] max-h-[520px]" theme="primary-slim" uniqueKey="wired-monitor-history" windowPosition={ DraggableWindowPosition.TOP_LEFT } offsetLeft={ 560 } offsetTop={ 40 }>
                 <NitroCardHeaderView headerText="Wired Monitor Logs" onCloseClick={ () => setIsMonitorHistoryOpen(false) } />
                 <NitroCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
@@ -4173,7 +4173,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                     </div>
                 </NitroCardContentView>
             </NitroCardView> }
-        { isMonitorInfoOpen &&
+            { isMonitorInfoOpen &&
             <NitroCardView className="min-w-[560px] max-w-[560px] max-h-[520px]" theme="primary-slim" uniqueKey="wired-monitor-info" windowPosition={ DraggableWindowPosition.TOP_LEFT } offsetLeft={ 610 } offsetTop={ 80 }>
                 <NitroCardHeaderView headerText="Wired Monitor Information" onCloseClick={ () => setIsMonitorInfoOpen(false) } />
                 <NitroCardContentView className="text-black bg-[#f4efe3] p-4 flex flex-col gap-4 overflow-y-auto">
@@ -4187,7 +4187,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                     )) }
                 </NitroCardContentView>
             </NitroCardView> }
-        { isVariableManageOpen && !!selectedVariableDefinition &&
+            { isVariableManageOpen && !!selectedVariableDefinition &&
             <NitroCardView className="min-w-[860px] max-w-[860px] max-h-[620px]" theme="primary-slim" uniqueKey="wired-variable-management" windowPosition={ DraggableWindowPosition.TOP_LEFT } offsetLeft={ 540 } offsetTop={ 60 }>
                 <NitroCardHeaderView headerText="Variable Management" onCloseClick={ () => setIsVariableManageOpen(false) } />
                 <NitroCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3" overflow="hidden">
@@ -4322,10 +4322,10 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                                 &raquo;
                             </button>
                         </div>
-                        </div>
+                    </div>
                 </NitroCardContentView>
             </NitroCardView> }
-        { !!selectedManagedVariableEntry && !!selectedVariableDefinition &&
+            { !!selectedManagedVariableEntry && !!selectedVariableDefinition &&
             <NitroCardView className="min-w-[430px] max-w-[430px] max-h-[620px]" theme="primary-slim" uniqueKey="wired-variable-management-entry" windowPosition={ DraggableWindowPosition.TOP_LEFT } offsetLeft={ 890 } offsetTop={ 110 }>
                 <NitroCardHeaderView headerText={ managedHolderPanelTitle } onCloseClick={ () => setSelectedManagedVariableEntry(null) } />
                 <NitroCardContentView className="text-black bg-[#f4efe3] p-3 flex flex-col gap-3 relative" overflow="hidden">
@@ -4459,7 +4459,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                     </div>
                 </NitroCardContentView>
             </NitroCardView> }
-        { !!selectedMonitorErrorInfo &&
+            { !!selectedMonitorErrorInfo &&
             <NitroCardView className="min-w-[470px] max-w-[470px] max-h-[500px]" theme="primary-slim" uniqueKey="wired-monitor-error-info" windowPosition={ DraggableWindowPosition.TOP_LEFT } offsetLeft={ 660 } offsetTop={ 120 }>
                 <NitroCardHeaderView
                     headerText="Wired Error Information"

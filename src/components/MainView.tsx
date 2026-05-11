@@ -127,7 +127,7 @@ export const MainView: FC<{}> = props =>
             <AvatarEffectsView />
             <AchievementsView />
             <NavigatorView />
-			<NitrobubbleHiddenView />
+            <NitrobubbleHiddenView />
             <InventoryView />
             <CatalogView />
             <FriendsView />

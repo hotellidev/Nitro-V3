@@ -401,8 +401,8 @@ const useAvatarInfoWidgetState = () =>
 
     useEffect(() =>
     {
-		if(!roomSession) return;
-		
+        if(!roomSession) return;
+
         roomSession.isDecorating = isDecorating;
     }, [ roomSession, isDecorating ]);
 

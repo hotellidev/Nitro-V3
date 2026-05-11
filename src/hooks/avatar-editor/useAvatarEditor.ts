@@ -320,7 +320,7 @@ const useAvatarEditorState = () =>
         newAvatarModels[AvatarEditorFigureCategory.TORSO] = [ AvatarFigurePartType.CHEST, AvatarFigurePartType.CHEST_PRINT, AvatarFigurePartType.COAT_CHEST, AvatarFigurePartType.CHEST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.LEGS] = [ AvatarFigurePartType.LEGS, AvatarFigurePartType.SHOES, AvatarFigurePartType.WAIST_ACCESSORY ].map(setType => buildCategory(setType, buildModeDefault));
         newAvatarModels[AvatarEditorFigureCategory.PETS] = [ AvatarFigurePartType.PET ].map(setType => buildCategory(setType)).filter(Boolean);
-		newAvatarModels[AvatarEditorFigureCategory.MISC] = [ AvatarFigurePartType.MISC ].map(setType => buildCategory(setType)).filter(Boolean);
+        newAvatarModels[AvatarEditorFigureCategory.MISC] = [ AvatarFigurePartType.MISC ].map(setType => buildCategory(setType)).filter(Boolean);
         newAvatarModels[AvatarEditorFigureCategory.NFT] = [
             AvatarFigurePartType.HEAD,
             AvatarFigurePartType.HAIR,

@@ -18,8 +18,10 @@ interface IUiSettingsContext
 const UiSettingsContext = createContext<IUiSettingsContext>({
     settings: DEFAULT_UI_SETTINGS,
     isCustomActive: false,
-    updateSettings: () => {},
-    resetSettings: () => {},
+    updateSettings: () =>
+    {},
+    resetSettings: () =>
+    {},
     getHeaderStyle: () => ({}),
     getTabsStyle: () => ({}),
     getAccentColor: () => DEFAULT_UI_SETTINGS.headerColor
@@ -42,7 +44,8 @@ const loadSettings = (): IUiSettings =>
         const stored = localStorage.getItem(STORAGE_KEY);
         if(stored) return { ...DEFAULT_UI_SETTINGS, ...JSON.parse(stored) };
     }
-    catch(e) {}
+    catch(e)
+    {}
 
     return { ...DEFAULT_UI_SETTINGS };
 };
@@ -53,7 +56,8 @@ const saveSettings = (settings: IUiSettings): void =>
     {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     }
-    catch(e) {}
+    catch(e)
+    {}
 };
 
 const sendComposer = (composer: any): void =>
@@ -62,7 +66,8 @@ const sendComposer = (composer: any): void =>
     {
         GetCommunication()?.connection?.send(composer);
     }
-    catch(e) {}
+    catch(e)
+    {}
 };
 
 export const UiSettingsProvider: FC<PropsWithChildren> = ({ children }) =>
@@ -93,7 +98,8 @@ export const UiSettingsProvider: FC<PropsWithChildren> = ({ children }) =>
                     saveSettings(serverSettings);
                 }
             }
-            catch(e) {}
+            catch(e)
+            {}
         };
 
         connection.addMessageEvent(new UiSettingsDataEvent(handler));

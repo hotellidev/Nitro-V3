@@ -126,7 +126,10 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 { !adminMode && node.pageId > 0 &&
                     <FaStar
                         className={ `text-[8px] transition-all duration-100 cursor-pointer shrink-0 ${ isFav ? 'text-warning opacity-100' : 'text-muted opacity-0 group-hover/nav:opacity-100 hover:text-warning' }` }
-                        onClick={ e => { e.stopPropagation(); toggleFavoritePage(node.pageId); } }
+                        onClick={ e =>
+                        {
+                            e.stopPropagation(); toggleFavoritePage(node.pageId);
+                        } }
                     /> }
                 { node.isBranch &&
                     <span className="text-[9px] text-muted shrink-0">

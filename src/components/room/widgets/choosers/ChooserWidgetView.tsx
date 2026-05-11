@@ -69,7 +69,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
                 chooserSelectionVisualizer.clearAll();
             }
         }
-    }
+    };
 
     const isChecked = (id: number) => checkedIds.includes(id);
 
@@ -80,7 +80,7 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
         setCheckAll(false);
         chooserSelectionVisualizer.clearAll();
         setSelectedItems([]);
-    }
+    };
 
     const filteredItems = useMemo(() =>
     {
@@ -179,7 +179,10 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
                         alignItems="center"
                         className={ classNames('rounded p-1', selectedItems.some(item => item.id === row.id) && 'bg-muted') }
                         pointer
-                        onClick={ () => { toggleItemSelection(row); if(pickallFurni) checkedId(row.id); } }
+                        onClick={ () =>
+                        {
+                            toggleItemSelection(row); if(pickallFurni) checkedId(row.id);
+                        } }
                     >
                         { pickallFurni && (
                             <input
@@ -187,7 +190,10 @@ export const ChooserWidgetView: FC<ChooserWidgetViewProps> = props =>
                                 type="checkbox"
                                 checked={ isChecked(row.id) }
                                 onChange={ () => checkedId(row.id) }
-                                onClick={ e => { e.stopPropagation(); toggleItemSelection(row); } }
+                                onClick={ e =>
+                                {
+                                    e.stopPropagation(); toggleItemSelection(row);
+                                } }
                             />
                         )}
                         <Text truncate>

@@ -49,18 +49,21 @@ export const BackgroundsView: FC<BackgroundsViewProps> = ({
     setSelectedOverlay,
     selectedCardBackground,
     setSelectedCardBackground
-}) => {
+}) =>
+{
     const [activeTab, setActiveTab] = useState<TabType>('backgrounds');
     const remoteData = use(fetchBackgroundsData());
     const { roomSession } = useRoom();
 
-    const processData = useCallback((configData: any[], idField: string): ItemData[] => {
+    const processData = useCallback((configData: any[], idField: string): ItemData[] =>
+    {
         if (!configData?.length) return [];
 
         return configData.map(item => ({ id: typeof item === 'number' ? item : item[idField] }));
     }, []);
 
-    const readData = useCallback((key: 'backgrounds.data' | 'stands.data' | 'overlays.data' | 'cards.data'): any[] => {
+    const readData = useCallback((key: 'backgrounds.data' | 'stands.data' | 'overlays.data' | 'cards.data'): any[] =>
+    {
         const fromRemote = remoteData?.[key];
         if(Array.isArray(fromRemote)) return fromRemote;
         return GetOptionalConfigurationValue<any[]>(key, []) || [];
@@ -73,7 +76,8 @@ export const BackgroundsView: FC<BackgroundsViewProps> = ({
         cards: processData(readData('cards.data').length ? readData('cards.data') : readData('backgrounds.data'), 'backgroundId')
     }), [processData, readData]);
 
-    const handleSelection = useCallback((id: number) => {
+    const handleSelection = useCallback((id: number) =>
+    {
         if (!roomSession) return;
 
         const setters = { backgrounds: setSelectedBackground, stands: setSelectedStand, overlays: setSelectedOverlay, cards: setSelectedCardBackground };

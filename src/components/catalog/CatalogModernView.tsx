@@ -21,9 +21,11 @@ const CatalogModernViewInner: FC<{}> = () =>
     const { isVisible = false, setIsVisible = null, rootNode = null, currentPage = null, navigationHidden = false, setNavigationHidden = null, activeNodes = [], searchResult = null, setSearchResult = null, openPageByName = null, openPageByOfferId = null, activateNode = null, openCatalogByType = null, toggleCatalogByType = null, currentType = CatalogType.NORMAL } = useCatalog();
     const catalogAdmin = useCatalogAdmin();
     const adminMode = catalogAdmin?.adminMode ?? false;
-    const setAdminMode = catalogAdmin?.setAdminMode ?? (() => {});
+    const setAdminMode = catalogAdmin?.setAdminMode ?? (() =>
+    {});
     const hasPendingChanges = catalogAdmin?.hasPendingChanges ?? false;
-    const publishCatalog = catalogAdmin?.publishCatalog ?? (() => {});
+    const publishCatalog = catalogAdmin?.publishCatalog ?? (() =>
+    {});
     const loading = catalogAdmin?.loading ?? false;
     const { favoriteOfferIds, favoritePageIds } = useCatalogFavorites();
     const [ showFavorites, setShowFavorites ] = useState(false);
@@ -170,7 +172,10 @@ const CatalogModernViewInner: FC<{}> = () =>
                                         <button
                                             className="flex items-center gap-1 text-[9px] text-primary hover:text-dark cursor-pointer transition-colors"
                                             title={ LocalizeText('catalog.admin.edit.root') }
-                                            onClick={ () => { catalogAdmin.setEditingPageNode(null); catalogAdmin.setEditingRootPage(true); catalogAdmin.setEditingPageData(true); } }
+                                            onClick={ () =>
+                                            {
+                                                catalogAdmin.setEditingPageNode(null); catalogAdmin.setEditingRootPage(true); catalogAdmin.setEditingPageData(true);
+                                            } }
                                         >
                                             <FaEdit className="text-[8px]" />
                                             <span className="whitespace-nowrap">{ LocalizeText('catalog.admin.root') }</span>

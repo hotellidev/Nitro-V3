@@ -202,7 +202,10 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                 <div className="flex gap-2">
                     <button
                         className="flex items-center gap-1 text-[10px] text-primary hover:text-dark transition-colors cursor-pointer"
-                        onClick={ () => { catalogAdmin.setEditingPageNode(null); catalogAdmin.setEditingRootPage(false); catalogAdmin.setEditingPageData(true); } }
+                        onClick={ () =>
+                        {
+                            catalogAdmin.setEditingPageNode(null); catalogAdmin.setEditingRootPage(false); catalogAdmin.setEditingPageData(true);
+                        } }
                     >
                         <FaEdit className="text-[10px]" /> { LocalizeText('catalog.admin.edit.page') }
                     </button>

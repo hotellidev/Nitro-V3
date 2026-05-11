@@ -26,7 +26,8 @@ const setBootDebug = (message: string) =>
 
         if(secureNode) secureNode.textContent = `${ secureNode.textContent }\n${ message }`;
     }
-    catch {}
+    catch
+    {}
 };
 
 setBootDebug('boot: secure fetch installed');
@@ -38,14 +39,16 @@ const deployBaseUrl = (): string =>
         const loaderBase = (window as any).__nitroLoaderBase;
         if(typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
     }
-    catch {}
+    catch
+    {}
 
     try
     {
         const moduleUrl = (import.meta as any).url;
         if(typeof moduleUrl === 'string' && moduleUrl.length) return new URL('..', new URL('.', moduleUrl)).toString();
     }
-    catch {}
+    catch
+    {}
 
     try
     {
@@ -56,7 +59,8 @@ const deployBaseUrl = (): string =>
             return trimmed ? `${ window.location.origin }/${ trimmed }/` : `${ window.location.origin }/`;
         }
     }
-    catch {}
+    catch
+    {}
 
     return `${ window.location.origin }/`;
 };

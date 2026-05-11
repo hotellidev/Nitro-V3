@@ -32,7 +32,7 @@ export class ProductImageUtility
                     }
                 }
                 break;
-             case FurnitureType.EFFECT:
+            case FurnitureType.EFFECT:
             // fx_icon_furniClassId_png
                 break;
         }

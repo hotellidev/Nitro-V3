@@ -67,7 +67,12 @@ export const TurnstileWidget: FC<TurnstileWidgetProps> = props =>
         {
             if(widgetIdRef.current && window.turnstile)
             {
-                try { window.turnstile.remove(widgetIdRef.current); } catch { }
+                try
+                {
+                    window.turnstile.remove(widgetIdRef.current);
+                }
+                catch
+                { }
                 widgetIdRef.current = null;
             }
         };
@@ -78,7 +83,12 @@ export const TurnstileWidget: FC<TurnstileWidgetProps> = props =>
         if(resetSignal <= 0) return;
         if(widgetIdRef.current && window.turnstile)
         {
-            try { window.turnstile.reset(widgetIdRef.current); } catch { }
+            try
+            {
+                window.turnstile.reset(widgetIdRef.current);
+            }
+            catch
+            { }
         }
     }, [ resetSignal ]);
 

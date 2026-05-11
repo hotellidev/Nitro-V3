@@ -81,7 +81,7 @@ export const CatalogSearchView: FC<{}> = () =>
             FilterCatalogNode(search, foundFurniLines, rootNode, nodes);
 
             setSearchResult(new SearchResult(search, offers, nodes.filter(node => (node.isVisible))));
-            setCurrentPage((new CatalogPage(-1, 'default_3x3', new PageLocalization([], []), offers, false, 1) as ICatalogPage));
+            setCurrentPage((new CatalogPage(-1, 'default_3x3', new PageLocalization([], []), offers, false, 1)));
         }, 300);
 
         return () => clearTimeout(timeout);

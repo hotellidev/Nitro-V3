@@ -93,9 +93,9 @@ export const FurniEditorView: FC<{}> = () =>
             loadBySpriteId(spriteId);
         };
 
-        window.addEventListener('furni-editor:open', handler as EventListener);
+        window.addEventListener('furni-editor:open', handler);
 
-        return () => window.removeEventListener('furni-editor:open', handler as EventListener);
+        return () => window.removeEventListener('furni-editor:open', handler);
     }, [ isMod, loadBySpriteId ]);
 
     const handleSelect = useCallback((id: number) =>

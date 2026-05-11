@@ -77,7 +77,10 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                 <LayoutAvatarImageView direction={ 3 } figure={ offer.product.extraParam } headOnly={ true } /> }
             <div
                 className={ `absolute top-0 right-0 z-10 p-0.5 cursor-pointer transition-opacity duration-100 ${ isFav ? 'opacity-100' : 'opacity-0 group-hover/tile:opacity-100' }` }
-                onClick={ e => { e.stopPropagation(); e.preventDefault(); toggleFavoriteOffer(offer.offerId, offer.localizationName, iconUrl); } }
+                onClick={ e =>
+                {
+                    e.stopPropagation(); e.preventDefault(); toggleFavoriteOffer(offer.offerId, offer.localizationName, iconUrl);
+                } }
                 onMouseDown={ e => e.stopPropagation() }
             >
                 <FaHeart className={ `text-[10px] drop-shadow transition-colors duration-100 ${ isFav ? 'text-danger' : 'text-muted hover:text-danger' }` } />

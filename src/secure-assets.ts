@@ -26,14 +26,16 @@ const getDeployBaseUrl = (): string =>
         const loaderBase = (window as any).__nitroLoaderBase;
         if(typeof loaderBase === 'string' && loaderBase.length) return new URL('..', loaderBase).toString();
     }
-    catch {}
+    catch
+    {}
 
     try
     {
         const moduleUrl = (import.meta as any).url;
         if(typeof moduleUrl === 'string' && moduleUrl.length) return new URL('..', new URL('.', moduleUrl)).toString();
     }
-    catch {}
+    catch
+    {}
 
     try
     {
@@ -44,7 +46,8 @@ const getDeployBaseUrl = (): string =>
             return trimmed ? `${ window.location.origin }/${ trimmed }/` : `${ window.location.origin }/`;
         }
     }
-    catch {}
+    catch
+    {}
 
     return `${ window.location.origin }/`;
 };
@@ -101,7 +104,8 @@ const setDebugState = (message: string): void =>
         node.textContent = (window as any).__nitroSecureDebugLog.slice(-8).join('\n');
         document.body.appendChild(node);
     }
-    catch {}
+    catch
+    {}
 };
 
 const textEncoder = new TextEncoder();
@@ -137,7 +141,8 @@ export const getClientMode = (): NitroClientMode =>
             };
         }
     }
-    catch {}
+    catch
+    {}
 
     return { ...CLIENT_MODE_DEFAULTS };
 };
@@ -574,7 +579,8 @@ export const installSecureFetch = (): void =>
                         scheduleSecureRekey();
                     }
                 }
-                catch {}
+                catch
+                {}
 
                 return decrypted;
             }

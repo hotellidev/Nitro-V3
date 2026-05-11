@@ -36,7 +36,8 @@ const preloadUrl = async (url: string): Promise<void> =>
         const response = await fetch(url, { cache: 'force-cache' });
         await response.arrayBuffer();
     }
-    catch {}
+    catch
+    {}
 };
 
 const preloadImage = (url: string): void =>
@@ -49,7 +50,8 @@ const preloadImage = (url: string): void =>
         image.decoding = 'async';
         image.src = url;
     }
-    catch {}
+    catch
+    {}
 };
 
 const asStringArray = (value: unknown): string[] =>
@@ -126,8 +128,12 @@ export const App: FC<{}> = props =>
             });
 
             let payload: Record<string, unknown> = {};
-            try { payload = await response.json(); }
-            catch {}
+            try
+            {
+                payload = await response.json();
+            }
+            catch
+            {}
 
             const ssoTicket = typeof payload.ssoTicket === 'string' ? payload.ssoTicket : (typeof payload.sso === 'string' ? payload.sso : '');
 
@@ -175,8 +181,12 @@ export const App: FC<{}> = props =>
             });
 
             let payload: Record<string, unknown> = {};
-            try { payload = await response.json(); }
-            catch {}
+            try
+            {
+                payload = await response.json();
+            }
+            catch
+            {}
 
             if(response.ok)
             {
@@ -320,8 +330,14 @@ export const App: FC<{}> = props =>
                     // Configuration is loaded lazily — fetch it up-front so the login
                     // screen toggle and Turnstile keys are available before we decide.
                     let configInitError: unknown = null;
-                    try { await GetConfiguration().init(); }
-                    catch(e) { configInitError = e; }
+                    try
+                    {
+                        await GetConfiguration().init();
+                    }
+                    catch(e)
+                    {
+                        configInitError = e;
+                    }
 
                     const rawLoginEnabled = GetConfiguration().getValue<unknown>('login.screen.enabled', false);
                     const loginScreenEnabled = rawLoginEnabled === true || rawLoginEnabled === 'true' || rawLoginEnabled === 1;

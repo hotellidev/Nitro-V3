@@ -27,8 +27,12 @@ const interpolate = (value: string | null | undefined): string =>
 
     let output = value;
 
-    try { output = GetConfiguration().interpolate(value) || value; }
-    catch {}
+    try
+    {
+        output = GetConfiguration().interpolate(value) || value;
+    }
+    catch
+    {}
 
     return output.replace(/\$\{([^}]+)\}/g, (_, key: string) =>
     {
@@ -45,7 +49,8 @@ const interpolate = (value: string | null | undefined): string =>
 
             if(configValue) return configValue;
         }
-        catch {}
+        catch
+        {}
 
         try
         {
@@ -53,7 +58,8 @@ const interpolate = (value: string | null | undefined): string =>
 
             if(configValue) return configValue;
         }
-        catch {}
+        catch
+        {}
 
         return '';
     });
@@ -100,13 +106,20 @@ const readLock = (): AttemptState =>
         if(!raw) return { attempts: 0, firstAt: 0, lockedUntil: 0 };
         return JSON.parse(raw);
     }
-    catch { return { attempts: 0, firstAt: 0, lockedUntil: 0 }; }
+    catch
+    {
+        return { attempts: 0, firstAt: 0, lockedUntil: 0 };
+    }
 };
 
 const writeLock = (state: AttemptState) =>
 {
-    try { sessionStorage.setItem(LOCK_KEY, JSON.stringify(state)); }
-    catch { }
+    try
+    {
+        sessionStorage.setItem(LOCK_KEY, JSON.stringify(state));
+    }
+    catch
+    { }
 };
 
 const normalizeLanguageCode = (value: string): string =>
@@ -150,7 +163,8 @@ const readCachedLocale = (): LoginLocale =>
 
         if(typeof settings.uiTextLanguage === 'string' && settings.uiTextLanguage.length) return resolveLoginLocale(settings.uiTextLanguage);
     }
-    catch {}
+    catch
+    {}
 
     return getBrowserLocale();
 };
@@ -170,7 +184,8 @@ const applyLocaleSelection = (locale: LoginLocale): void =>
 
         localStorage.setItem(CHAT_TRANSLATION_SETTINGS_KEY, JSON.stringify(nextSettings));
     }
-    catch {}
+    catch
+    {}
 };
 
 const LoginSubmitButton: FC<{ isEntering: boolean; isLocked: boolean; loginPingingServer: boolean }> = ({ isEntering, isLocked, loginPingingServer }) =>
@@ -220,7 +235,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
 
     const configuredLoginWidgets = useMemo<Record<string, unknown>>(() =>
         (loginViewConfig?.['widgets'] as Record<string, unknown>) ?? {}, [ loginViewConfig ]);
-  
+
     const loginWidgetSlots = useMemo(() =>
     {
         return Object.entries(configuredLoginWidgets)
@@ -411,8 +426,12 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
         });
 
         let payload: Record<string, unknown> = {};
-        try { payload = await response.json(); }
-        catch { }
+        try
+        {
+            payload = await response.json();
+        }
+        catch
+        { }
 
         return { ok: response.ok, status: response.status, payload };
     }, []);
@@ -705,7 +724,10 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
                                         <button
                                             type="button"
                                             className="login-widget-button"
-                                            onClick={ () => { if(btnLink) window.location.href = btnLink; } }
+                                            onClick={ () =>
+                                            {
+                                                if(btnLink) window.location.href = btnLink;
+                                            } }
                                         >
                                             { btnText }
                                         </button> }
@@ -957,7 +979,12 @@ const renderAvatarPreview = (figure: string, gender: GenderKey, setType: string)
             if(resolved) return;
             resolved = true;
             if(timer !== null) window.clearTimeout(timer);
-            try { avatarImage?.dispose(); } catch {}
+            try
+            {
+                avatarImage?.dispose();
+            }
+            catch
+            {}
             avatarImage = null;
             if(url)
             {
@@ -976,17 +1003,26 @@ const renderAvatarPreview = (figure: string, gender: GenderKey, setType: string)
         const attempt = () =>
         {
             if(resolved) return;
-            if(attempts >= AVATAR_PREVIEW_MAX_ATTEMPTS) { finish(''); return; }
+            if(attempts >= AVATAR_PREVIEW_MAX_ATTEMPTS)
+            {
+                finish(''); return;
+            }
             attempts++;
 
-            try { avatarImage?.dispose(); } catch {}
+            try
+            {
+                avatarImage?.dispose();
+            }
+            catch
+            {}
             avatarImage = null;
 
             try
             {
                 avatarImage = GetAvatarRenderManager().createAvatarImage(figure, AvatarScaleType.LARGE, gender, {
                     resetFigure: () => attempt(),
-                    dispose: () => {},
+                    dispose: () =>
+                    {},
                     disposed: false
                 });
             }
@@ -996,7 +1032,10 @@ const renderAvatarPreview = (figure: string, gender: GenderKey, setType: string)
                 return;
             }
 
-            if(!avatarImage) { finish(''); return; }
+            if(!avatarImage)
+            {
+                finish(''); return;
+            }
 
             if(avatarImage.isPlaceholder()) return;
 
@@ -1036,7 +1075,10 @@ const useAvatarPreview = (figure: string, gender: GenderKey, setType: string): s
         {
             if(!cancelled) setUrl(result);
         });
-        return () => { cancelled = true; };
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ figure, gender, setType ]);
 
     return url;
@@ -1061,7 +1103,10 @@ const AvatarPartRow: FC<AvatarPartRowProps> = ({ setType, selection, gender, onP
         <div className="avatar-part-row">
             <button type="button" className="arrow-btn" aria-label={ `Previous ${ setType }` } onClick={ onPrev }>&lsaquo;</button>
             <div className={ `part-preview part-preview-${ setType }` }>
-                { url && <img src={ url } alt={ `${ setType } preview` } onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } /> }
+                { url && <img src={ url } alt={ `${ setType } preview` } onError={ e =>
+                {
+                    (e.currentTarget).style.visibility = 'hidden';
+                } } /> }
             </div>
             <button type="button" className="arrow-btn" aria-label={ `Next ${ setType }` } onClick={ onNext }>&rsaquo;</button>
         </div>
@@ -1108,7 +1153,10 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
             const ok = await onCheckServer();
             if(!cancelled) setServerReachable(ok);
         })();
-        return () => { cancelled = true; };
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ onCheckServer ]);
 
     const resetWidget = useCallback(() =>
@@ -1117,15 +1165,24 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
         setResetSignal(prev => prev + 1);
     }, []);
 
-    useEffect(() => { setLocalError(null); }, [ step ]);
+    useEffect(() =>
+    {
+        setLocalError(null);
+    }, [ step ]);
 
     const [ figureData, setFigureData ] = useState<FigureData | null>(null);
     const figureDataUrlRaw = GetConfigurationValue<string>('avatar.figuredata.url', '');
     const figureDataUrl = useMemo(() =>
     {
         if(!figureDataUrlRaw) return '';
-        try { return GetConfiguration().interpolate(figureDataUrlRaw); }
-        catch { return figureDataUrlRaw; }
+        try
+        {
+            return GetConfiguration().interpolate(figureDataUrlRaw);
+        }
+        catch
+        {
+            return figureDataUrlRaw;
+        }
     }, [ figureDataUrlRaw ]);
 
     useEffect(() =>
@@ -1134,9 +1191,16 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
         let cancelled = false;
         fetch(figureDataUrl, { credentials: 'omit' })
             .then(r => r.ok ? r.json() : null)
-            .then(json => { if(!cancelled && json) setFigureData(json as FigureData); })
-            .catch(() => { });
-        return () => { cancelled = true; };
+            .then(json =>
+            {
+                if(!cancelled && json) setFigureData(json as FigureData);
+            })
+            .catch(() =>
+            { });
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ step, figureData, figureDataUrl ]);
 
     const partOptions = useMemo(() =>
@@ -1162,7 +1226,10 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
         {
             if(!PART_ROWS.includes(st.type)) continue;
             const palette = figureData.palettes.find(p => p.id === st.paletteId);
-            if(!palette) { result[st.type] = []; continue; }
+            if(!palette)
+            {
+                result[st.type] = []; continue;
+            }
             result[st.type] = palette.colors
                 .filter(c => c.selectable && c.club === 0)
                 .map(c => ({ id: c.id, hex: '#' + c.hexCode.toUpperCase() }));
@@ -1199,12 +1266,16 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
                     const rawGender = typeof entry._gender === 'string' ? entry._gender.toUpperCase() : '';
                     const figure = typeof entry._figure === 'string' ? entry._figure : '';
                     if((rawGender !== 'M' && rawGender !== 'F') || !figure) continue;
-                    parsed.push({ gender: rawGender as GenderKey, figure });
+                    parsed.push({ gender: rawGender, figure });
                 }
                 if(parsed.length) setHotLooks(parsed);
             })
-            .catch(() => { });
-        return () => { cancelled = true; };
+            .catch(() =>
+            { });
+        return () =>
+        {
+            cancelled = true;
+        };
     }, [ step, hotLooks.length ]);
 
     const applyLook = useCallback((figure: string, lookGender: GenderKey) =>
@@ -1498,11 +1569,15 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
                                 </div>
 
                                 <div className="avatar-preview">
-                                    { previewSrc && <img src={ previewSrc } alt="Habbo preview" onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } /> }
+                                    { previewSrc && <img src={ previewSrc } alt="Habbo preview" onError={ e =>
+                                    {
+                                        (e.currentTarget).style.visibility = 'hidden';
+                                    } } /> }
                                 </div>
 
                                 <div className="avatar-color-col">
-                                    { PART_ROWS.map(setType => {
+                                    { PART_ROWS.map(setType =>
+                                    {
                                         const fallbackColor = FALLBACK_DEFAULTS[gender][setType]?.colors?.[0] ?? 0;
                                         const currentColor = selection[setType]?.colors?.[0] ?? fallbackColor;
                                         const swatchHex = hexFor(setType, currentColor);

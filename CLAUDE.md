@@ -155,19 +155,20 @@ Login / Register / Forgot in `src/components/login/LoginView.tsx` use
 
 | Adopted | Pilot sites |
 |---|---|
-| `useNitroEventState` | `OfferView` |
-| `useNitroQuery` | `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`, `CfhChatlogView` |
+| `useNitroEventState` + companions (Reducer, ExternalSnapshot) | `OfferView`, `useAvatarInfoWidget` (figure/badges/group reducer), `useInventoryFurni` (pure reducers + fragments useRef) |
+| `useNitroQuery` + `useNitroEventInvalidator` | `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`, `CfhChatlogView`, `useGiftConfiguration`, `useUserGroups`, `useClubOffers(windowId)`, `useSellablePetPalette(breed)`, `useMarketplaceConfiguration`, `useClubGifts` (with invalidator) |
 | Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`) |
-| God-hook split | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request` |
+| God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
+| God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation` |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella |
 | Vitest | 99/99 cases on pure helpers + the Zustand store |
 
 | Not yet | Notes |
 |---|---|
-| Split `useCatalog` (~1100 LOC) | Migrate read-only fetches to `useNitroQuery` first, then split into `useCatalogData` / `useCatalogUiState` / `useCatalogActions`. |
-| Split `useChatInputWidget` / `useChatWidget` / `useAvatarInfoWidget` | Large state machines; needs careful per-file design before mechanical split. |
-| Split `usePetPackageWidget` / `useWordQuizWidget` | Their "actions" mutate internal state; need to either pass args or hoist state to a store first. Documented in commit messages, skipped intentionally. |
-| Hoist Wired Creator Tools shared state to a Zustand slice | Would remove ~25 props passed to the 3 tab sub-components. |
+| Core `useCatalog` split | Session-stable secondary fetches all migrated to TanStack queries (see ARCHITECTURE.md). What's left: core `rootNode`/`offersToNodes`/`currentPage` slice + Builders Club status. Needs a dedicated `useCatalogData`/`useCatalogUiState`/`useCatalogActions` split. |
+| Split `useChatWidget` / `useAvatarInfoWidget` | Both state-driven via events with no clean imperative actions to extract — skip-motivated. Already touched today for the InfoStand listener move. |
+| Split `usePetPackageWidget` / `useWordQuizWidget` / `useChatCommandSelector` | Their "actions" mutate internal state or are tightly interdependent — skip-motivated. |
+| Hoist Wired Creator Tools shared state to a Zustand slice | Would remove ~25 props passed to the 3 tab sub-components. (Wired-tools split done as singleton-filter; Zustand slice is the next step.) |
 | Wider Vitest coverage (React components) | `@testing-library/*` is installed; needs a small renderer-SDK mock layer first. |
 
 ## Known open logic bugs

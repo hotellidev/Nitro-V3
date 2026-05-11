@@ -4,3 +4,4 @@ export * from './useCatalogPlaceMultipleItems';
 export * from './useCatalogSkipPurchaseConfirmation';
 export * from './useClubOffers';
 export * from './useGiftConfiguration';
+export * from './useSellablePetPalette';

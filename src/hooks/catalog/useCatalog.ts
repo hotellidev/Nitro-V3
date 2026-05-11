@@ -1,7 +1,7 @@
-import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, ClubGiftInfoEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetClubGiftInfo, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, NodeData, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomControllerLevel, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource, RoomObjectType, RoomObjectVariable, RoomPreviewer, SellablePetPalettesMessageEvent, Vector3d } from '@nitrots/nitro-renderer';
+import { BuildersClubFurniCountMessageEvent, BuildersClubPlaceRoomItemMessageComposer, BuildersClubPlaceWallItemMessageComposer, BuildersClubQueryFurniCountMessageComposer, BuildersClubSubscriptionStatusMessageEvent, CatalogPageMessageEvent, CatalogPagesListEvent, CatalogPublishedMessageEvent, ClubGiftInfoEvent, CreateLinkEvent, FrontPageItem, FurniturePlaceComposer, FurniturePlacePaintComposer, GetCatalogIndexComposer, GetCatalogPageComposer, GetClubGiftInfo, GetRoomEngine, GetSessionDataManager, GetTickerTime, LegacyDataType, LimitedEditionSoldOutEvent, MarketplaceMakeOfferResult, NodeData, ProductOfferEvent, PurchaseErrorMessageEvent, PurchaseFromCatalogComposer, PurchaseNotAllowedMessageEvent, PurchaseOKMessageEvent, RoomControllerLevel, RoomEngineObjectPlacedEvent, RoomObjectCategory, RoomObjectPlacementSource, RoomObjectType, RoomObjectVariable, RoomPreviewer, Vector3d } from '@nitrots/nitro-renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
-import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogPetPalette, CatalogType, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomSession, ICatalogNode, ICatalogOptions, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
+import { BuilderFurniPlaceableStatus, CatalogNode, CatalogPage, CatalogType, DispatchUiEvent, FurniCategory, GetFurnitureData, GetProductDataForLocalization, GetRoomSession, ICatalogNode, ICatalogOptions, ICatalogPage, IPageLocalization, IProduct, IPurchasableOffer, IPurchaseOptions, LocalizeText, NotificationAlertType, Offer, PageLocalization, PlacedObjectPurchaseData, PlaySound, Product, ProductTypeEnum, RequestedPage, SearchResult, SendMessageComposer, SoundNames } from '../../api';
 import { CatalogPurchaseFailureEvent, CatalogPurchaseNotAllowedEvent, CatalogPurchaseSoldOutEvent, CatalogPurchasedEvent, InventoryFurniAddedEvent } from '../../events';
 import { useMessageEvent, useNitroEvent, useUiEvent } from '../events';
 import { useNotification } from '../notification';
@@ -710,34 +710,6 @@ const useCatalogState = () =>
         // (this._isObjectMoverRequested) && (this._purchasableOffer)
     });
 
-    useMessageEvent<SellablePetPalettesMessageEvent>(SellablePetPalettesMessageEvent, event =>
-    {
-        const parser = event.getParser();
-        const petPalette = new CatalogPetPalette(parser.productCode, parser.palettes.slice());
-
-        setCatalogOptions(prevValue =>
-        {
-            const petPalettes = [];
-
-            if(prevValue.petPalettes) petPalettes.push(...prevValue.petPalettes);
-
-            for(let i = 0; i < petPalettes.length; i++)
-            {
-                const palette = petPalettes[i];
-
-                if(palette.breed === petPalette.breed)
-                {
-                    petPalettes.splice(i, 1);
-
-                    break;
-                }
-            }
-
-            petPalettes.push(petPalette);
-
-            return { ...prevValue, petPalettes };
-        });
-    });
 
 
 

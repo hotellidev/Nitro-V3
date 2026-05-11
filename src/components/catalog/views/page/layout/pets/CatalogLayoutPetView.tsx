@@ -1,10 +1,10 @@
-import { ApproveNameMessageComposer, ApproveNameMessageEvent, ColorConverter, GetSellablePetPalettesComposer, PurchaseFromCatalogComposer, SellablePetPaletteData } from '@nitrots/nitro-renderer';
+import { ApproveNameMessageComposer, ApproveNameMessageEvent, ColorConverter, PurchaseFromCatalogComposer, SellablePetPaletteData } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaCheck, FaEdit, FaFillDrip, FaPaw, FaPlus, FaTimes } from 'react-icons/fa';
 import { DispatchUiEvent, GetPetAvailableColors, GetPetIndexFromLocalization, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../../../../../api';
 import { LayoutGridItem, LayoutPetImageView } from '../../../../../../common';
 import { CatalogPurchaseFailureEvent } from '../../../../../../events';
-import { useCatalog, useMessageEvent } from '../../../../../../hooks';
+import { useCatalog, useMessageEvent, useSellablePetPalette } from '../../../../../../hooks';
 import { useCatalogAdmin } from '../../../../CatalogAdminContext';
 import { CatalogAddOnBadgeWidgetView } from '../../widgets/CatalogAddOnBadgeWidgetView';
 import { CatalogTotalPriceWidget } from '../../widgets/CatalogTotalPriceWidget';
@@ -23,10 +23,11 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
     const [ petName, setPetName ] = useState('');
     const [ approvalPending, setApprovalPending ] = useState(true);
     const [ approvalResult, setApprovalResult ] = useState(-1);
-    const { currentOffer = null, setCurrentOffer = null, setPurchaseOptions = null, catalogOptions = null, roomPreviewer = null } = useCatalog();
+    const { currentOffer = null, setCurrentOffer = null, setPurchaseOptions = null, roomPreviewer = null } = useCatalog();
     const catalogAdmin = useCatalogAdmin();
     const adminMode = catalogAdmin?.adminMode ?? false;
-    const { petPalettes = null } = catalogOptions;
+    const breed: string = (currentOffer?.product?.productData?.type as unknown as string) ?? '';
+    const { data: petPalette = null } = useSellablePetPalette(breed);
 
     const getColor = useMemo(() =>
     {
@@ -129,39 +130,25 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
 
     useEffect(() =>
     {
-        if(!currentOffer) return;
-
-        const productData = currentOffer.product.productData;
-
-        if(!productData) return;
-
-        if(petPalettes)
+        if(!currentOffer || !petPalette)
         {
-            for(const paletteData of petPalettes)
-            {
-                if(paletteData.breed !== productData.type) continue;
-
-                const palettes: SellablePetPaletteData[] = [];
-
-                for(const palette of paletteData.palettes)
-                {
-                    if(!palette.sellable) continue;
-
-                    palettes.push(palette);
-                }
-
-                setSelectedPaletteIndex((palettes.length ? 0 : -1));
-                setSellablePalettes(palettes);
-
-                return;
-            }
+            setSelectedPaletteIndex(-1);
+            setSellablePalettes([]);
+            return;
         }
 
-        setSelectedPaletteIndex(-1);
-        setSellablePalettes([]);
+        const palettes: SellablePetPaletteData[] = [];
 
-        SendMessageComposer(new GetSellablePetPalettesComposer(productData.type));
-    }, [ currentOffer, petPalettes ]);
+        for(const palette of petPalette.palettes)
+        {
+            if(!palette.sellable) continue;
+
+            palettes.push(palette);
+        }
+
+        setSelectedPaletteIndex(palettes.length ? 0 : -1);
+        setSellablePalettes(palettes);
+    }, [ currentOffer, petPalette ]);
 
     useEffect(() =>
     {

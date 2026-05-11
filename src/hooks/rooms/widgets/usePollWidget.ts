@@ -1,52 +1,17 @@
-import { RoomSessionPollEvent } from '@nitrots/nitro-renderer';
-import { DispatchUiEvent, RoomWidgetPollUpdateEvent } from '../../../api';
-import { useNitroEvent } from '../../events';
-import { useRoom } from '../useRoom';
+import { usePollActions } from './usePollActions';
+import { usePollSubscriptions } from './usePollSubscriptions';
 
-const usePollWidgetState = () =>
+/**
+ * @deprecated Prefer `usePollSubscriptions` (mount once, top-level) and
+ * `usePollActions` (anywhere a component dispatches a vote/accept/reject).
+ * This shim preserves the old `{ startPoll, rejectPoll, answerPoll }`
+ * shape for existing consumers, but each call also re-mounts the three
+ * subscription listeners — which is wrong if the hook is called from
+ * multiple places.
+ */
+export const usePollWidget = () =>
 {
-    const { roomSession = null } = useRoom();
+    usePollSubscriptions();
 
-    const startPoll = (pollId: number) => roomSession.sendPollStartMessage(pollId);
-
-    const rejectPoll = (pollId: number) => roomSession.sendPollRejectMessage(pollId);
-
-    const answerPoll = (pollId: number, questionId: number, answers: string[]) => roomSession.sendPollAnswerMessage(pollId, questionId, answers);
-
-    useNitroEvent<RoomSessionPollEvent>(RoomSessionPollEvent.OFFER, event =>
-    {
-        const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.OFFER, event.id);
-
-        pollEvent.summary = event.summary;
-        pollEvent.headline = event.headline;
-
-        DispatchUiEvent(pollEvent);
-    });
-
-    useNitroEvent<RoomSessionPollEvent>(RoomSessionPollEvent.ERROR, event =>
-    {
-        const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.ERROR, event.id);
-
-        pollEvent.summary = event.summary;
-        pollEvent.headline = event.headline;
-
-        DispatchUiEvent(pollEvent);
-    });
-
-    useNitroEvent<RoomSessionPollEvent>(RoomSessionPollEvent.CONTENT, event =>
-    {
-        const pollEvent = new RoomWidgetPollUpdateEvent(RoomWidgetPollUpdateEvent.CONTENT, event.id);
-
-        pollEvent.startMessage = event.startMessage;
-        pollEvent.endMessage = event.endMessage;
-        pollEvent.numQuestions = event.numQuestions;
-        pollEvent.questionArray = event.questionArray;
-        pollEvent.npsPoll = event.npsPoll;
-
-        DispatchUiEvent(pollEvent);
-    });
-
-    return { startPoll, rejectPoll, answerPoll };
+    return usePollActions();
 };
-
-export const usePollWidget = usePollWidgetState;

@@ -313,13 +313,21 @@ The current branch (`claude/update-react-typescript-He2rs`) has applied:
 - **Pattern #1 (`useNitroEventState`)** — implemented + 1 pilot.
 - **Pattern #3 (feature folder)** — **rejected**; the existing
   `src/components/<area>/` + `src/hooks/<area>/` layout is kept.
-- **Pattern #4 (split god-hook)** — applied to the doorbell hook:
-  `src/hooks/rooms/widgets/useDoorbellState.ts` (data) +
-  `src/hooks/rooms/widgets/useDoorbellActions.ts` (actions).
-- **Pattern #2 (`useNitroQuery`)** — adapter prototype written, not yet
-  enabled (needs `yarn add @tanstack/react-query`).
-- **Pattern #5 (Zustand store)** — skeleton written, not yet enabled
-  (needs `yarn add zustand`).
+- **Pattern #4 (split god-hook)** — applied to:
+    - doorbell: `useDoorbellState` (data) + `useDoorbellActions`;
+    - poll: `usePollSubscriptions` (3 listeners) + `usePollActions`
+      (3 imperative actions). `useWordQuizWidget` migrated to import
+      `usePollActions` directly (it doesn't need the subscriptions).
+- **Pattern #2 (`useNitroQuery`)** — **enabled**: `@tanstack/react-query`
+  installed, `QueryClientProvider` mounted, real adapter in
+  `src/api/nitro-query/`, first migration on `OfferView`.
+- **Pattern #5 (Zustand store)** — **enabled**: `zustand` installed,
+  `createNitroStore` is now a real re-export, first migration converts
+  the `let isCreatingRoom` / `createRoomTimeout` singleton in
+  `NavigatorRoomCreatorView` to `useRoomCreatorStore`.
+- **Test infrastructure** — Vitest 3 + jsdom + @testing-library set up.
+  22 smoke tests passing on the pure helpers
+  (`WiredCreatorTools.helpers.ts`) and the new Zustand store.
 - **Bonus (error boundaries)** — `WidgetErrorBoundary` applied at
   `RoomWidgetsView`.
 
@@ -327,28 +335,36 @@ The current branch (`claude/update-react-typescript-He2rs`) has applied:
 
 ## How to pick the next refactor PR
 
-Order of value/risk for the next contributor:
+Foundations #1–#3 (React Query, Zustand, Vitest) are **done**. Order of
+value/risk for the next contributor:
 
-1. **Enable React Query** (`yarn add @tanstack/react-query`) and migrate
-   one read-only `useCatalog` fetch as a second pilot. Highest impact, low
-   risk.
-2. **Enable Zustand** and migrate the `let isCreatingRoom` /
-   `createRoomTimeout` singleton in `NavigatorRoomCreatorView`. Trivial,
-   makes the Compiler stop complaining about cross-component variable
-   writes.
-3. **Add tests** (still the #1 thing missing — see "What I'd fix" notes).
-   Vitest + jsdom + a tiny mock layer for the renderer would unblock every
-   refactor below.
-4. **Split `useCatalog`** — the biggest god-hook, following the doorbell
-   pattern (`useCatalogData` / `useCatalogUiState` / `useCatalogActions`
-   as siblings under `src/hooks/catalog/`). Only do this *after* #1 and
-   #2 in this list (React Query removes 60% of the file's responsibility,
-   Zustand handles its UI state).
+1. **Migrate `useCatalog`'s read-only fetches to `useNitroQuery`.**
+   Biggest expected payoff (cache + dedup + loading state for free).
+   Move the page-tree fetch first; the imperative purchase/gift flows
+   stay where they are. Adds tests against the new hooks as you go.
+2. **Mount `usePollSubscriptions` once at room-session level** instead
+   of inside `useWordQuizWidget`. The shim in `usePollWidget` works for
+   now but is wrong design: subscriptions don't belong inside an actions
+   hook. Right place is probably `RoomWidgetsView` or wherever poll
+   state should be observable.
+3. **Split `useCatalog` along the doorbell/poll lines**
+   (`useCatalogData` / `useCatalogUiState` / `useCatalogActions`,
+   siblings under `src/hooks/catalog/`). Only after #1 — React Query
+   removes ~60% of the file's responsibility, Zustand absorbs the UI
+   state slice.
+4. **Wider Vitest coverage**: add cases for `useDoorbellState` (event
+   reducer), `useNitroQuery` (timeout + cleanup), the smaller pure
+   formatters in `src/api/`. ~20 cases gets us to a meaningful smoke
+   baseline.
+5. **Per-tab split of `WiredCreatorToolsView`** (Monitor / Inspection /
+   Variables / Settings panels). Needs a tiny Zustand slice for the
+   shared state, then each tab moves to its own file. Unblocks the
+   React Compiler memoization on the parent module.
 
-Anything else (the per-tab `WiredCreatorTools` split, the
-`react-compiler/react-compiler` warnings, the `set-state-in-effect`
-sweep, the `LoginView` dialog split) is a downstream consequence of these
-five — easier and safer once the foundations are in place.
+Anything else (the `LoginView` dialog split, the
+`react-compiler/react-compiler` warnings on the remaining big files,
+the `set-state-in-effect` sweep) is a downstream consequence of the
+above — easier and safer once the foundations are in place.
 
 ---
 

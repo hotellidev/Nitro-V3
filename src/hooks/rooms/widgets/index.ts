@@ -10,6 +10,8 @@ export * from './useFilterWordsWidget';
 export * from './useFriendRequestWidget';
 export * from './useFurniChooserWidget';
 export * from './usePetPackageWidget';
+export * from './usePollActions';
+export * from './usePollSubscriptions';
 export * from './usePollWidget';
 export * from './useUserChooserWidget';
 export * from './useWordQuizWidget';

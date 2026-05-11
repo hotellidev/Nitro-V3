@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { VoteValue } from '../../../api';
 import { useNitroEvent } from '../../events';
 import { useRoom } from '../useRoom';
-import { usePollWidget } from './usePollWidget';
+import { usePollActions } from './usePollActions';
 
 const DEFAULT_DISPLAY_DELAY = 4000;
 const SIGN_FADE_DELAY = 3;
@@ -16,7 +16,7 @@ const useWordQuizWidgetState = () =>
     const [ questionClearTimeout, setQuestionClearTimeout ] = useState<ReturnType<typeof setTimeout>>(null);
     const [ answerCounts, setAnswerCounts ] = useState<Map<string, number>>(new Map());
     const [ userAnswers, setUserAnswers ] = useState<Map<number, VoteValue>>(new Map());
-    const { answerPoll = null } = usePollWidget();
+    const { answerPoll } = usePollActions();
     const { roomSession = null } = useRoom();
 
     const clearQuestion = () =>

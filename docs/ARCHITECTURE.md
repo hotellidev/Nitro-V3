@@ -82,7 +82,9 @@ Internally the selector closure is held in a ref refreshed in commit phase
 (`useLayoutEffect`), so a new selector identity per render does not force
 re-subscription. The listener is registered once.
 
-**Status.** Implemented + 1 pilot adoption (`OfferView.tsx`).
+**Status.** Implemented + adopted in `OfferView.tsx`, `useAvatarInfoWidget`
+(figure/badges/group merge), and `useInventoryFurni` (extracted pure
+reducers consumed by `useMessageEvent` setters).
 
 **Adoption.** Organic: when a contributor sees a clean
 "derive-from-single-event" case, they convert it. **Do not sweep-replace.**
@@ -90,9 +92,24 @@ The majority of existing subscriptions have side effects, multi-state
 updates, conditional filters, or state-machine semantics that lose
 information when forced into a single selector.
 
-**Companion to add later.** A `useNitroEventReducer<S, T>(events, reducer, initial)`
-for the cases where multiple events affect one state slice
-(see `useDoorbellWidget` — three events, one users array).
+**Companions** (all implemented in `src/hooks/events/`):
+- `useNitroEventReducer<S, T>(types, reducer, initial)` — multiple event
+  types collapsing into one owned state slice (analogous to
+  `useReducer` but driven by renderer events).
+- `useMessageEventReducer<S, T>(eventTypes, reducer, initial)` — same
+  shape on the server message channel; accepts a single type or an
+  array of types that all feed the same reducer.
+- `useExternalSnapshot<T>(subscribe, getSnapshot)` —
+  `useSyncExternalStore` wrapper pairing the renderer's
+  `EventDispatcher.subscribe()` with the `getXxxSnapshot()` getters
+  added in renderer 2.1.0. Use this for readonly views over manager
+  state (`getUserDataSnapshot`, `getActiveRoomSessionSnapshot`).
+
+For state owned outside the listener (the `useState` + `setState(prev =>
+applyX(prev, event))` pattern), keep using `useNitroEvent` /
+`useMessageEvent` and extract the reducer as a pure function for
+testability. See `src/hooks/inventory/useInventoryFurni.reducers.ts` and
+`src/hooks/rooms/widgets/avatarInfo.reducers.ts` for the convention.
 
 ---
 
@@ -324,17 +341,30 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
   `useEffectEvent`).
 
 ### Patterns + adoption (proposals #1, #2, #4, #5)
-- **`useNitroEventState` / `useMessageEventState`** (proposal #1) — adapter
-  in `src/hooks/events/`. Pilot: `OfferView`. Selector held in a
+- **`useNitroEventState` / `useMessageEventState` + companions** (proposal #1)
+  — adapters in `src/hooks/events/`. Selectors are held in a
   `useLayoutEffect`-refreshed ref (Dan Abramov's use-event-callback
   pattern) so the listener stays mounted across renders.
+  Companions for the multi-event → single state-slice case:
+  `useNitroEventReducer`, `useMessageEventReducer`, plus
+  `useExternalSnapshot` (a typed wrapper of `useSyncExternalStore` for the
+  renderer's `EventDispatcher.subscribe()` + `getXxxSnapshot()` getters
+  added in `Nitro_Render_V3` 2.1.0).
+  Pilots: `OfferView` (single-event), `useAvatarInfoWidget` (3 listeners
+  for figure/badges/group merged via pure reducers — moved out of
+  `InfoStandWidgetUserView`, killing 3 `CloneObject` calls), and
+  `useInventoryFurni` (4 message listeners + fragment buffer refactored
+  to pure reducers; the module-level `furniMsgFragments` is now a
+  `useRef` and the dead `FurniturePostItPlacedEvent` handler dropped).
 - **`useNitroQuery`** (proposal #2) — **enabled**. `@tanstack/react-query` +
   devtools installed; `QueryClientProvider` mounted in `src/index.tsx`.
   Adapter at `src/api/nitro-query/createNitroQuery.ts` with `select`,
   `accept` (correlation-key filter), `timeoutMs`, `staleTime`, plus a
   lower-level `awaitNitroResponse()` for imperative use. Pilots:
   `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`,
-  `CfhChatlogView`.
+  `CfhChatlogView`, `useGiftConfiguration` (replaces the
+  `GiftWrappingConfigurationEvent` listener + eager composer dispatch
+  that lived in `useCatalog`; consumed directly by `CatalogGiftView`).
 - **Layout / feature folders** (proposal #3) — **rejected**. The existing
   `src/components/<area>/<feature>/` (views) +
   `src/hooks/<area>/<feature?>/` (flat hook files) is the layout that
@@ -346,7 +376,9 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
       import `usePollActions` directly so it doesn't pull subscriptions.
     - **furni chooser**: `useFurniChooserState` + `useFurniChooserActions`
       + shim. Helper `buildWallItem`/`buildFloorItem` dedupes ~50 lines
-      of inline `RoomObjectItem` construction.
+      of inline `RoomObjectItem` construction (typed via `IRoomObject`;
+      the dead `sessionDataManager.getUserData` fallback dropped — the
+      method never existed).
     - **user chooser**: `useUserChooserState` + `useUserChooserActions`
       + shim. Helper `buildUserItem`. Adds `?.` guards on
       `roomSession?.userDataManager?` to avoid the room-transition NPE
@@ -378,7 +410,7 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
 - Vitest 3 + jsdom + `@testing-library/react` + `@testing-library/jest-dom`
   configured. Separate `vitest.config.mts` so the runner doesn't drag in
   the renderer SDK aliases from `vite.config.mjs`.
-- **77 cases passing** across 6 test files:
+- **83 cases passing** across 7 test files:
     - `WiredCreatorTools.helpers.test.ts` (18) — formatters + snapshot
       factory.
     - `navigatorRoomCreatorStore.test.ts` (4) — Zustand store invariants
@@ -390,6 +422,8 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
       `LocalizeFormattedNumber`.
     - `friendly-time.test.ts` (12) — `FriendlyTime` with a deterministic
       `LocalizeText` mock (cuts the transitive renderer-SDK import).
+    - `dedupeBadges.test.ts` (6) — slot-preserving badge dedup
+      (covers the helper used by the InfoStand pilot).
 - `yarn test` + `yarn test:watch` scripts added.
 
 ### Logic bug fixes
@@ -401,12 +435,41 @@ The current branch (**`feat/react19-modernization`**, PR #2) has applied:
   every `beforeunload` (every tab close).
 - `AvatarInfoPetTrainingPanelView` crashed if `roomSession` was null at
   parser time.
+- `useInventoryFurni` had a module-level `furniMsgFragments` buffer that
+  would have collided between two simultaneous client instances (now
+  scoped to a `useRef` inside the singleton hook).
 
 ### Dead code removed
 - `src/components/login/components/RegisterDialog.tsx`.
 - `src/components/login/components/ForgotDialog.tsx`.
 - `src/components/login/components/shared.ts` (consumed only by the two
   legacy dialogs).
+- `useInventoryFurni`'s empty `FurniturePostItPlacedEvent` handler.
+- `IRoomSession.sendWhisperGroupMessage` + impl in the renderer (the
+  `ChatWhisperGroupComposer` it referenced never existed; no client
+  call site).
+
+### Typecheck baseline
+- Repository-wide `tsgo` (TS 7 preview) errors driven down to **57**
+  client-side and **0** renderer-side via a series of small targeted
+  sweeps:
+    - Framer-motion `Variants` typing on `ToolbarView` + `FriendsBarView`
+      (−33).
+    - `createNitroQuery` import path / generics / Pick subset
+      (−3 + −1 propagation).
+    - `useFurniChooserState` typed as `IRoomObject` + dead getUserData
+      branch dropped (−10).
+    - `ColorVariantType` extended with the 5 `outline-*` bootstrap
+      variants used by the group-forum thread view (−4).
+    - React 19 `JSX` import in `WiredNeighborhoodSelectorView` (−1).
+    - `showConfirm` extra-arg drop in `useOnClickChat` (−1).
+    - `UserContainerView` `friendsCount.toString()` (−1).
+- Renderer-side cluster cleared in a single pass: TS 5.7+ `ArrayBuffer`
+  drift, Pixi v8 `Filter[]` / `WebGLRenderer` narrows, missing
+  `IGraphicAsset` import, empty-tuple `IMessageComposer<[]>`,
+  `PetBreedingMessageParser.bytesAvailable` boolean-vs-number bug,
+  `RoomEnterComposer` extended with optional spawnX/spawnY to match the
+  Arcturus server (which already reads both ints when present).
 
 ### Bonus
 - **`WidgetErrorBoundary`** (`src/common/error-boundary/`) — wraps the

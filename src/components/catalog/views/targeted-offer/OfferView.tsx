@@ -1,27 +1,28 @@
 import { GetTargetedOfferComposer, TargetedOfferData, TargetedOfferEvent } from '@nitrots/nitro-renderer';
-import { useEffect, useState } from 'react';
-import { SendMessageComposer } from '../../../../api';
-import { useMessageEventState } from '../../../../hooks';
+import { useState } from 'react';
+import { useNitroQuery } from '../../../../api/nitro-query';
 import { OfferBubbleView } from './OfferBubbleView';
 import { OfferWindowView } from './OfferWindowView';
 
 export const OfferView = () =>
 {
-    const offer = useMessageEventState<TargetedOfferEvent, TargetedOfferData>(
-        TargetedOfferEvent,
-        evt => evt.getParser()?.data ?? null,
-        null
-    );
+    const { data: offer } = useNitroQuery<TargetedOfferEvent, TargetedOfferData>({
+        key: [ 'nitro', 'catalog', 'targeted-offer' ],
+        request: () => new GetTargetedOfferComposer(),
+        parser: TargetedOfferEvent,
+        select: evt => evt.getParser()?.data ?? null,
+        staleTime: Infinity
+    });
+
     const [ opened, setOpened ] = useState<boolean>(false);
 
-    useEffect(() =>
-    {
-        SendMessageComposer(new GetTargetedOfferComposer());
-    }, []);
+    if(!offer) return null;
 
-    if(!offer) return;
-
-    return <>
-        { opened ? <OfferWindowView offer={ offer } setOpen={ setOpened } /> : <OfferBubbleView offer={ offer } setOpen={ setOpened } /> }
-    </>;
+    return (
+        <>
+            { opened
+                ? <OfferWindowView offer={ offer } setOpen={ setOpened } />
+                : <OfferBubbleView offer={ offer } setOpen={ setOpened } /> }
+        </>
+    );
 };

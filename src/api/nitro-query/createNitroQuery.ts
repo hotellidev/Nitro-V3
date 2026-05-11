@@ -1,42 +1,20 @@
-/**
- * Adapter prototype for proposal #2 (server requests as queries).
- *
- * NOT YET ENABLED — `@tanstack/react-query` is not in package.json.
- * To activate:
- *
- *   yarn add @tanstack/react-query @tanstack/react-query-devtools
- *
- * Then mount the provider once in `src/index.tsx`:
- *
- *   import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
- *   const queryClient = new QueryClient({
- *       defaultOptions: { queries: { staleTime: 30_000, retry: 1 } }
- *   });
- *   <QueryClientProvider client={queryClient}><App /></QueryClientProvider>
- *
- * Then this file becomes:
- *
- *   import { useQuery } from '@tanstack/react-query';
- *   ...
- *
- * The interface below shows the intended API. Once enabled, replace the
- * placeholder bodies with the real `useQuery` calls.
- */
-
-import { IMessageEvent, MessageEvent } from '@nitrots/nitro-renderer';
+import { GetCommunication, IMessageEvent, MessageEvent } from '@nitrots/nitro-renderer';
+import { QueryKey, useQuery, UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
 import { SendMessageComposer } from '../SendMessageComposer';
 
 export interface NitroQueryConfig<TParser extends IMessageEvent, TData>
 {
     /**
-     * Stable key used for caching/deduping (TanStack Query queryKey).
-     * Convention: ['nitro', '<domain>', '<request>', ...args].
+     * Stable key for caching/deduping. Convention:
+     * `['nitro', '<domain>', '<request>', ...args]`.
      */
-    key: readonly unknown[];
+    key: QueryKey;
     /**
      * Factory for the request composer. Called once per query execution.
+     * `null` skips sending (useful when the server pushes the event
+     * unprompted — you only want subscription, not a request).
      */
-    request: () => any;
+    request: (() => unknown) | null;
     /**
      * The parser class to listen for as the response.
      */
@@ -46,39 +24,95 @@ export interface NitroQueryConfig<TParser extends IMessageEvent, TData>
      */
     select?: (event: TParser) => TData;
     /**
-     * Optional max time to wait for the response before failing.
+     * Max time to wait for the response before rejecting (default 15s).
      */
     timeoutMs?: number;
+    /**
+     * Forwarded to TanStack Query.
+     */
+    enabled?: boolean;
+    staleTime?: number;
+    refetchOnMount?: boolean | 'always';
 }
 
 /**
- * Build a one-shot Promise that sends a composer and resolves with the
- * matching parser event. To be passed into TanStack Query's queryFn:
+ * Wraps a Nitro composer/parser request-response pair as a TanStack Query
+ * `useQuery` call. The returned object is the standard TanStack result —
+ * `{ data, isLoading, isError, error, refetch, ... }`.
  *
- *   useQuery({
- *       queryKey: cfg.key,
- *       queryFn: () => awaitNitroResponse(cfg),
- *   });
- *
- * Implementation outline (filled in once react-query is added):
- *
- *   return new Promise<TData>((resolve, reject) => {
- *       const event = new cfg.parser((e: TParser) => {
- *           GetCommunication().removeMessageEvent(event);
- *           resolve(cfg.select ? cfg.select(e) : (e as unknown as TData));
- *       });
- *       GetCommunication().registerMessageEvent(event);
- *       SendMessageComposer(cfg.request());
- *       if (cfg.timeoutMs) setTimeout(() => {
- *           GetCommunication().removeMessageEvent(event);
- *           reject(new Error('NitroQuery timeout'));
- *       }, cfg.timeoutMs);
- *   });
+ * Behavior:
+ * - On the first subscribe, registers the parser, sends the composer,
+ *   resolves the Promise with the selected payload when the parser fires.
+ * - Default `staleTime` is the QueryClient default (30s).
+ * - Subsequent mounts within `staleTime` get the cached value immediately;
+ *   the request is NOT re-sent.
+ * - Identical concurrent calls (same `key`) are deduped.
+ */
+export const useNitroQuery = <TParser extends IMessageEvent, TData = TParser>(
+    config: NitroQueryConfig<TParser, TData>
+): UseQueryResult<TData> =>
+{
+    const { key, request, parser, select, timeoutMs = 15_000, enabled, staleTime, refetchOnMount } = config;
+
+    const options: UseQueryOptions<TData, Error, TData> = {
+        queryKey: key,
+        queryFn: () => awaitNitroResponse<TParser, TData>({ key, request, parser, select, timeoutMs }),
+        enabled,
+        staleTime,
+        refetchOnMount
+    };
+
+    return useQuery(options);
+};
+
+/**
+ * Lower-level helper: send a composer (if any) and resolve with the next
+ * matching parser event. Exposed so `queryClient.fetchQuery({...})` callers
+ * can use the same plumbing imperatively.
  */
 export const awaitNitroResponse = <TParser extends IMessageEvent, TData>(
-    _cfg: NitroQueryConfig<TParser, TData>
+    config: Pick<NitroQueryConfig<TParser, TData>, 'request' | 'parser' | 'select' | 'timeoutMs'>
 ): Promise<TData> =>
-{
-    void SendMessageComposer;
-    throw new Error('useNitroQuery is not enabled. See docs/ARCHITECTURE.md proposal #2.');
-};
+        new Promise<TData>((resolve, reject) =>
+        {
+            const { request, parser: ParserCtor, select, timeoutMs = 15_000 } = config;
+
+            let settled = false;
+            let timeoutHandle: ReturnType<typeof setTimeout> | null = null;
+            let listener: IMessageEvent | undefined = undefined;
+
+            const cleanup = () =>
+            {
+                if(timeoutHandle !== null) clearTimeout(timeoutHandle);
+                if(listener) GetCommunication().removeMessageEvent(listener);
+            };
+
+            listener = new (ParserCtor as any)((event: TParser) =>
+            {
+                if(settled) return;
+                settled = true;
+
+                cleanup();
+
+                try
+                {
+                    resolve(select ? select(event) : (event));
+                }
+                catch(err)
+                {
+                    reject(err instanceof Error ? err : new Error(String(err)));
+                }
+            });
+
+            GetCommunication().registerMessageEvent(listener);
+
+            timeoutHandle = setTimeout(() =>
+            {
+                if(settled) return;
+                settled = true;
+                cleanup();
+                reject(new Error(`NitroQuery timed out after ${ timeoutMs }ms`));
+            }, timeoutMs);
+
+            if(request) SendMessageComposer(request());
+        });

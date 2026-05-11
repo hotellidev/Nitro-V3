@@ -10,6 +10,7 @@ import { DIRECTION_NAMES, EDITABLE_FURNI_VARIABLES, EDITABLE_USER_VARIABLES, INS
 import { createEmptyMonitorSnapshot, formatMonitorHistoryOccurrence, formatMonitorLatestOccurrence, formatMonitorSource, formatVariableTimestamp, getHotelDateTimeParts, getHotelTimeFormatter, normalizeMonitorReason } from './WiredCreatorTools.helpers';
 import { HotelDateTimeParts, InspectionElementButton, InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, InspectionUserTeamData, InspectionVariable, ManagedHolderVariableEntry, MonitorLog, MonitorLogDetails, MonitorSnapshot, MonitorStat, ParsedWallLocation, TeamEffectData, VariableDefinition, VariableHighlightOverlay, VariableHighlightTarget, VariableManageEntry, VariableTextValue, VariablesElementButton, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
 import { WiredInspectionTabView } from './WiredInspectionTabView';
+import { WiredMonitorTabView } from './WiredMonitorTabView';
 import { WiredToolsSettingsTabView } from './WiredToolsSettingsTabView';
 import { WiredVariablesTabView } from './WiredVariablesTabView';
 
@@ -3073,182 +3074,15 @@ export const WiredCreatorToolsView: FC<{}> = () =>
                 </NitroCardTabsView>
                 <NitroCardContentView className="text-black bg-[#e9e6d9]" gap={ 3 }>
                     { (activeTab === 'monitor') &&
-                        <div className="p-3 flex flex-col gap-3 relative">
-                            <div className="grid grid-cols-[190px_1fr] gap-3">
-                                <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-1">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <Text bold>Statistics:</Text>
-                                        <button className="rounded border border-[#7f7f7f] bg-[#ece9e1] px-2 py-[2px] text-[11px] text-[#333] hover:bg-[#e3ded2]" type="button" onClick={ () => setIsMonitorInfoOpen(true) }>Info</button>
-                                    </div>
-                                    { monitorStats.map(stat => (
-                                        <div key={ stat.label } className="flex justify-between gap-2 text-[12px]">
-                                            <span>{ stat.label }:</span>
-                                            <span>{ stat.value }</span>
-                                        </div>
-                                    )) }
-                                </div>
-                                <div className="min-h-[140px] flex items-center justify-center px-4">
-                                    <img alt="Monitor preview" className="max-w-full max-h-[180px] object-contain" src={ wiredMonitorImage } />
-                                </div>
-                            </div>
-                            <div className="bg-white rounded border border-[#b9b3a5] p-2 flex flex-col gap-2">
-                                <Text bold>Logs:</Text>
-                                <div className="max-h-[180px] overflow-y-auto border border-[#d1ccbf] rounded">
-                                    <table className="w-full text-[12px]">
-                                        <thead className="bg-[#efede5] sticky top-0">
-                                            <tr>
-                                                <th className="text-left px-2 py-1">Type</th>
-                                                <th className="text-left px-2 py-1">Severity</th>
-                                                <th className="text-left px-2 py-1">Amount</th>
-                                                <th className="text-left px-2 py-1">Latest occurrence</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            { monitorLogs.map((log, index) => (
-                                                <tr
-                                                    key={ log.type }
-                                                    className={ `${ (index % 2 === 0) ? 'bg-white' : 'bg-[#f8f6f0]' } cursor-pointer hover:bg-[#e8eefc]` }
-                                                    onClick={ () => openMonitorLogDetails(log.type, {
-                                                        severity: log.category,
-                                                        amount: log.amount,
-                                                        latest: log.latest,
-                                                        reason: log.latestReason,
-                                                        sourceLabel: log.latestSourceLabel,
-                                                        sourceId: log.latestSourceId
-                                                    }) }>
-                                                    <td className="px-2 py-1 text-[#1b57b2] underline-offset-2 hover:underline">{ log.type }</td>
-                                                    <td className="px-2 py-1">{ log.category }</td>
-                                                    <td className="px-2 py-1">{ log.amount }</td>
-                                                    <td className="px-2 py-1">{ log.latest }</td>
-                                                </tr>
-                                            )) }
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div className="flex justify-between gap-2">
-                                    <Button disabled={ !monitorHistoryRows.length && !monitorLogs.some(log => log.amount !== '0') } variant="danger" onClick={ clearMonitorLogs }>Clear all</Button>
-                                    <Button disabled={ !monitorHistoryRows.length } variant="secondary" onClick={ () => setIsMonitorHistoryOpen(true) }>View full logs</Button>
-                                </div>
-                            </div>
-                            { false && isMonitorHistoryOpen &&
-                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/25">
-                                    <div className="w-[760px] rounded border border-[#6b8ca0] overflow-hidden shadow-lg bg-[#f4efe3]">
-                                        <div className="h-[32px] bg-[#3b8bb5] text-white flex items-center justify-between px-3">
-                                            <Text bold>Wired Monitor Logs</Text>
-                                            <button className="w-[20px] h-[20px] rounded bg-[#c9482e] text-white leading-none" type="button" onClick={ () => setIsMonitorHistoryOpen(false) }>×</button>
-                                        </div>
-                                        <div className="p-3 flex flex-col gap-3">
-                                            <div className="flex flex-wrap items-center gap-2 text-[12px]">
-                                                <span className="text-[#555]">Severity:</span>
-                                                { [ 'ALL', 'WARNING', 'ERROR' ].map(severity => (
-                                                    <button
-                                                        key={ severity }
-                                                        className={ `rounded border px-2 py-[2px] ${ (monitorHistorySeverityFilter === severity) ? 'border-[#4d7892] bg-[#dbeaf4] text-[#1a4d68]' : 'border-[#b8b2a4] bg-white text-[#555]' }` }
-                                                        type="button"
-                                                        onClick={ () => setMonitorHistorySeverityFilter(severity as 'ALL' | 'ERROR' | 'WARNING') }>
-                                                        { severity }
-                                                    </button>
-                                                )) }
-                                                <span className="ml-2 text-[#555]">Type:</span>
-                                                <select
-                                                    className="rounded border border-[#b8b2a4] bg-white px-2 py-[2px] text-[12px]"
-                                                    value={ monitorHistoryTypeFilter }
-                                                    onChange={ event => setMonitorHistoryTypeFilter(event.target.value) }>
-                                                    { monitorHistoryTypeOptions.map(type => (
-                                                        <option key={ type } value={ type }>
-                                                            { type }
-                                                        </option>
-                                                    )) }
-                                                </select>
-                                            </div>
-                                            <div className="max-h-[300px] overflow-y-auto border border-[#d1ccbf] rounded bg-white">
-                                                <table className="w-full text-[12px]">
-                                                    <thead className="bg-[#efede5] sticky top-0">
-                                                        <tr>
-                                                            <th className="text-left px-2 py-1">Type</th>
-                                                            <th className="text-left px-2 py-1">Severity</th>
-                                                            <th className="text-left px-2 py-1">Trigger</th>
-                                                            <th className="text-left px-2 py-1">Motivation</th>
-                                                            <th className="text-left px-2 py-1">Occurred at</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        { !filteredMonitorHistoryRows.length &&
-                                                            <tr>
-                                                                <td className="px-2 py-3 text-center text-[#8b8678]" colSpan={ 5 }>No log history for the current filters</td>
-                                                            </tr> }
-                                                        { filteredMonitorHistoryRows.map((row, index) => (
-                                                            <tr
-                                                                key={ row.id }
-                                                                className={ `${ (index % 2 === 0) ? 'bg-white' : 'bg-[#f8f6f0]' } cursor-pointer hover:bg-[#e8eefc]` }
-                                                                onClick={ () => openMonitorLogDetails(row.type, {
-                                                                    severity: row.category,
-                                                                    occurredAt: row.occurredAt,
-                                                                    reason: row.reason,
-                                                                    sourceLabel: row.sourceLabel,
-                                                                    sourceId: row.sourceId
-                                                                }) }>
-                                                                <td className="px-2 py-1 text-[#1b57b2]">{ row.type }</td>
-                                                                <td className="px-2 py-1">{ row.category }</td>
-                                                                <td className="px-2 py-1">{ formatMonitorSource(row.sourceLabel, row.sourceId) }</td>
-                                                                <td className="px-2 py-1 text-[#555]">{ row.reason }</td>
-                                                                <td className="px-2 py-1">{ row.occurredAt }</td>
-                                                            </tr>
-                                                        )) }
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> }
-                            { false && isMonitorInfoOpen &&
-                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/25">
-                                    <div className="w-[560px] rounded border border-[#6b8ca0] overflow-hidden shadow-lg bg-[#f4efe3]">
-                                        <div className="h-[32px] bg-[#3b8bb5] text-white flex items-center justify-between px-3">
-                                            <Text bold>Wired Monitor Information</Text>
-                                            <button className="w-[20px] h-[20px] rounded bg-[#c9482e] text-white leading-none" type="button" onClick={ () => setIsMonitorInfoOpen(false) }>Ã—</button>
-                                        </div>
-                                        <div className="p-4 flex flex-col gap-4 text-[12px] text-[#222]">
-                                            { monitorInfoSections.map(section => (
-                                                <div key={ section.title } className="flex flex-col gap-1">
-                                                    <Text bold>{ section.title }</Text>
-                                                    { section.lines.map((line, index) => (
-                                                        <Text key={ `${ section.title }-${ index }` }>{ line }</Text>
-                                                    )) }
-                                                </div>
-                                            )) }
-                                        </div>
-                                    </div>
-                                </div> }
-                            { false && !!selectedMonitorErrorInfo &&
-                                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/25">
-                                    <div className="w-[470px] rounded border border-[#6b8ca0] overflow-hidden shadow-lg bg-[#f4efe3]">
-                                        <div className="h-[32px] bg-[#3b8bb5] text-white flex items-center justify-between px-3">
-                                            <Text bold>Wired Error Information</Text>
-                                            <button className="w-[20px] h-[20px] rounded bg-[#c9482e] text-white leading-none" type="button" onClick={ () => setSelectedMonitorErrorType(null) }>×</button>
-                                        </div>
-                                        <div className="p-4 flex flex-col gap-3 text-[12px] text-[#222]">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <Text bold>{ selectedMonitorErrorInfo.title }</Text>
-                                                <span className={ `rounded px-2 py-[2px] text-[10px] font-semibold ${ ((selectedMonitorLogDetails?.severity ?? selectedMonitorErrorInfo.severity) === 'WARNING') ? 'bg-[#d4f0d0] text-[#2a6a24]' : 'bg-[#f6d7d7] text-[#8c2424]' }` }>
-                                                    { selectedMonitorLogDetails?.severity ?? selectedMonitorErrorInfo.severity }
-                                                </span>
-                                            </div>
-                                            { !!selectedMonitorLogDetails &&
-                                                <div className="rounded border border-[#d8d2c3] bg-white/60 p-3 flex flex-col gap-1">
-                                                    <Text><b>Trigger:</b> { selectedMonitorDetailSource }</Text>
-                                                    <Text><b>Motivation:</b> { selectedMonitorLogDetails.reason }</Text>
-                                                    { !!selectedMonitorLogDetails.amount && <Text><b>Amount:</b> { selectedMonitorLogDetails.amount }</Text> }
-                                                    { !!selectedMonitorLogDetails.latest && <Text><b>Latest occurrence:</b> { selectedMonitorLogDetails.latest }</Text> }
-                                                    { !!selectedMonitorLogDetails.occurredAt && <Text><b>Occurred at:</b> { selectedMonitorLogDetails.occurredAt }</Text> }
-                                                </div> }
-                                            { selectedMonitorErrorInfo.description.map((paragraph, index) => (
-                                                <Text key={ index }>{ paragraph }</Text>
-                                            )) }
-                                        </div>
-                                    </div>
-                                </div> }
-                        </div> }
+                        <WiredMonitorTabView
+                            monitorStats={ monitorStats }
+                            monitorLogs={ monitorLogs }
+                            monitorHistoryRows={ monitorHistoryRows }
+                            onOpenMonitorInfo={ () => setIsMonitorInfoOpen(true) }
+                            onOpenMonitorHistory={ () => setIsMonitorHistoryOpen(true) }
+                            onClearMonitorLogs={ clearMonitorLogs }
+                            onOpenMonitorLogDetails={ openMonitorLogDetails }
+                        /> }
                     { (activeTab === 'inspection') &&
                         <WiredInspectionTabView
                             inspectionType={ inspectionType }

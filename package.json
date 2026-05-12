@@ -8,6 +8,7 @@
         "start": "vite --host",
         "build": "vite build && node scripts/minify-dist.mjs",
         "build:prod": "npx browserslist@latest --update-db && yarn build",
+        "preview": "vite preview --host",
         "eslint": "eslint ./src",
         "typecheck": "tsgo --noEmit",
         "test": "vitest run",

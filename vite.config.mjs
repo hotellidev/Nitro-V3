@@ -7,6 +7,23 @@ const legacyRendererRoot = resolve(__dirname, '..', 'renderer');
 const currentRendererRoot = resolve(__dirname, '..', 'Nitro_Render_V3');
 const rendererRoot = existsSync(currentRendererRoot) ? currentRendererRoot : legacyRendererRoot;
 
+if(!existsSync(rendererRoot))
+{
+    // Fail fast with a useful message instead of waiting for Rolldown to
+    // report "Failed to resolve import @nitrots/nitro-renderer" deep
+    // inside the bundle pass.
+    throw new Error(
+        '\n  Nitro renderer SDK not found.\n\n' +
+        '  vite.config.mjs expects one of these directories to exist as a sibling of this repo:\n' +
+        `    - ${ currentRendererRoot } (preferred)\n` +
+        `    - ${ legacyRendererRoot } (legacy)\n\n` +
+        '  Clone the Nitro_Render_V3 repo next to Nitro-V3 and rerun:\n' +
+        '    git clone <renderer-repo> ../Nitro_Render_V3\n' +
+        '    cd ../Nitro_Render_V3 && yarn install\n\n' +
+        '  (See CLAUDE.md "Commands" section for the full setup walkthrough.)\n'
+    );
+}
+
 const ReactCompilerConfig = {
     target: '19'
 };

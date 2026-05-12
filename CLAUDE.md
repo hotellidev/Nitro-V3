@@ -21,10 +21,41 @@ read that before starting anything non-trivial.
 |---|---|
 | Dev server | `yarn start` |
 | Production build | `yarn build` |
+| Serve production build | `yarn preview` (defaults to http://localhost:4173) |
 | Lint | `yarn eslint` |
 | Type-check (TS 7 native, fast) | `yarn typecheck` |
 | Test (Vitest, once) | `yarn test` |
 | Test (watch) | `yarn test:watch` |
+
+## Setup walkthrough
+
+1. **Clone the renderer SDK as a sibling of this repo.**
+   `vite.config.mjs` resolves the `@nitrots/*` aliases against
+   `../Nitro_Render_V3` (preferred) or `../renderer` (legacy). If neither
+   exists, the dev server and build now fail fast with a message
+   pointing here.
+
+   ```sh
+   cd ..                            # parent of Nitro-V3
+   git clone <renderer-repo> Nitro_Render_V3
+   cd Nitro_Render_V3 && yarn install
+   ```
+
+2. **Install client deps.**
+   ```sh
+   cd ../Nitro-V3
+   yarn install
+   ```
+
+3. **Materialize the runtime configuration.** `public/configuration/`
+   ships `.example` files. Copy the ones you need without the `.example`
+   suffix and point them at your game server (websocket URL, asset
+   base URL, UI texts, etc.). The dev server doesn't fail if these are
+   missing but the client renders a blank/error screen at runtime.
+
+4. **Run.**
+   - Dev: `yarn start` (Vite, HMR, includes the renderer source).
+   - Production preview: `yarn build && yarn preview`.
 
 The renderer SDK (`@nitrots/nitro-renderer`) is consumed via a filesystem
 link to a sibling working tree — `../Nitro_Render_V3` (preferred) or

@@ -12,21 +12,24 @@ export interface NotificationBadgeReceivedBubbleViewProps extends LayoutNotifica
 export const NotificationBadgeReceivedBubbleView: FC<NotificationBadgeReceivedBubbleViewProps> = props =>
 {
     const { item = null, onClose = null, ...rest } = props;
-    const { badgeCodes = [], toggleBadge = null } = useInventoryBadges();
+    const { activeBadgeCodes = [], toggleBadge = null, isWearingBadge = null, canWearBadges = null } = useInventoryBadges();
 
     useEffect(() =>
     {
-        if(badgeCodes.length === 0) SendMessageComposer(new RequestBadgesComposer());
-    }, []);
+        if(activeBadgeCodes.length === 0) SendMessageComposer(new RequestBadgesComposer());
+    }, [ activeBadgeCodes.length ]);
+
+    const badgeCode = item?.linkUrl ?? null;
+    const isLoaded = activeBadgeCodes.length > 0;
+    const alreadyWearing = !!badgeCode && !!isWearingBadge && isWearingBadge(badgeCode);
+    const slotsAvailable = !!canWearBadges && canWearBadges();
+    const canShowWearButton = !!badgeCode && isLoaded && !alreadyWearing && slotsAvailable;
 
     const handleWear = (event: React.MouseEvent) =>
     {
         event.stopPropagation();
 
-        if(item.linkUrl)
-        {
-            toggleBadge(item.linkUrl);
-        }
+        if(canShowWearButton && toggleBadge) toggleBadge(badgeCode);
 
         if(onClose) onClose();
     };
@@ -54,12 +57,13 @@ export const NotificationBadgeReceivedBubbleView: FC<NotificationBadgeReceivedBu
                     </Flex>
                 </Flex>
                 <Flex alignItems="center" justifyContent="end" gap={ 2 }>
-                    <button
-                        className="btn btn-success w-full btn-sm"
-                        type="button"
-                        onClick={ handleWear }>
-                        { LocalizeText('inventory.badges.wearbadge') }
-                    </button>
+                    { canShowWearButton &&
+                        <button
+                            className="btn btn-success w-full btn-sm"
+                            type="button"
+                            onClick={ handleWear }>
+                            { LocalizeText('inventory.badges.wearbadge') }
+                        </button> }
                     <span className="underline cursor-pointer text-nowrap" onClick={ handleDismiss }>
                         { LocalizeText('notifications.button.later') }
                     </span>

@@ -261,7 +261,7 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
 | God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends` |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella |
-| Vitest | 113/113 cases on pure helpers + the Zustand store |
+| Vitest | 124/124 cases — 113 on pure helpers + Zustand store, plus the first 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the new renderer-SDK mock at `tests/mocks/renderer-mock.ts` |
 | Form Actions | Login / Register / Forgot (LoginView.tsx) |
 | Cherry-picked from `duckietm` PR #126 | `UserAccountSettingsView` (reset password / email / username under user settings), plus the wear-badge popup `canShowWearButton` gating |
 
@@ -271,7 +271,7 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 | Split `useChatWidget` / `useAvatarInfoWidget` | Both state-driven via events with no clean imperative actions to extract — skip-motivated. Already touched today for the InfoStand listener move. |
 | Split `usePetPackageWidget` / `useWordQuizWidget` / `useChatCommandSelector` | Their "actions" mutate internal state or are tightly interdependent — skip-motivated. |
 | Hoist Wired Creator Tools shared state to a Zustand slice | Would remove ~25 props passed to the 3 tab sub-components. (Wired-tools split done as singleton-filter; Zustand slice is the next step.) |
-| Wider Vitest coverage (React components) | `@testing-library/*` is installed; needs a small renderer-SDK mock layer first. |
+| Widen the component / hook test coverage | Mock layer is in place (`tests/mocks/renderer-mock.ts`) and the first 2 pilots pass. Good follow-up targets: other `*State` hooks built on event reducers, `LoginView` Form Actions happy/error paths, OfferView with `useNitroQuery`. |
 
 ## Known open logic bugs
 
@@ -323,3 +323,11 @@ Fix shapes documented; both are reasonable PRs on their own.
 - Asset middleware: `nitroAssetsServer()` in `vite.config.mjs`
 - Configuration pre-init: `src/bootstrap.ts` (`await GetConfiguration().init()`
   before `import('./index')`)
+- Renderer-SDK mock for Vitest: `tests/mocks/renderer-mock.ts`
+  (aliased over `@nitrots/nitro-renderer` via `vitest.config.mts`).
+  Hosts the explicit `NitroLogger` mock, the `mockEventDispatcher` /
+  `clearMockEventDispatcher` helpers used by hook tests, the
+  `RoomSessionDoorbellEvent` stub, and a long list of placeholder
+  classes/enums kept around just so the `src/api/*` barrel cascade
+  imports without throwing. **Grow this file when a new test needs a
+  symbol; prefer real deterministic stubs over `vi.fn()`.**

@@ -484,7 +484,7 @@ Status after this round of work:
 - Vitest 3 + jsdom + `@testing-library/react` + `@testing-library/jest-dom`
   configured. Separate `vitest.config.mts` so the runner doesn't drag in
   the renderer SDK aliases from `vite.config.mjs`.
-- **113 cases passing** across 8 test files:
+- **124 cases passing** across 10 test files. Pure-module suites:
     - `WiredCreatorTools.helpers.test.ts` (18) — formatters + snapshot
       factory.
     - `navigatorRoomCreatorStore.test.ts` (4) — Zustand store invariants
@@ -504,13 +504,40 @@ Status after this round of work:
       bail-out branches (state-not-AvatarInfoUser, mismatched
       user/roomIndex, equal-after-dedup) + the figure / favorite-group
       apply paths.
-- **Pure-module convention**: tests live in `tests/` and import from
-  concrete file paths (e.g. `../src/api/catalog/CatalogType`) rather
-  than the api barrel, so jsdom doesn't transitively load the renderer
-  SDK's Pixi-bound modules. Renderer event type imports use
-  `import type { … }` so they're erased at compile time and don't
-  trigger the runtime module load either.
-- `yarn test` + `yarn test:watch` scripts added.
+
+  Component-/hook-level suites (on the new renderer-SDK mock):
+    - `WidgetErrorBoundary.test.tsx` (4) — happy path + caught render
+      error logged via `NitroLogger.error` + custom fallback +
+      `unknown` default name.
+    - `useDoorbellState.test.tsx` (7) — initial empty state, append on
+      `DOORBELL`, dedup duplicates, remove on `RSDE_ACCEPTED` /
+      `RSDE_REJECTED`, ignore stale events, unsubscribe on unmount.
+
+- **Renderer-SDK mock at `tests/mocks/renderer-mock.ts`** —
+  `vitest.config.mts` aliases `@nitrots/nitro-renderer` over this file
+  so jsdom-hosted tests never load Pixi or the message
+  parser/composer registry. The mock exports:
+    - Explicit, behavioral stubs for the symbols tests actually
+      exercise: `NitroLogger`, `GetEventDispatcher`,
+      `mockEventDispatcher` / `clearMockEventDispatcher` helpers, the
+      `RoomSessionDoorbellEvent` class (signature mirrors the real
+      `(type, session, userName)` so `tsgo` stays happy).
+    - String-keyed `Proxy` enums for every `*EventType` /
+      `*FigurePartType` / `RoomObjectCategory` etc. — each access
+      returns a stable unique string so dispatch + listener agree.
+    - Lightweight `class StubClass {}` placeholders for the ~30 Pixi
+      and gameplay classes the `src/api/*` barrel touches at import
+      time (`NitroAlphaFilter`, `NitroContainer`, `EventDispatcher`,
+      etc.). Keeps the cascade from throwing without simulating
+      behavior tests don't care about.
+    - Singleton getters (`GetAssetManager`, `GetCommunication`,
+      `GetSessionDataManager`, …) returning a chainable proxy so
+      `GetX().y.z` evaluates to a no-op proxy instead of crashing.
+- **Pure-module convention** (still applies for non-component tests):
+  import from concrete file paths so jsdom doesn't transitively load
+  the renderer SDK; use `import type { … }` for type-only renderer
+  imports.
+- `yarn test` + `yarn test:watch` scripts.
 
 ### Logic bug fixes
 - Doorbell close button didn't close while users were pending
@@ -648,11 +675,15 @@ Remaining order of value/risk for the next contributor:
    token; the `LayoutFurniImageView` / `LayoutAvatarImageView` async
    fetch race needs a request-id ref (or is solved by migrating the
    image fetch to `useNitroQuery` keyed on props).
-6. **Wider Vitest coverage** — next worthwhile targets: the
-   `useNitroQuery` adapter (timeout + cleanup + accept-filter
-   behavior, needs a stub for `@nitrots/nitro-renderer`),
-   `useDoorbellState`/`useUserChooserState` event-reducer logic
-   (needs the same renderer stub).
+6. **Widen the component/hook Vitest coverage.** The renderer-SDK
+   mock layer is in place (`tests/mocks/renderer-mock.ts`) and the
+   first two pilots — `WidgetErrorBoundary` and `useDoorbellState` —
+   pass. Good follow-up targets: other `*State` hooks built on event
+   reducers (`useFurniChooserState`, `useUserChooserState`,
+   `useFriendRequestState`, `useChatInputState`), the `useNitroQuery`
+   adapter (timeout + cleanup + accept-filter behavior), and the
+   `LoginView` Form Actions happy/error paths. Each new test will
+   likely need to add 1-3 named exports to the renderer mock.
 
 Skipped intentionally and documented in commit messages:
 

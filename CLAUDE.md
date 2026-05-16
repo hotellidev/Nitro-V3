@@ -211,7 +211,7 @@ Components subscribe to slices, not the whole store:
 const value = useFooStore(s => s.value);
 ```
 
-First adoption: `src/components/navigator/views/navigatorRoomCreatorStore.ts`.
+Adoptions: `src/components/navigator/views/navigatorRoomCreatorStore.ts` (create-room lockout) and `src/components/wired-tools/wiredCreatorToolsUiStore.ts` (UI-only flags for the WiredCreatorTools panel — tab nav, modal/popover open, monitor + variable-manage filters).
 
 ### `WidgetErrorBoundary`
 
@@ -257,11 +257,11 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 |---|---|
 | `useNitroEventState` + companions (Reducer, ExternalSnapshot) | `OfferView`, `useAvatarInfoWidget` (figure/badges/group reducer), `useInventoryFurni` (pure reducers + fragments useRef) |
 | `useNitroQuery` + `useNitroEventInvalidator` | `OfferView`, `CatalogLayoutRoomAdsView`, `ModToolsChatlogView`, `CfhChatlogView`, `useGiftConfiguration`, `useUserGroups`, `useClubOffers(windowId)`, `useSellablePetPalette(breed)`, `useMarketplaceConfiguration`, `useClubGifts` (with invalidator) |
-| Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`) |
+| Zustand | `NavigatorRoomCreatorView` (`useRoomCreatorStore`), `WiredCreatorToolsView` (`useWiredCreatorToolsUiStore` — 14 UI-only flags: tab nav, modal/popover open, monitor + variable-manage filters) |
 | God-hook split (state + actions + shim) | `doorbell`, `poll`, `furni-chooser`, `user-chooser`, `friend-request`, `chat-input` |
 | God-hook split (`useBetween` singleton + state filter + actions filter + shim) | `wired-tools`, `translation`, `notification`, `friends`, `catalog` (three-way: `useCatalogData` / `useCatalogUiState` / `useCatalogActions` — all 48 consumers migrated, deprecated `useCatalog` shim removed) |
 | `WidgetErrorBoundary` | `RoomWidgetsView` umbrella + per-widget wrap on all 13 room widgets and all 20 furniture widgets (so a crash in one widget no longer takes down its siblings) |
-| Vitest | 162/162 cases — pure helpers + Zustand store + 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the renderer-SDK mock at `tests/mocks/renderer-mock.ts`, 34 cases on the catalog pure helpers, 4 contract cases on the catalog filters |
+| Vitest | 178/178 cases — pure helpers + 2 Zustand store suites (`navigatorRoomCreatorStore`, `wiredCreatorToolsUiStore`) + 2 component-/hook-level pilots (WidgetErrorBoundary, useDoorbellState) on top of the renderer-SDK mock at `tests/mocks/renderer-mock.ts`, 34 cases on the catalog pure helpers, 4 contract cases on the catalog filters |
 | Form Actions | Login / Register / Forgot (LoginView.tsx) |
 | Cherry-picked from `duckietm` PR #126 | `UserAccountSettingsView` (reset password / email / username under user settings), plus the wear-badge popup `canShowWearButton` gating |
 
@@ -269,7 +269,7 @@ into `configurePreviewServer` so `yarn preview` keeps working.
 |---|---|
 | Split `useChatWidget` / `useAvatarInfoWidget` | Both state-driven via events with no clean imperative actions to extract — skip-motivated. Already touched today for the InfoStand listener move. |
 | Split `usePetPackageWidget` / `useWordQuizWidget` / `useChatCommandSelector` | Their "actions" mutate internal state or are tightly interdependent — skip-motivated. |
-| Hoist Wired Creator Tools shared state to a Zustand slice | Would remove ~25 props passed to the 3 tab sub-components. (Wired-tools split done as singleton-filter; Zustand slice is the next step.) |
+| Hoist Wired Creator Tools **derived** state to the Zustand slice | UI-only flags are already hoisted (`useWiredCreatorToolsUiStore`). What's left is the event-driven derived state — `selectedFurni` / `selectedUser` / `monitorSnapshot` / `variableHighlightOverlays` — which can only move alongside their listener effects (multi-session refactor). |
 | Widen the component / hook test coverage | Mock layer is in place (`tests/mocks/renderer-mock.ts`) and the first 2 pilots pass. Good follow-up targets: other `*State` hooks built on event reducers, `LoginView` Form Actions happy/error paths, OfferView with `useNitroQuery`. |
 
 ## Known open logic bugs
@@ -298,7 +298,7 @@ Fix shapes documented; both are reasonable PRs on their own.
 - **Skip-motivated god-hook splits are fine** — when a hook's actions
   mutate internal state, document the reason in the commit message and
   move on rather than forcing a bad split.
-- **`yarn test` must stay green** on every commit. Currently 163/163.
+- **`yarn test` must stay green** on every commit. Currently 178/178.
   The GitHub Actions workflow at `.github/workflows/ci.yml` runs
   `yarn typecheck` + `yarn test --run` on every push to `main` /
   `feat/**` and on every PR — both must pass.

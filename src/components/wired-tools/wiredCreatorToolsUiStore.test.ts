@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { createEmptyMonitorSnapshot } from './WiredCreatorTools.helpers';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
 
 const INITIAL = {
@@ -15,7 +16,8 @@ const INITIAL = {
     monitorHistoryTypeFilter: 'ALL',
     variableManageTypeFilter: 'ALL',
     variableManageSort: 'highest_value',
-    variableManagePage: 1
+    variableManagePage: 1,
+    monitorSnapshot: createEmptyMonitorSnapshot()
 };
 
 describe('useWiredCreatorToolsUiStore', () =>
@@ -43,6 +45,7 @@ describe('useWiredCreatorToolsUiStore', () =>
         expect(state.variableManageTypeFilter).toBe('ALL');
         expect(state.variableManageSort).toBe('highest_value');
         expect(state.variableManagePage).toBe(1);
+        expect(state.monitorSnapshot).toEqual(createEmptyMonitorSnapshot());
     });
 
     describe('setIsVisible', () =>
@@ -175,6 +178,59 @@ describe('useWiredCreatorToolsUiStore', () =>
 
             useWiredCreatorToolsUiStore.getState().setVariableManagePage(prev => Math.max(1, prev - 1));
             expect(useWiredCreatorToolsUiStore.getState().variableManagePage).toBe(2);
+        });
+    });
+
+    describe('monitorSnapshot', () =>
+    {
+        it('setMonitorSnapshot replaces the snapshot with the server payload shape', () =>
+        {
+            const next = {
+                ...createEmptyMonitorSnapshot(),
+                usageCurrentWindow: 7,
+                usageLimitPerWindow: 10,
+                isHeavy: true,
+                averageExecutionMs: 42
+            };
+
+            useWiredCreatorToolsUiStore.getState().setMonitorSnapshot(next);
+
+            expect(useWiredCreatorToolsUiStore.getState().monitorSnapshot).toEqual(next);
+            expect(useWiredCreatorToolsUiStore.getState().monitorSnapshot.isHeavy).toBe(true);
+        });
+
+        it('resetMonitorSnapshot returns a fresh empty snapshot (new reference)', () =>
+        {
+            const populated = {
+                ...createEmptyMonitorSnapshot(),
+                usageCurrentWindow: 5,
+                logs: [ { amount: 1, latestOccurrenceSeconds: 0, latestReason: '', latestSourceId: 0, latestSourceLabel: '', severity: 'ERROR', type: 'foo' } ],
+                history: [ { occurredAtSeconds: 0, reason: '', sourceId: 0, sourceLabel: '', severity: 'ERROR', type: 'foo' } ]
+            };
+            useWiredCreatorToolsUiStore.getState().setMonitorSnapshot(populated);
+
+            useWiredCreatorToolsUiStore.getState().resetMonitorSnapshot();
+
+            const cleared = useWiredCreatorToolsUiStore.getState().monitorSnapshot;
+            expect(cleared).toEqual(createEmptyMonitorSnapshot());
+            expect(cleared).not.toBe(populated);
+            expect(cleared.logs).toEqual([]);
+            expect(cleared.history).toEqual([]);
+        });
+
+        it('the snapshot persists across the panel close/reopen lifecycle (UI flag flip)', () =>
+        {
+            // Server pushed a non-empty snapshot while the panel was open.
+            const payload = { ...createEmptyMonitorSnapshot(), usageCurrentWindow: 3 };
+            useWiredCreatorToolsUiStore.getState().setMonitorSnapshot(payload);
+
+            // User closes the panel — UI flag flips, snapshot should NOT reset.
+            useWiredCreatorToolsUiStore.getState().setIsVisible(false);
+
+            // User reopens — the last-known stats are still there.
+            useWiredCreatorToolsUiStore.getState().setIsVisible(true);
+
+            expect(useWiredCreatorToolsUiStore.getState().monitorSnapshot.usageCurrentWindow).toBe(3);
         });
     });
 });

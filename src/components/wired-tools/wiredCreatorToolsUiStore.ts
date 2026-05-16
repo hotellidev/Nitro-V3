@@ -1,5 +1,6 @@
 import { createNitroStore } from '../../state/createNitroStore';
-import { InspectionElementType, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
+import { createEmptyMonitorSnapshot } from './WiredCreatorTools.helpers';
+import { InspectionElementType, MonitorSnapshot, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
 
 type MonitorSeverityFilter = 'ALL' | 'ERROR' | 'WARNING';
 type Updater<T> = T | ((prev: T) => T);
@@ -27,6 +28,15 @@ interface WiredCreatorToolsUiState
     variableManageSort: string;
     variableManagePage: number;
 
+    /**
+     * Latest snapshot pushed by the server through `WiredMonitorDataEvent`.
+     * Held in the store (rather than `useState`) so it survives remount
+     * — e.g. closing and reopening the panel between two server pushes
+     * keeps the last-known stats visible instead of flashing back to the
+     * empty snapshot.
+     */
+    monitorSnapshot: MonitorSnapshot;
+
     setIsVisible: (next: Updater<boolean>) => void;
     setActiveTab: (next: WiredToolsTab) => void;
     setInspectionType: (next: InspectionElementType) => void;
@@ -44,6 +54,9 @@ interface WiredCreatorToolsUiState
     setVariableManageTypeFilter: (next: string) => void;
     setVariableManageSort: (next: string) => void;
     setVariableManagePage: (next: Updater<number>) => void;
+
+    setMonitorSnapshot: (next: MonitorSnapshot) => void;
+    resetMonitorSnapshot: () => void;
 }
 
 export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiState>()((set) => ({
@@ -65,6 +78,8 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     variableManageSort: 'highest_value',
     variableManagePage: 1,
 
+    monitorSnapshot: createEmptyMonitorSnapshot(),
+
     setIsVisible: (next) => set(state => ({ isVisible: apply(state.isVisible, next) })),
     setActiveTab: (next) => set({ activeTab: next }),
     setInspectionType: (next) => set({ inspectionType: next }),
@@ -81,5 +96,8 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
 
     setVariableManageTypeFilter: (next) => set({ variableManageTypeFilter: next }),
     setVariableManageSort: (next) => set({ variableManageSort: next }),
-    setVariableManagePage: (next) => set(state => ({ variableManagePage: apply(state.variableManagePage, next) }))
+    setVariableManagePage: (next) => set(state => ({ variableManagePage: apply(state.variableManagePage, next) })),
+
+    setMonitorSnapshot: (next) => set({ monitorSnapshot: next }),
+    resetMonitorSnapshot: () => set({ monitorSnapshot: createEmptyMonitorSnapshot() })
 }));

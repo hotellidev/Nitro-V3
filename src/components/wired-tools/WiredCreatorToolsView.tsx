@@ -7,8 +7,8 @@ import { AvatarInfoUtilities, GetRoomObjectBounds, GetRoomObjectScreenLocation, 
 import { Button, DraggableWindowPosition, LayoutAvatarImageView, LayoutPetImageView, LayoutRoomObjectImageView, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView, Text } from '../../common';
 import { useInventoryTrade, useMessageEvent, useNotification, useObjectSelectedEvent, useRoom, useWiredTools } from '../../hooks';
 import { DIRECTION_NAMES, EDITABLE_FURNI_VARIABLES, EDITABLE_USER_VARIABLES, INSPECTION_ELEMENTS, MONITOR_ERROR_INFO, MONITOR_LOG_ORDER, MONTH_NAMES, TABS, TEAM_COLOR_NAMES, VARIABLES_ELEMENTS, VARIABLE_DEFINITIONS, WEEKDAY_NAMES, WIRED_CLOCK_REFRESH_MS, WIRED_FREEZE_EFFECT_IDS, WIRED_INSPECTION_REFRESH_MS, WIRED_MONITOR_ACTION_CLEAR_LOGS, WIRED_MONITOR_ACTION_FETCH, WIRED_MONITOR_POLL_MS, WIRED_VARIABLES_POLL_MS } from './WiredCreatorTools.constants';
-import { createEmptyMonitorSnapshot, formatMonitorHistoryOccurrence, formatMonitorLatestOccurrence, formatMonitorSource, formatVariableTimestamp, getHotelDateTimeParts, getHotelTimeFormatter, normalizeMonitorReason } from './WiredCreatorTools.helpers';
-import { HotelDateTimeParts, InspectionElementButton, InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, InspectionUserTeamData, InspectionVariable, ManagedHolderVariableEntry, MonitorLog, MonitorLogDetails, MonitorSnapshot, MonitorStat, ParsedWallLocation, TeamEffectData, VariableDefinition, VariableHighlightOverlay, VariableHighlightTarget, VariableManageEntry, VariableTextValue, VariablesElementButton, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
+import { formatMonitorHistoryOccurrence, formatMonitorLatestOccurrence, formatMonitorSource, formatVariableTimestamp, getHotelDateTimeParts, getHotelTimeFormatter, normalizeMonitorReason } from './WiredCreatorTools.helpers';
+import { HotelDateTimeParts, InspectionElementButton, InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, InspectionUserTeamData, InspectionVariable, ManagedHolderVariableEntry, MonitorLog, MonitorLogDetails, MonitorStat, ParsedWallLocation, TeamEffectData, VariableDefinition, VariableHighlightOverlay, VariableHighlightTarget, VariableManageEntry, VariableTextValue, VariablesElementButton, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
 import { useWiredCreatorToolsUiStore } from './wiredCreatorToolsUiStore';
 import { WiredInspectionTabView } from './WiredInspectionTabView';
 import { WiredMonitorTabView } from './WiredMonitorTabView';
@@ -32,7 +32,9 @@ export const WiredCreatorToolsView: FC<{}> = () =>
     const [ selectedUserActionVersion, setSelectedUserActionVersion ] = useState(0);
     const [ globalClock, setGlobalClock ] = useState(Date.now());
     const [ roomEnteredAt, setRoomEnteredAt ] = useState(Date.now());
-    const [ monitorSnapshot, setMonitorSnapshot ] = useState<MonitorSnapshot>(() => createEmptyMonitorSnapshot());
+    const monitorSnapshot = useWiredCreatorToolsUiStore(s => s.monitorSnapshot);
+    const setMonitorSnapshot = useWiredCreatorToolsUiStore(s => s.setMonitorSnapshot);
+    const resetMonitorSnapshot = useWiredCreatorToolsUiStore(s => s.resetMonitorSnapshot);
     const [ selectedMonitorErrorType, setSelectedMonitorErrorType ] = useState<string>(null);
     const [ selectedMonitorLogDetails, setSelectedMonitorLogDetails ] = useState<MonitorLogDetails>(null);
     const isMonitorHistoryOpen = useWiredCreatorToolsUiStore(s => s.isMonitorHistoryOpen);
@@ -688,7 +690,7 @@ export const WiredCreatorToolsView: FC<{}> = () =>
 
     useEffect(() =>
     {
-        setMonitorSnapshot(createEmptyMonitorSnapshot());
+        resetMonitorSnapshot();
         setSelectedMonitorErrorType(null);
         setSelectedMonitorLogDetails(null);
         setIsMonitorHistoryOpen(false);

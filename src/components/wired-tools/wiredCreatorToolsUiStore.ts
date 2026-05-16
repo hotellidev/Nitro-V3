@@ -1,6 +1,6 @@
 import { createNitroStore } from '../../state/createNitroStore';
 import { createEmptyMonitorSnapshot } from './WiredCreatorTools.helpers';
-import { InspectionElementType, MonitorSnapshot, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
+import { InspectionElementType, InspectionFurniLiveState, InspectionFurniSelection, InspectionUserLiveState, InspectionUserSelection, MonitorSnapshot, VariablesElementType, WiredToolsTab } from './WiredCreatorTools.types';
 
 type MonitorSeverityFilter = 'ALL' | 'ERROR' | 'WARNING';
 type Updater<T> = T | ((prev: T) => T);
@@ -37,6 +37,24 @@ interface WiredCreatorToolsUiState
      */
     monitorSnapshot: MonitorSnapshot;
 
+    /**
+     * Inspection selection. The room-event listeners
+     * (`useObjectSelectedEvent` and the per-kind `useMessageEvent`
+     * handlers) still live in `WiredCreatorToolsView` — they need React
+     * lifecycle to subscribe/unsubscribe correctly — but the resulting
+     * state lives here so a closed/reopened panel keeps the last
+     * inspected target.
+     *
+     * `*ActionVersion` is a monotonic counter the user-action handlers
+     * bump to force the live-state recomputation effect to re-run even
+     * when neither `selectedUser` nor `roomIndex` changed identity.
+     */
+    selectedFurni: InspectionFurniSelection | null;
+    selectedFurniLiveState: InspectionFurniLiveState | null;
+    selectedUser: InspectionUserSelection | null;
+    selectedUserLiveState: InspectionUserLiveState | null;
+    selectedUserActionVersion: number;
+
     setIsVisible: (next: Updater<boolean>) => void;
     setActiveTab: (next: WiredToolsTab) => void;
     setInspectionType: (next: InspectionElementType) => void;
@@ -57,6 +75,12 @@ interface WiredCreatorToolsUiState
 
     setMonitorSnapshot: (next: MonitorSnapshot) => void;
     resetMonitorSnapshot: () => void;
+
+    setSelectedFurni: (next: InspectionFurniSelection | null) => void;
+    setSelectedFurniLiveState: (next: Updater<InspectionFurniLiveState | null>) => void;
+    setSelectedUser: (next: InspectionUserSelection | null) => void;
+    setSelectedUserLiveState: (next: Updater<InspectionUserLiveState | null>) => void;
+    setSelectedUserActionVersion: (next: Updater<number>) => void;
 }
 
 export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiState>()((set) => ({
@@ -80,6 +104,12 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
 
     monitorSnapshot: createEmptyMonitorSnapshot(),
 
+    selectedFurni: null,
+    selectedFurniLiveState: null,
+    selectedUser: null,
+    selectedUserLiveState: null,
+    selectedUserActionVersion: 0,
+
     setIsVisible: (next) => set(state => ({ isVisible: apply(state.isVisible, next) })),
     setActiveTab: (next) => set({ activeTab: next }),
     setInspectionType: (next) => set({ inspectionType: next }),
@@ -99,5 +129,11 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     setVariableManagePage: (next) => set(state => ({ variableManagePage: apply(state.variableManagePage, next) })),
 
     setMonitorSnapshot: (next) => set({ monitorSnapshot: next }),
-    resetMonitorSnapshot: () => set({ monitorSnapshot: createEmptyMonitorSnapshot() })
+    resetMonitorSnapshot: () => set({ monitorSnapshot: createEmptyMonitorSnapshot() }),
+
+    setSelectedFurni: (next) => set({ selectedFurni: next }),
+    setSelectedFurniLiveState: (next) => set(state => ({ selectedFurniLiveState: apply(state.selectedFurniLiveState, next) })),
+    setSelectedUser: (next) => set({ selectedUser: next }),
+    setSelectedUserLiveState: (next) => set(state => ({ selectedUserLiveState: apply(state.selectedUserLiveState, next) })),
+    setSelectedUserActionVersion: (next) => set(state => ({ selectedUserActionVersion: apply(state.selectedUserActionVersion, next) }))
 }));

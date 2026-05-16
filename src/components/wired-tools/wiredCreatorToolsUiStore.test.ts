@@ -17,7 +17,12 @@ const INITIAL = {
     variableManageTypeFilter: 'ALL',
     variableManageSort: 'highest_value',
     variableManagePage: 1,
-    monitorSnapshot: createEmptyMonitorSnapshot()
+    monitorSnapshot: createEmptyMonitorSnapshot(),
+    selectedFurni: null,
+    selectedFurniLiveState: null,
+    selectedUser: null,
+    selectedUserLiveState: null,
+    selectedUserActionVersion: 0
 };
 
 describe('useWiredCreatorToolsUiStore', () =>
@@ -46,6 +51,11 @@ describe('useWiredCreatorToolsUiStore', () =>
         expect(state.variableManageSort).toBe('highest_value');
         expect(state.variableManagePage).toBe(1);
         expect(state.monitorSnapshot).toEqual(createEmptyMonitorSnapshot());
+        expect(state.selectedFurni).toBeNull();
+        expect(state.selectedFurniLiveState).toBeNull();
+        expect(state.selectedUser).toBeNull();
+        expect(state.selectedUserLiveState).toBeNull();
+        expect(state.selectedUserActionVersion).toBe(0);
     });
 
     describe('setIsVisible', () =>
@@ -231,6 +241,77 @@ describe('useWiredCreatorToolsUiStore', () =>
             useWiredCreatorToolsUiStore.getState().setIsVisible(true);
 
             expect(useWiredCreatorToolsUiStore.getState().monitorSnapshot.usageCurrentWindow).toBe(3);
+        });
+    });
+
+    describe('inspection selection', () =>
+    {
+        const furniSelection = {
+            objectId: 42,
+            category: 10,
+            info: { id: 42, name: 'sofa', description: '', image: null } as never
+        };
+        const userSelection = {
+            kind: 'user' as const,
+            roomIndex: 7,
+            name: 'simoleo',
+            figure: 'hd-180-1.lg-3023-110',
+            gender: 'M',
+            userId: 99,
+            level: 12,
+            posture: 'std'
+        } as never;
+
+        it('setSelectedFurni stores the picked furni selection', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setSelectedFurni(furniSelection);
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedFurni).toEqual(furniSelection);
+        });
+
+        it('setSelectedFurni(null) clears the selection (deselect path)', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setSelectedFurni(furniSelection);
+            useWiredCreatorToolsUiStore.getState().setSelectedFurni(null);
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedFurni).toBeNull();
+        });
+
+        it('setSelectedFurniLiveState accepts a functional updater', () =>
+        {
+            const initial = { positionX: 1, positionY: 2, altitude: 3, rotation: 4, state: 5 };
+            useWiredCreatorToolsUiStore.getState().setSelectedFurniLiveState(initial);
+
+            useWiredCreatorToolsUiStore.getState().setSelectedFurniLiveState(prev => (prev ? { ...prev, state: prev.state + 1 } : null));
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedFurniLiveState).toEqual({ ...initial, state: 6 });
+        });
+
+        it('setSelectedUser + setSelectedUserLiveState write the user selection / live state', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setSelectedUser(userSelection);
+            useWiredCreatorToolsUiStore.getState().setSelectedUserLiveState({ positionX: 5, positionY: 6, altitude: 0, direction: 2 });
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedUser).toEqual(userSelection);
+            expect(useWiredCreatorToolsUiStore.getState().selectedUserLiveState).toEqual({ positionX: 5, positionY: 6, altitude: 0, direction: 2 });
+        });
+
+        it('setSelectedUserActionVersion bumps the monotonic counter via functional updater', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setSelectedUserActionVersion(prev => prev + 1);
+            useWiredCreatorToolsUiStore.getState().setSelectedUserActionVersion(prev => prev + 1);
+            useWiredCreatorToolsUiStore.getState().setSelectedUserActionVersion(prev => prev + 1);
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedUserActionVersion).toBe(3);
+        });
+
+        it('the selection persists across the panel close/reopen lifecycle', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setSelectedFurni(furniSelection);
+            useWiredCreatorToolsUiStore.getState().setIsVisible(false);
+            useWiredCreatorToolsUiStore.getState().setIsVisible(true);
+
+            expect(useWiredCreatorToolsUiStore.getState().selectedFurni).toEqual(furniSelection);
         });
     });
 });

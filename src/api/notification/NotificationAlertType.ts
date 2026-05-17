@@ -5,6 +5,7 @@ export class NotificationAlertType
     public static MODERATION: string = 'moderation';
     public static EVENT: string = 'event';
     public static NITRO: string = 'nitro';
+    public static NITRO_INFO: string = 'nitro-info';
     public static SEARCH: string = 'search';
     public static ALERT: string = 'alert';
 }

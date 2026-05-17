@@ -212,8 +212,18 @@ const useNotificationState = () =>
     useMessageEvent<HabboBroadcastMessageEvent>(HabboBroadcastMessageEvent, event =>
     {
         const parser = event.getParser();
+        const raw = parser.message.replace(/\\r/g, '\r');
 
-        simpleAlert(parser.message.replace(/\\r/g, '\r'), null, null, LocalizeText('notifications.broadcast.title'));
+        const sentinel = '[NITRO_INFO_V1]';
+
+        if(raw.startsWith(sentinel))
+        {
+            const body = raw.substring(sentinel.length).replace(/^[\r\n]+/, '');
+            simpleAlert(body, NotificationAlertType.NITRO_INFO, null, null, LocalizeText('nitro.info.title'));
+            return;
+        }
+
+        simpleAlert(raw, null, null, LocalizeText('notifications.broadcast.title'));
     });
 
     useMessageEvent<AchievementNotificationMessageEvent>(AchievementNotificationMessageEvent, event =>

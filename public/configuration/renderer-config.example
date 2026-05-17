@@ -1,6 +1,9 @@
 {
     "socket.url": "wss://nitro.example.com:2096",
     "api.url": "https://nitro.example.com:2096",
+	"crypto.ws.enabled": false,
+	"crypto.ws.signing.enabled": false,
+	"crypto.ws.signing.public_key": "",
     "asset.url": "https://hotel.example.com/client/nitro/bundled",
     "image.library.url": "https://hotel.example.com/client/c_images/",
     "hof.furni.url": "https://hotel.example.com/client/c_images/dcr/hof_furni",

@@ -75,6 +75,94 @@ Useful workflow flags:
 `install.mjs` is idempotent: re-running it keeps any `*.json` config files
 that already exist and only patches the URL keys you pass on the CLI.
 
+## Splitting gamedata
+
+The renderer can load gamedata files (FigureData, FurnitureData, FigureMap,
+EffectMap, ProductData, HabboAvatarActions, ExternalTexts, UITexts) either as
+a single legacy JSON/JSON5 file or as a **directory of small files** organised
+in three tiers: `core/` (vendor baseline), `custom/` (your additions / overrides),
+`seasonal/` (date-bound content such as Christmas or Easter).
+
+The split layout is much easier to maintain — you edit a small focused file
+instead of a 43 MB FurnitureData.json — and lets you keep vendor and operator
+content cleanly separated.
+
+### Directory layout
+
+```
+nitro-assets/gamedata/furnidata/
+  manifest.json5           # { "tiers": ["core", "custom", "seasonal"] }
+  core/
+    manifest.json5         # { "files": ["floor-001.json5", ..., "wall-001.json5"] }
+    floor-001.json5
+    floor-002.json5
+    wall-001.json5
+  custom/                  # OPTIONAL — created by you
+    manifest.json5         # { "files": ["my-rares.json5"] }
+    my-rares.json5
+  seasonal/                # OPTIONAL — created by you
+    manifest.json5
+    xmas-2026.json5
+```
+
+Each tier is loaded in order. Within a tier, files load in the order listed in
+its `manifest.json5`. Items in later layers override items in earlier layers
+when they share the same identifier (`id`, `classname`, `name`, or the
+top-level key for flat dictionaries).
+
+### Generating the `core/` tier from a legacy file
+
+Use the bundled CLI splitter:
+
+```
+node scripts/split-gamedata.mjs \
+    --input ~/legacy-gamedata/FurnitureData.json \
+    --output ~/nitro-assets/gamedata/furnidata
+```
+
+It auto-detects the gamedata type from the file's top-level keys and applies
+the strategy that makes the most sense:
+
+| Type                 | Split strategy                              |
+|----------------------|---------------------------------------------|
+| EffectMap            | one file per effect `type` (dance, fx, ...) |
+| FigureData           | one `palettes.json5` + one file per setType |
+| FigureMap            | chunks of `libraries` (default 500/file)    |
+| FurnitureData        | floor / wall, chunks of `furnitype` (300)   |
+| HabboAvatarActions   | grouped by `state` (or single file if ≤1)   |
+| ProductData          | chunks of products (default 500)            |
+| ExternalTexts/UITexts| grouped by key prefix (e.g. `gamecenter.*`) |
+
+Useful flags: `--type=<name>` to force the type, `--chunk-size=N` to override
+the default chunk size, `--json` to emit standard JSON instead of JSON5,
+`--force` to overwrite an existing output directory. Full reference:
+
+```
+node scripts/split-gamedata.mjs --help
+```
+
+We only ship the `core/` tier with vendor baselines — `custom/` and `seasonal/`
+are operator-owned: create their manifests when you need them and the loader
+picks them up automatically.
+
+### Pointing the renderer at a directory
+
+In `public/configuration/renderer-config.json`, replace the legacy file URL
+with the directory URL (note the trailing slash — that's how the loader
+detects split mode):
+
+```json5
+{
+  // single file (legacy, still supported):
+  "furnidata.url": "https://example.com/nitro-assets/gamedata/FurnitureData.json",
+
+  // directory (split mode):
+  "furnidata.url": "https://example.com/nitro-assets/gamedata/furnidata/",
+}
+```
+
+Both styles work; you can migrate one gamedata file at a time.
+
 ## Installation (manual)
 
 -   First you should open terminal and navigate to the folder where you want to clone Nitro and Nitro-Renderer

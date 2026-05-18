@@ -58,8 +58,10 @@ export const WiredCreatorToolsView: FC<{}> = () =>
     const setSelectedInspectionVariableKeys = useWiredCreatorToolsUiStore(s => s.setSelectedInspectionVariableKeys);
     const isInspectionGiveOpen = useWiredCreatorToolsUiStore(s => s.isInspectionGiveOpen);
     const setIsInspectionGiveOpen = useWiredCreatorToolsUiStore(s => s.setIsInspectionGiveOpen);
-    const [ inspectionGiveVariableItemId, setInspectionGiveVariableItemId ] = useState(0);
-    const [ inspectionGiveValue, setInspectionGiveValue ] = useState('0');
+    const inspectionGiveVariableItemId = useWiredCreatorToolsUiStore(s => s.inspectionGiveVariableItemId);
+    const setInspectionGiveVariableItemId = useWiredCreatorToolsUiStore(s => s.setInspectionGiveVariableItemId);
+    const inspectionGiveValue = useWiredCreatorToolsUiStore(s => s.inspectionGiveValue);
+    const setInspectionGiveValue = useWiredCreatorToolsUiStore(s => s.setInspectionGiveValue);
     const isVariableManageOpen = useWiredCreatorToolsUiStore(s => s.isVariableManageOpen);
     const setIsVariableManageOpen = useWiredCreatorToolsUiStore(s => s.setIsVariableManageOpen);
     const variableManageTypeFilter = useWiredCreatorToolsUiStore(s => s.variableManageTypeFilter);

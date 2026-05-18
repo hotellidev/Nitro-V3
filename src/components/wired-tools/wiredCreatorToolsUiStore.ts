@@ -91,6 +91,15 @@ interface WiredCreatorToolsUiState
     selectedInspectionVariableKeys: Record<InspectionElementType, string>;
     selectedVariableKeys: Record<VariablesElementType, string>;
 
+    /**
+     * Inspection-tab "Give variable" popover state. `itemId` is the
+     * picked variable definition id (0 = none); `value` is the in-flight
+     * value text. Both reset to their defaults whenever the inspection
+     * target changes (sync effect in WiredCreatorToolsView).
+     */
+    inspectionGiveVariableItemId: number;
+    inspectionGiveValue: string;
+
     setIsVisible: (next: Updater<boolean>) => void;
     setActiveTab: (next: WiredToolsTab) => void;
     setInspectionType: (next: InspectionElementType) => void;
@@ -128,6 +137,9 @@ interface WiredCreatorToolsUiState
 
     setSelectedInspectionVariableKeys: (next: Updater<Record<InspectionElementType, string>>) => void;
     setSelectedVariableKeys: (next: Updater<Record<VariablesElementType, string>>) => void;
+
+    setInspectionGiveVariableItemId: (next: number) => void;
+    setInspectionGiveValue: (next: string) => void;
 }
 
 export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiState>()((set) => ({
@@ -168,6 +180,9 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     selectedInspectionVariableKeys: { furni: '', user: '', global: '' },
     selectedVariableKeys: { furni: '', user: '', global: '', context: '' },
 
+    inspectionGiveVariableItemId: 0,
+    inspectionGiveValue: '0',
+
     setIsVisible: (next) => set(state => ({ isVisible: apply(state.isVisible, next) })),
     setActiveTab: (next) => set({ activeTab: next }),
     setInspectionType: (next) => set({ inspectionType: next }),
@@ -204,5 +219,8 @@ export const useWiredCreatorToolsUiStore = createNitroStore<WiredCreatorToolsUiS
     setEditingManagedHolderValue: (next) => set({ editingManagedHolderValue: next }),
 
     setSelectedInspectionVariableKeys: (next) => set(state => ({ selectedInspectionVariableKeys: apply(state.selectedInspectionVariableKeys, next) })),
-    setSelectedVariableKeys: (next) => set(state => ({ selectedVariableKeys: apply(state.selectedVariableKeys, next) }))
+    setSelectedVariableKeys: (next) => set(state => ({ selectedVariableKeys: apply(state.selectedVariableKeys, next) })),
+
+    setInspectionGiveVariableItemId: (next) => set({ inspectionGiveVariableItemId: next }),
+    setInspectionGiveValue: (next) => set({ inspectionGiveValue: next })
 }));

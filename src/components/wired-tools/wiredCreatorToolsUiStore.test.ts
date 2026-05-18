@@ -30,7 +30,9 @@ const INITIAL = {
     editingManagedHolderVariableId: 0,
     editingManagedHolderValue: '',
     selectedInspectionVariableKeys: { furni: '', user: '', global: '' },
-    selectedVariableKeys: { furni: '', user: '', global: '', context: '' }
+    selectedVariableKeys: { furni: '', user: '', global: '', context: '' },
+    inspectionGiveVariableItemId: 0,
+    inspectionGiveValue: '0'
 };
 
 describe('useWiredCreatorToolsUiStore', () =>
@@ -72,6 +74,8 @@ describe('useWiredCreatorToolsUiStore', () =>
         expect(state.editingManagedHolderValue).toBe('');
         expect(state.selectedInspectionVariableKeys).toEqual({ furni: '', user: '', global: '' });
         expect(state.selectedVariableKeys).toEqual({ furni: '', user: '', global: '', context: '' });
+        expect(state.inspectionGiveVariableItemId).toBe(0);
+        expect(state.inspectionGiveValue).toBe('0');
     });
 
     describe('setIsVisible', () =>
@@ -456,6 +460,30 @@ describe('useWiredCreatorToolsUiStore', () =>
 
             expect(useWiredCreatorToolsUiStore.getState().selectedVariableKeys.furni).toBe('@state');
             expect(useWiredCreatorToolsUiStore.getState().selectedInspectionVariableKeys.user).toBe('level');
+        });
+    });
+
+    describe('inspection give pickers', () =>
+    {
+        it('setInspectionGiveVariableItemId / setInspectionGiveValue write the picker pair', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveVariableItemId(42);
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveValue('150');
+
+            expect(useWiredCreatorToolsUiStore.getState().inspectionGiveVariableItemId).toBe(42);
+            expect(useWiredCreatorToolsUiStore.getState().inspectionGiveValue).toBe('150');
+        });
+
+        it('reset path uses 0 / "0" as the sentinel-empty pair (post-action and target-change paths)', () =>
+        {
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveVariableItemId(42);
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveValue('150');
+
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveVariableItemId(0);
+            useWiredCreatorToolsUiStore.getState().setInspectionGiveValue('0');
+
+            expect(useWiredCreatorToolsUiStore.getState().inspectionGiveVariableItemId).toBe(0);
+            expect(useWiredCreatorToolsUiStore.getState().inspectionGiveValue).toBe('0');
         });
     });
 });

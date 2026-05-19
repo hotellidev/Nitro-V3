@@ -124,18 +124,38 @@ export const useIsUserIgnored = (name: string): boolean =>
 };
 
 /**
- * Reactive equivalent of `GetSessionDataManager().isModerator`. Derives
- * from `useUserDataSnapshot().securityLevel` so any future
- * promote/demote that flips the SESSION_DATA_UPDATED event re-renders
- * the consumer without an F5. Mirrors the renderer-side getter at
- * `SessionDataManager.ts:684` (`securityLevel >= SecurityLevel.MODERATOR`).
+ * Reactive raw security level from the user snapshot. Use this when
+ * you need the numeric level (e.g. to compare against a threshold not
+ * covered by the named wrappers below); for the common case of "is
+ * the user at least <X>?", prefer the matching `useIsXxx` predicate.
  */
-export const useIsModerator = (): boolean =>
-{
-    const userData = useUserDataSnapshot();
+export const useUserSecurityLevel = (): number => useUserDataSnapshot().securityLevel;
 
-    return userData.securityLevel >= SecurityLevel.MODERATOR;
-};
+/**
+ * Reactive predicate: does the current user's security level satisfy
+ * `>= minLevel`? Mirrors the renderer-side comparison used by
+ * `SessionDataManager.isModerator` (and its peers) and propagates the
+ * SESSION_DATA_UPDATED invalidation, so a runtime promote/demote
+ * re-renders the consumer.
+ *
+ * The named wrappers below (`useIsModerator`, `useIsAdmin`, …) are
+ * one-line shims over this primitive — use them in widget bodies for
+ * readability; reach for `useHasSecurityLevel(level)` directly only
+ * when the threshold is dynamic or not covered by a named wrapper.
+ */
+export const useHasSecurityLevel = (minLevel: number): boolean =>
+    useUserSecurityLevel() >= minLevel;
+
+export const useIsModerator = (): boolean => useHasSecurityLevel(SecurityLevel.MODERATOR);
+export const useIsPlayerSupport = (): boolean => useHasSecurityLevel(SecurityLevel.PLAYER_SUPPORT);
+export const useIsCommunity = (): boolean => useHasSecurityLevel(SecurityLevel.COMMUNITY);
+export const useIsAdmin = (): boolean => useHasSecurityLevel(SecurityLevel.ADMINISTRATOR);
+
+/**
+ * Reactive ambassador flag. Not derived from security level — it's a
+ * separate boolean on the snapshot.
+ */
+export const useIsAmbassador = (): boolean => useUserDataSnapshot().isAmbassador;
 
 export const useGroupBadgesSnapshot = (): ReadonlyMap<number, string> =>
     useExternalSnapshot(

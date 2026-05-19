@@ -1,7 +1,7 @@
 import { AddLinkEventTracker, ILinkEventTracker, RemoveLinkEventTracker } from '@nitrots/nitro-renderer';
 import { FC, useCallback, useEffect, useState } from 'react';
-import { GetSessionDataManager } from '../../api';
 import { NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView } from '../../common';
+import { useIsModerator } from '../../hooks';
 import { useFurniEditor } from '../../hooks/furni-editor';
 import { FurniEditorEditView } from './views/FurniEditorEditView';
 import { FurniEditorSearchView } from './views/FurniEditorSearchView';
@@ -21,7 +21,7 @@ export const FurniEditorView: FC<{}> = () =>
         searchItems, loadDetail, loadBySpriteId, updateItem, deleteItem, loadInteractions
     } = useFurniEditor();
 
-    const isMod = GetSessionDataManager()?.isModerator;
+    const isMod = useIsModerator();
 
     // Auto-switch to edit tab when an item is selected
     useEffect(() =>

@@ -137,15 +137,19 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
         };
     }, [ purchaseState ]);
 
-    if(!currentOffer) return null;
-
+    // Builders-club state — derived + hooks MUST run unconditionally on
+    // every render so the hook order stays stable even when currentOffer
+    // is null (the `if(!currentOffer) return null` below would otherwise
+    // hide the useMemo/useEffect block from the first render and React
+    // would flag "Rendered more hooks than during the previous render").
     const isBuildersClubOffer = (currentType === CatalogType.BUILDER);
     const isBuildersClubPlaceable = isBuildersClubOffer
+        && !!currentOffer
         && !!currentOffer.product
         && ((currentOffer.product.productType === ProductTypeEnum.FLOOR) || (currentOffer.product.productType === ProductTypeEnum.WALL));
     const builderPlaceableStatus = useMemo(() =>
     {
-        if(!isBuildersClubPlaceable || !getBuilderFurniPlaceableStatus) return BuilderFurniPlaceableStatus.OKAY;
+        if(!isBuildersClubPlaceable || !getBuilderFurniPlaceableStatus || !currentOffer) return BuilderFurniPlaceableStatus.OKAY;
 
         return getBuilderFurniPlaceableStatus(currentOffer);
     }, [ currentOffer, getBuilderFurniPlaceableStatus, isBuildersClubPlaceable, builderPlaceableRefreshTick ]);
@@ -163,6 +167,8 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
         return () => clearInterval(interval);
     }, [ isBuildersClubPlaceable ]);
+
+    if(!currentOffer) return null;
 
     const PurchaseButton = () =>
     {

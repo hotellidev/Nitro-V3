@@ -1,5 +1,4 @@
-import { AddLinkEventTracker, AvatarDirectionAngle, AvatarEffectActivatedComposer, GetConfiguration, GetSessionDataManager, ILinkEventTracker, RemoveLinkEventTracker } from '@nitrots/nitro-renderer';
-import { loadGamedata } from '@nitrots/utils';
+import { AddLinkEventTracker, AvatarDirectionAngle, AvatarEffectActivatedComposer, GetConfiguration, GetSessionDataManager, ILinkEventTracker, loadGamedata, RemoveLinkEventTracker } from '@nitrots/nitro-renderer';
 import { ChangeEvent, FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FaChevronLeft, FaChevronRight, FaSearch } from 'react-icons/fa';
 import { LocalizeText, SendMessageComposer } from '../../api';

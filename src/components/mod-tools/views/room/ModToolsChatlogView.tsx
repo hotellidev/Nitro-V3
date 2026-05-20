@@ -1,9 +1,9 @@
 import { ChatRecordData, GetRoomChatlogMessageComposer, RoomChatlogEvent } from '@nitrots/nitro-renderer';
-import { FC } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { FaSpinner } from 'react-icons/fa';
-import { LocalizeText } from '../../../../api';
-import { useNitroQuery } from '../../../../api/nitro-query';
+import { LocalizeText, SendMessageComposer } from '../../../../api';
 import { DraggableWindowPosition, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
+import { useMessageEvent } from '../../../../hooks';
 import { ChatlogView } from '../chatlog/ChatlogView';
 
 interface ModToolsChatlogViewProps
@@ -15,15 +15,21 @@ interface ModToolsChatlogViewProps
 export const ModToolsChatlogView: FC<ModToolsChatlogViewProps> = props =>
 {
     const { roomId = null, onCloseClick = null } = props;
+    const [ roomChatlog, setRoomChatlog ] = useState<ChatRecordData>(null);
 
-    const { data: roomChatlog } = useNitroQuery<RoomChatlogEvent, ChatRecordData>({
-        key: [ 'nitro', 'mod-tools', 'room-chatlog', roomId ],
-        request: () => new GetRoomChatlogMessageComposer(roomId),
-        parser: RoomChatlogEvent,
-        accept: e => e.getParser()?.data.roomId === roomId,
-        select: e => e.getParser().data,
-        enabled: roomId !== null
+    useMessageEvent<RoomChatlogEvent>(RoomChatlogEvent, event =>
+    {
+        const parser = event.getParser();
+
+        if(!parser || parser.data.roomId !== roomId) return;
+
+        setRoomChatlog(parser.data);
     });
+
+    useEffect(() =>
+    {
+        SendMessageComposer(new GetRoomChatlogMessageComposer(roomId));
+    }, [ roomId ]);
 
     return (
         <NitroCardView className="nitro-mod-tools-chatlog min-w-[460px] max-w-[520px] max-h-[500px]" theme="primary-slim" windowPosition={ DraggableWindowPosition.TOP_LEFT }>

@@ -15,7 +15,7 @@ interface IssueInfoViewProps
 const Field: FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
     <>
         <dt className="opacity-60 whitespace-nowrap">{ label }</dt>
-        <dd className="m-0 break-words font-medium">{ children || <span className="opacity-40 italic">—</span> }</dd>
+        <dd className="m-0 break-words font-medium">{ children || <span className="opacity-40">-</span> }</dd>
     </>
 );
 

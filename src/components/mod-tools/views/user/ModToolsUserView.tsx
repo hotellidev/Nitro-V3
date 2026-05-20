@@ -56,7 +56,7 @@ const Section: FC<{ title: string; children: React.ReactNode }> = ({ title, chil
 const Field: FC<{ label: string; value: React.ReactNode }> = ({ label, value }) => (
     <>
         <dt className="opacity-60 whitespace-nowrap">{ label }</dt>
-        <dd className="m-0 break-words font-medium">{ value || <span className="opacity-40 italic">—</span> }</dd>
+        <dd className="m-0 break-words font-medium">{ (value || value === 0) ? value : <span className="opacity-40">-</span> }</dd>
     </>
 );
 

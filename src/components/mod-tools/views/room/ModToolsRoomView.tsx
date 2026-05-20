@@ -119,7 +119,7 @@ export const ModToolsRoomView: FC<ModToolsRoomViewProps> = props =>
                             className="text-sm font-semibold leading-tight truncate max-w-full underline cursor-pointer hover:text-sky-700"
                             onClick={ () => ownerId && CreateLinkEvent(`mod-tools/open-user-info/${ ownerId }`) }
                             title={ ownerName ? LocalizeText('modtools.roominfo.owner.open', [ 'username' ], [ ownerName ]) : '' }>
-                            { ownerName || '—' }
+                            { ownerName || '-' }
                         </div>
                     </div>
                 </div>

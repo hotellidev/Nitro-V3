@@ -1,4 +1,4 @@
-import { Dispatch, FC, SetStateAction, use, useCallback, useMemo, useState } from 'react';
+import { Dispatch, FC, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { Base, Grid, Flex, NitroCardView, NitroCardHeaderView, NitroCardTabsView, NitroCardTabsItemView, NitroCardContentView, Text } from '../../common';
 import { useRoom } from '../../hooks';
 import { GetOptionalConfigurationValue } from '../../api';
@@ -27,18 +27,32 @@ type TabType = typeof TABS[number];
 
 type RemoteData = Partial<Record<'backgrounds.data' | 'stands.data' | 'overlays.data' | 'cards.data' | 'borders.data', any[]>>;
 
-let backgroundsDataPromise: Promise<RemoteData | null> | null = null;
+// Module-scoped cache so repeated mounts don't refetch the same JSON.
+// Not a Promise — we deliberately don't expose anything that could be
+// passed to React's `use()` hook. Suspending here unmounts the parent
+// room tree (no <Suspense> boundary upstream), which orphans the Pixi
+// canvas and leaves the room rendered as a black square until another
+// state change forces a re-render.
+let cachedBackgroundsData: RemoteData | null = null;
+let inflightBackgroundsFetch: Promise<RemoteData | null> | null = null;
 
-const fetchBackgroundsData = (): Promise<RemoteData | null> =>
+const loadBackgroundsData = (): Promise<RemoteData | null> =>
 {
-    if(backgroundsDataPromise) return backgroundsDataPromise;
+    if(cachedBackgroundsData) return Promise.resolve(cachedBackgroundsData);
+    if(inflightBackgroundsFetch) return inflightBackgroundsFetch;
 
-    backgroundsDataPromise = fetch(configFileUrl('infostand_backgrounds.json'), { credentials: 'omit' })
+    inflightBackgroundsFetch = fetch(configFileUrl('infostand_backgrounds.json'), { credentials: 'omit' })
         .then(r => r.ok ? r.json() : null)
-        .then(json => (json && typeof json === 'object') ? json as RemoteData : null)
-        .catch(() => null);
+        .then(json =>
+        {
+            const result = (json && typeof json === 'object') ? json as RemoteData : null;
+            cachedBackgroundsData = result;
+            return result;
+        })
+        .catch(() => null)
+        .finally(() => { inflightBackgroundsFetch = null; });
 
-    return backgroundsDataPromise;
+    return inflightBackgroundsFetch;
 };
 
 export const BackgroundsView: FC<BackgroundsViewProps> = ({
@@ -56,8 +70,19 @@ export const BackgroundsView: FC<BackgroundsViewProps> = ({
 }) =>
 {
     const [activeTab, setActiveTab] = useState<TabType>('backgrounds');
-    const remoteData = use(fetchBackgroundsData());
+    const [remoteData, setRemoteData] = useState<RemoteData | null>(cachedBackgroundsData);
     const { roomSession } = useRoom();
+
+    useEffect(() =>
+    {
+        if(remoteData) return;
+        let cancelled = false;
+        loadBackgroundsData().then(data =>
+        {
+            if(!cancelled && data) setRemoteData(data);
+        });
+        return () => { cancelled = true; };
+    }, [remoteData]);
 
     const processData = useCallback((configData: any[], idField: string): ItemData[] =>
     {

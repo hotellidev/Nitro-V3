@@ -265,6 +265,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
     const [ loginImagesVersion, setLoginImagesVersion ] = useState(0);
     const loginUrl = GetConfigurationValue<string>('login.endpoint', '/api/auth/login');
     const registerUrl = GetConfigurationValue<string>('login.register.endpoint', '/api/auth/register');
+    const roomTemplatesUrl = GetConfigurationValue<string>('login.room_templates.endpoint', '/api/auth/room-templates');
     const forgotUrl = GetConfigurationValue<string>('login.forgot.endpoint', '/api/auth/forgot-password');
     const newsUrl = interpolate(GetConfigurationValue<string>('login.news.url', ''));
     const turnstileSiteKey = GetConfigurationValue<string>('login.turnstile.sitekey', '');
@@ -601,7 +602,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
         }
     }, [ checkUsernameUrl, postJson ]);
 
-    const handleRegisterSubmit = useCallback(async (body: { username: string; email: string; password: string; figure: string; gender: string; turnstileToken: string; }, onDialogReset: () => void) =>
+    const handleRegisterSubmit = useCallback(async (body: { username: string; email: string; password: string; figure: string; gender: string; turnstileToken: string; templateId: number | null; }, onDialogReset: () => void) =>
     {
         if(turnstileEnabled && !body.turnstileToken)
         {
@@ -621,7 +622,8 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
                 password: body.password,
                 figure: body.figure,
                 gender: body.gender,
-                turnstileToken: turnstileEnabled ? body.turnstileToken : undefined
+                turnstileToken: turnstileEnabled ? body.turnstileToken : undefined,
+                templateId: body.templateId ?? undefined
             });
 
             if(ok)
@@ -848,6 +850,7 @@ export const LoginView: FC<LoginViewProps> = ({ onAuthenticated, isEntering = fa
                     info={ info }
                     turnstileEnabled={ turnstileEnabled }
                     turnstileSiteKey={ turnstileSiteKey }
+                    roomTemplatesUrl={ roomTemplatesUrl }
                 /> }
 
             { mode === 'forgot' &&
@@ -876,13 +879,22 @@ interface DialogSharedProps
 
 interface RegisterDialogProps extends DialogSharedProps
 {
-    onSubmit: (body: { username: string; email: string; password: string; figure: string; gender: string; turnstileToken: string; }, onDialogReset: () => void) => Promise<void> | void;
+    onSubmit: (body: { username: string; email: string; password: string; figure: string; gender: string; turnstileToken: string; templateId: number | null; }, onDialogReset: () => void) => Promise<void> | void;
     onCheckEmail: (email: string) => Promise<{ available: boolean; error?: string }>;
     onCheckUsername: (username: string) => Promise<{ available: boolean; error?: string }>;
     onCheckServer: () => Promise<boolean>;
+    roomTemplatesUrl: string;
 }
 
-type RegisterStep = 'credentials' | 'avatar';
+type RegisterStep = 'credentials' | 'avatar' | 'room';
+
+interface RoomTemplate
+{
+    templateId: number;
+    title: string;
+    description: string;
+    thumbnail: string;
+}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -1116,7 +1128,7 @@ const AvatarPartRow: FC<AvatarPartRowProps> = ({ setType, selection, gender, onP
 
 const RegisterDialog: FC<RegisterDialogProps> = props =>
 {
-    const { onCancel, onSubmit, onCheckEmail, onCheckUsername, onCheckServer, submitting, error, info, turnstileEnabled, turnstileSiteKey } = props;
+    const { onCancel, onSubmit, onCheckEmail, onCheckUsername, onCheckServer, submitting, error, info, turnstileEnabled, turnstileSiteKey, roomTemplatesUrl } = props;
 
     const [ step, setStep ] = useState<RegisterStep>('credentials');
     const [ email, setEmail ] = useState('');
@@ -1129,6 +1141,9 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
     const [ prevStep, setPrevStep ] = useState<RegisterStep>(step);
     const [ turnstileToken, setTurnstileToken ] = useState('');
     const [ resetSignal, setResetSignal ] = useState(0);
+    const [ roomTemplates, setRoomTemplates ] = useState<RoomTemplate[] | null>(null);
+    const [ roomTemplatesError, setRoomTemplatesError ] = useState<string | null>(null);
+    const [ selectedTemplateId, setSelectedTemplateId ] = useState<number | null>(null);
 
     if(prevStep !== step)
     {
@@ -1463,26 +1478,65 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
             return null;
         }
 
+        setStep('room');
+        return null;
+    }, [ username, turnstileEnabled, turnstileToken, pingServer, onCheckUsername ]);
+
+    const [ , submitAvatarAction, isAvatarPending ] = useActionState<null, FormData>(avatarAction, null);
+
+    const roomAction = useCallback(async (_prev: null, _formData: FormData): Promise<null> =>
+    {
+        setLocalError(null);
+
         await onSubmit({
-            username: trimmed,
+            username: username.trim(),
             email: email.trim(),
             password,
             figure: buildFigureString(selection),
             gender,
-            turnstileToken
+            turnstileToken,
+            templateId: selectedTemplateId
         }, resetWidget);
 
         return null;
-    }, [ username, turnstileEnabled, turnstileToken, pingServer, onCheckUsername, onSubmit, email, password, selection, gender, resetWidget ]);
+    }, [ onSubmit, username, email, password, selection, gender, turnstileToken, selectedTemplateId, resetWidget ]);
 
-    const [ , submitAvatarAction, isAvatarPending ] = useActionState<null, FormData>(avatarAction, null);
+    const [ , submitRoomAction, isRoomPending ] = useActionState<null, FormData>(roomAction, null);
 
-    const busy = submitting || isCredentialsPending || isAvatarPending || pingingServer;
+    useEffect(() =>
+    {
+        if(step !== 'room' || roomTemplates !== null || !roomTemplatesUrl) return;
+        let cancelled = false;
+        setRoomTemplatesError(null);
+        fetch(roomTemplatesUrl, { credentials: 'include' })
+            .then(async r =>
+            {
+                if(!r.ok) throw new Error(`status ${ r.status }`);
+                return r.json();
+            })
+            .then(json =>
+            {
+                if(cancelled) return;
+                const list = Array.isArray((json as { templates?: unknown })?.templates)
+                    ? (json as { templates: RoomTemplate[] }).templates
+                    : [];
+                setRoomTemplates(list);
+            })
+            .catch(() =>
+            {
+                if(cancelled) return;
+                setRoomTemplates([]);
+                setRoomTemplatesError(t('nitro.login.register.room.error', 'Could not load room options. You can still skip this step.'));
+            });
+        return () => { cancelled = true; };
+    }, [ step, roomTemplates, roomTemplatesUrl ]);
+
+    const busy = submitting || isCredentialsPending || isAvatarPending || isRoomPending || pingingServer;
     const serverOffline = serverReachable === false;
 
     return (
         <div className="nitro-login-modal">
-            <div className={ `dialog ${ step === 'avatar' ? 'dialog-avatar' : '' }` }>
+            <div className={ `dialog ${ step === 'avatar' ? 'dialog-avatar' : '' } ${ step === 'room' ? 'dialog-room' : '' }` }>
                 <div className="nitro-login-card">
                     <div className="card-title">
                         <span>{ t('nitro.login.register.title', 'Habbo Details') }</span>
@@ -1520,7 +1574,7 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
                             { (localError || error) && <div className="error-line">{ localError || error }</div> }
                             { info && <div className="info-line">{ info }</div> }
                             <div className="step-footer">
-                                <span className="step-indicator">1/2</span>
+                                <span className="step-indicator">1/3</span>
                                 <button type="submit" className="ok-button" disabled={ !credentialsValid || busy || serverOffline }>
                                     { isCredentialsPending || pingingServer ? t('nitro.login.server.checking', 'Checking…') : t('nitro.login.register.next', 'Next') }
                                 </button>
@@ -1622,9 +1676,67 @@ const RegisterDialog: FC<RegisterDialogProps> = props =>
 
                             <div className="step-footer step-footer-split">
                                 <button type="button" className="ok-button back-button" onClick={ () => setStep('credentials') } disabled={ busy }>{ t('nitro.login.register.back', 'Back') }</button>
-                                <span className="step-indicator">2/2</span>
+                                <span className="step-indicator">2/3</span>
                                 <button type="submit" className="ok-button" disabled={ !username.trim() || busy || serverOffline }>
-                                    { (submitting || isAvatarPending) ? t('nitro.login.register.creating', 'Creating…') : pingingServer ? t('nitro.login.server.checking', 'Checking…') : t('nitro.login.register.next', 'Next') }
+                                    { isAvatarPending ? t('nitro.login.server.checking', 'Checking…') : pingingServer ? t('nitro.login.server.checking', 'Checking…') : t('nitro.login.register.next', 'Next') }
+                                </button>
+                            </div>
+                        </form>
+                    }
+
+                    { step === 'room' &&
+                        <form className="card-body" action={ submitRoomAction } autoComplete="off">
+                            <div className="register-intro">
+                                { t('nitro.login.register.intro.room', 'Last step — pick a starter room, or skip and create your own later.') }
+                            </div>
+
+                            { serverOffline &&
+                                <div className="error-line server-offline">
+                                    { t('nitro.login.server.offline.long', 'The gameserver isn\'t running right now, so new accounts can\'t be created. Please try again in a moment.') }
+                                    <button type="button" className="retry-link" onClick={ pingServer } disabled={ pingingServer }>
+                                        { pingingServer ? t('nitro.login.server.checking', 'Checking…') : t('nitro.login.server.retry', 'Retry') }
+                                    </button>
+                                </div>
+                            }
+
+                            <div className="room-templates-list">
+                                <label className={ `room-template-option room-template-skip ${ selectedTemplateId === null ? 'selected' : '' }` }>
+                                    <input type="radio" name="register-room-template" checked={ selectedTemplateId === null }
+                                        onChange={ () => setSelectedTemplateId(null) } />
+                                    <div className="room-template-body">
+                                        <div className="room-template-title">{ t('nitro.login.register.room.skip.title', 'I\'m okay — I\'ll create my own rooms') }</div>
+                                        <div className="room-template-description">{ t('nitro.login.register.room.skip.description', 'Skip for now and start with an empty hotel inventory.') }</div>
+                                    </div>
+                                </label>
+
+                                { roomTemplates === null && <div className="info-line">{ t('nitro.login.register.room.loading', 'Loading rooms…') }</div> }
+
+                                { roomTemplates !== null && roomTemplates.map(template => (
+                                    <label key={ template.templateId }
+                                        className={ `room-template-option ${ selectedTemplateId === template.templateId ? 'selected' : '' }` }>
+                                        <input type="radio" name="register-room-template" checked={ selectedTemplateId === template.templateId }
+                                            onChange={ () => setSelectedTemplateId(template.templateId) } />
+                                        { template.thumbnail &&
+                                            <img className="room-template-thumb" src={ template.thumbnail } alt={ template.title }
+                                                onError={ e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; } } /> }
+                                        <div className="room-template-body">
+                                            <div className="room-template-title">{ template.title }</div>
+                                            { template.description &&
+                                                <div className="room-template-description">{ template.description }</div> }
+                                        </div>
+                                    </label>
+                                )) }
+                            </div>
+
+                            { roomTemplatesError && <div className="error-line">{ roomTemplatesError }</div> }
+                            { (localError || error) && <div className="error-line">{ localError || error }</div> }
+                            { info && <div className="info-line">{ info }</div> }
+
+                            <div className="step-footer step-footer-split">
+                                <button type="button" className="ok-button back-button" onClick={ () => setStep('avatar') } disabled={ busy }>{ t('nitro.login.register.back', 'Back') }</button>
+                                <span className="step-indicator">3/3</span>
+                                <button type="submit" className="ok-button" disabled={ busy || serverOffline }>
+                                    { (submitting || isRoomPending) ? t('nitro.login.register.creating', 'Creating…') : t('nitro.login.register.finish', 'Finish') }
                                 </button>
                             </div>
                         </form>

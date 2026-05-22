@@ -90,7 +90,6 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
     const pendingActionRef = useRef<string | null>(null);
     const { simpleAlert = null } = useNotification();
 
-    // Keyboard shortcuts: Esc to close edit panels
     useEffect(() =>
     {
         if(!adminMode) return;
@@ -178,11 +177,13 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
         setLoading(true);
         setLastError(null);
         pendingActionRef.current = 'savePage';
+
         SendMessageComposer(new CatalogAdminSavePageComposer(
             data.pageId || 0, data.caption, data.captionSave, data.pageLayout, data.iconImage,
             data.minRank, data.visible === '1', data.enabled === '1',
             data.orderNum, data.parentId,
-            data.pageHeadline || '', data.pageTeaser || '', data.pageTextDetails || '', currentType, data.catalogMode
+            data.pageHeadline || '', data.pageTeaser || '', data.pageTextDetails || '', currentType, data.catalogMode,
+            data.pageText1 || ''
         ));
     }, [ currentType ]);
 

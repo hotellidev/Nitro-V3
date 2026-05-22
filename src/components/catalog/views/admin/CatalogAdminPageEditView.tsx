@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import { FaSave, FaSpinner, FaTimes, FaTrash } from 'react-icons/fa';
+import { FaLanguage, FaSave, FaSpinner, FaTimes, FaTrash } from 'react-icons/fa';
 import { CatalogType, LocalizeText } from '../../../../api';
-import { useCatalogData, useCatalogUiState } from '../../../../hooks';
+import { useCatalogData, useCatalogUiState, useTranslationActions, useTranslationState } from '../../../../hooks';
 import { IPageEditData, useCatalogAdmin } from '../../CatalogAdminContext';
 
 const LAYOUT_OPTIONS = [
@@ -40,6 +40,13 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
     const [ enabled, setEnabled ] = useState('1');
     const [ orderNum, setOrderNum ] = useState(0);
     const [ parentId, setParentId ] = useState(-1);
+    const [ pageText1, setPageText1 ] = useState('');
+    const [ showTranslate, setShowTranslate ] = useState(false);
+    const [ translateTargetLanguage, setTranslateTargetLanguage ] = useState('en');
+    const [ isTranslating, setIsTranslating ] = useState(false);
+    const [ translateError, setTranslateError ] = useState<string | null>(null);
+    const { supportedLanguages = [], languagesLoading = false } = useTranslationState();
+    const { translateText, ensureSupportedLanguagesLoaded } = useTranslationActions();
     const targetNode = editingPageNode
         ? editingPageNode
         : editingRootPage
@@ -69,6 +76,14 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
         setEnabled('1');
         setMinRank(1);
         setOrderNum(0);
+        const matchesLoadedPage = currentPage && targetPageId === currentPage.pageId;
+        const existingText1 = matchesLoadedPage && currentPage.localization
+            ? currentPage.localization.getText(0)
+            : '';
+        setPageText1(existingText1 || '');
+        setShowTranslate(false);
+        setIsTranslating(false);
+        setTranslateError(null);
         const wireParentId = targetNode.parentId;
         setParentId(typeof wireParentId === 'number' && wireParentId !== -1
             ? wireParentId
@@ -95,11 +110,53 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
             enabled,
             orderNum,
             parentId,
+            pageText1,
         };
 
         catalogAdmin.savePage(data);
 
         closeForm();
+    };
+
+    const openTranslate = () =>
+    {
+        const next = !showTranslate;
+        setShowTranslate(next);
+        setTranslateError(null);
+        if(next) ensureSupportedLanguagesLoaded();
+    };
+
+    const runTranslate = async () =>
+    {
+        if(!pageText1.trim().length)
+        {
+            setTranslateError('Nothing to translate yet.');
+            return;
+        }
+
+        if(!translateTargetLanguage)
+        {
+            setTranslateError('Pick a language first.');
+            return;
+        }
+
+        setIsTranslating(true);
+        setTranslateError(null);
+
+        try
+        {
+            const result = await translateText(pageText1, translateTargetLanguage);
+            setPageText1(result?.translatedText || pageText1);
+            setShowTranslate(false);
+        }
+        catch(error)
+        {
+            setTranslateError((error as Error)?.message || 'Translation failed.');
+        }
+        finally
+        {
+            setIsTranslating(false);
+        }
     };
 
     const handleDelete = async () =>
@@ -167,6 +224,50 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
                         <input className="accent-primary" checked={ enabled === '1' } type="checkbox" onChange={ e => setEnabled(e.target.checked ? '1' : '0') } />
                         { LocalizeText('catalog.admin.enabled') }
                     </label>
+                </div>
+                <div className="flex flex-col gap-0.5 col-span-3">
+                    <div className="flex items-center justify-between">
+                        <label className="text-[9px] text-muted uppercase font-bold">Page Text 1 <span className="text-muted normal-case font-normal opacity-70">(leave blank to keep current)</span></label>
+                        <button
+                            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold text-primary border border-primary/40 hover:bg-primary/10 transition-colors cursor-pointer disabled:opacity-50"
+                            disabled={ isTranslating || !pageText1.trim().length }
+                            title="Translate via Google Translate"
+                            type="button"
+                            onClick={ openTranslate }>
+                            { isTranslating ? <FaSpinner className="text-[8px] animate-spin" /> : <FaLanguage className="text-[10px]" /> }
+                            Translate
+                        </button>
+                    </div>
+                    { showTranslate &&
+                        <div className="flex items-center gap-1 mb-1 p-1 bg-gray-50 border border-card-grid-item-border rounded">
+                            <select
+                                className={ `${ inputClass } flex-1` }
+                                disabled={ isTranslating || languagesLoading }
+                                value={ translateTargetLanguage }
+                                onChange={ e => setTranslateTargetLanguage(e.target.value) }>
+                                { languagesLoading && !supportedLanguages.length &&
+                                    <option value="">Loading languages…</option> }
+                                { supportedLanguages.map(lang => (
+                                    <option key={ lang.code } value={ lang.code }>{ lang.name } ({ lang.code })</option>
+                                )) }
+                            </select>
+                            <button
+                                className="px-2 py-1 rounded text-[10px] font-bold bg-primary text-white hover:bg-secondary transition-colors cursor-pointer disabled:opacity-50"
+                                disabled={ isTranslating || !translateTargetLanguage || !pageText1.trim().length }
+                                type="button"
+                                onClick={ runTranslate }>
+                                { isTranslating ? <FaSpinner className="text-[8px] animate-spin" /> : 'Apply' }
+                            </button>
+                            <button
+                                className="px-2 py-1 rounded text-[10px] font-bold text-muted border border-card-grid-item-border hover:bg-gray-100 transition-colors cursor-pointer"
+                                disabled={ isTranslating }
+                                type="button"
+                                onClick={ () => { setShowTranslate(false); setTranslateError(null); } }>
+                                Cancel
+                            </button>
+                        </div> }
+                    { translateError && <span className="text-[9px] text-danger">{ translateError }</span> }
+                    <textarea className={ `${ inputClass } min-h-[60px] resize-y` } value={ pageText1 } onChange={ e => setPageText1(e.target.value) } />
                 </div>
             </div>
 

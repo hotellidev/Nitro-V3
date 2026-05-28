@@ -4,6 +4,7 @@ import { FaSearch } from 'react-icons/fa';
 import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import { Button } from '../../../../common';
 import { useNavigatorData, useNavigatorUiStore } from '../../../../hooks';
+import { NavigatorFilterChipsView } from './NavigatorFilterChipsView';
 
 interface NavigatorSearchViewProps
 {
@@ -77,15 +78,8 @@ export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
     };
 
     return (
-        <div className="flex w-full gap-1">
-            <div className="flex shrink-0">
-                <select className="form-select" value={ searchFilterIndex } onChange={ event => setSearchFilterIndex(parseInt(event.target.value)) }>
-                    { SearchFilterOptions.map((filter, index) =>
-                    {
-                        return <option key={ index } value={ index }>{ LocalizeText('navigator.filter.' + filter.name) }</option>;
-                    }) }
-                </select>
-            </div>
+        <div className="flex w-full flex-col gap-1">
+            <NavigatorFilterChipsView value={ searchFilterIndex } onChange={ setSearchFilterIndex } />
             <div className="flex w-full gap-1">
                 <input className="w-full form-control" placeholder={ LocalizeText('navigator.filter.input.placeholder') } type="text" value={ inputText } onChange={ event => setInputText(event.target.value) } onKeyDown={ event => handleKeyDown(event) } />
                 <Button variant="primary" onClick={ processSearch }>

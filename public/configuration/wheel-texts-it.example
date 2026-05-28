@@ -1,0 +1,17 @@
+{
+    "wheel.title": "Ruota della Fortuna",
+    "wheel.free.today": "Hai %count% giri gratis oggi!",
+    "wheel.extra": "Giri extra: %count%",
+    "wheel.spin": "GIRA",
+    "wheel.buy": "Compra giro",
+    "wheel.winners": "Ultimi vincitori",
+    "wheel.winners.empty": "Ancora nessun vincitore",
+    "soundboard.title": "Soundboard",
+    "soundboard.empty": "Nessun suono disponibile",
+    "soundboard.lastplayed": "Suonato da %user%",
+    "soundboard.room.setting.desc": "Permetti ai presenti di suonare effetti audio in questa stanza",
+    "radio.title": "Radio",
+    "radio.empty": "Nessuna stazione",
+    "radio.error": "Impossibile caricare le stazioni",
+    "radio.stop": "Stop"
+}

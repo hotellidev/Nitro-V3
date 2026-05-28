@@ -1,0 +1,17 @@
+{
+    "wheel.title": "Fortune Wheel",
+    "wheel.free.today": "You have %count% free spins today!",
+    "wheel.extra": "Extra spins: %count%",
+    "wheel.spin": "SPIN",
+    "wheel.buy": "Buy spin",
+    "wheel.winners": "Latest winners",
+    "wheel.winners.empty": "No winners yet",
+    "soundboard.title": "Soundboard",
+    "soundboard.empty": "No sounds available",
+    "soundboard.lastplayed": "Played by %user%",
+    "soundboard.room.setting.desc": "Let people in this room play sound effects",
+    "radio.title": "Radio",
+    "radio.empty": "No stations",
+    "radio.error": "Couldn't load stations",
+    "radio.stop": "Stop"
+}

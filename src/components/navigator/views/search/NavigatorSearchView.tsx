@@ -1,15 +1,21 @@
+import { NavigatorSearchResultSet } from '@nitrots/nitro-renderer';
 import { FC, KeyboardEvent, useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import { Button } from '../../../../common';
-import { useNavigatorData, useNavigatorSearch, useNavigatorUiStore } from '../../../../hooks';
+import { useNavigatorData, useNavigatorUiStore } from '../../../../hooks';
 
-export const NavigatorSearchView: FC<{}> = props =>
+interface NavigatorSearchViewProps
 {
+    searchResult: NavigatorSearchResultSet | null;
+}
+
+export const NavigatorSearchView: FC<NavigatorSearchViewProps> = props =>
+{
+    const { searchResult } = props;
     const [ searchFilterIndex, setSearchFilterIndex ] = useState(0);
     const [ inputText, setInputText ] = useState('');
     const { topLevelContext } = useNavigatorData();
-    const { searchResult } = useNavigatorSearch();
 
     // Sync the input text display when a server result arrives (e.g. on tab switch
     // or deep-link navigation that sets the filter through the store directly).

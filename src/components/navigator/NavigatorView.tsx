@@ -14,8 +14,10 @@ import { NavigatorRoomCreatorView } from './views/NavigatorRoomCreatorView';
 import { NavigatorRoomInfoView } from './views/NavigatorRoomInfoView';
 import { NavigatorRoomLinkView } from './views/NavigatorRoomLinkView';
 import { NavigatorRoomSettingsView } from './views/room-settings/NavigatorRoomSettingsView';
+import { NavigatorEmptyStateView } from './views/search/NavigatorEmptyStateView';
 import { NavigatorSearchResultView } from './views/search/NavigatorSearchResultView';
 import { NavigatorSearchSavesResultView } from './views/search/NavigatorSearchSavesResultView';
+import { NavigatorSearchSkeletonView } from './views/search/NavigatorSearchSkeletonView';
 import { NavigatorSearchView } from './views/search/NavigatorSearchView';
 
 export const NavigatorView: FC<{}> = props =>
@@ -132,7 +134,7 @@ export const NavigatorView: FC<{}> = props =>
                             <FaPlus className="fa-icon" />
                         </NitroCard.TabItem>
                     </NitroCard.Tabs>
-                    <NitroCard.Content isLoading={ isFetching }>
+                    <NitroCard.Content>
                         { !isCreatorOpen &&
                             <div className="flex h-full overflow-hidden gap-2">
                                 { isOpenSavesSearches &&
@@ -140,13 +142,13 @@ export const NavigatorView: FC<{}> = props =>
                                         <NavigatorSearchSavesResultView searches={ navigatorSearches || [] } />
                                     </div> }
                                 <div className="flex flex-col w-full overflow-hidden gap-2">
-                                    <NavigatorSearchView />
+                                    <NavigatorSearchView searchResult={ searchResult } />
                                     <div ref={ elementRef } className="flex flex-col flex-1 min-h-0 overflow-auto gap-2">
+                                        { (isFetching && !searchResult) &&
+                                            <NavigatorSearchSkeletonView /> }
                                         { searchResult && searchResult.results.map((result, index) => <NavigatorSearchResultView key={ index } searchResult={ result } />) }
                                         { searchResult && (!searchResult.results || searchResult.results.length === 0) &&
-                                            <div className="nitro-card-panel px-3 py-2 text-sm text-muted">
-                                                { LocalizeText(searchResult.code === 'myworld_view' ? 'navigator.roomsettings.moderation.none' : 'navigator.search.returned.no.results') }
-                                            </div> }
+                                            <NavigatorEmptyStateView code={ searchResult.code } onCreateRoom={ () => useNavigatorUiStore.getState().openCreator() } /> }
                                     </div>
                                     <Flex className="nitro-card-divider pt-2 border-t gap-2">
                                         <Flex pointer alignItems="center" justifyContent="center"

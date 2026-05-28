@@ -2,16 +2,14 @@ import { FC, KeyboardEvent, useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { INavigatorSearchFilter, LocalizeText, SearchFilterOptions } from '../../../../api';
 import { Button } from '../../../../common';
-import { useNavigator } from '../../../../hooks';
+import { useNavigatorActions, useNavigatorData } from '../../../../hooks';
 
-export const NavigatorSearchView: FC<{
-    sendSearch: (searchValue: string, contextCode: string) => void;
-}> = props =>
+export const NavigatorSearchView: FC<{}> = props =>
 {
-    const { sendSearch = null } = props;
     const [ searchFilterIndex, setSearchFilterIndex ] = useState(0);
     const [ searchValue, setSearchValue ] = useState('');
-    const { topLevelContext = null, searchResult = null } = useNavigator();
+    const { topLevelContext, searchResult } = useNavigatorData();
+    const { sendSearch } = useNavigatorActions();
 
     const processSearch = () =>
     {

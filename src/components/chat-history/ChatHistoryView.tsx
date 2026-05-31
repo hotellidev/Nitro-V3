@@ -15,7 +15,7 @@ export const ChatHistoryView: FC<{}> = props =>
     const [searchText, setSearchText] = useState<string>('');
     const [activeTab, setActiveTab] = useState<string>(TAB_CHAT);
     const { chatHistory = [] } = useChatHistory();
-    const { mentions } = useMentionsSnapshot();
+    const { mentions, unreadCount } = useMentionsSnapshot();
     const onMentionRowClick = useMentionRowClick();
     const { onClickChat } = useOnClickChat();
     const elementRef = useRef<HTMLDivElement>(null);
@@ -98,7 +98,7 @@ export const ChatHistoryView: FC<{}> = props =>
                 <NitroCardTabsItemView isActive={ activeTab === TAB_CHAT } onClick={ () => setActiveTab(TAB_CHAT) }>
                     { LocalizeText('room.chathistory.button.text') }
                 </NitroCardTabsItemView>
-                <NitroCardTabsItemView count={ mentions.reduce((n, m) => n + (m.read ? 0 : 1), 0) } isActive={ activeTab === TAB_MENTIONS } onClick={ () => setActiveTab(TAB_MENTIONS) }>
+                <NitroCardTabsItemView count={ unreadCount } isActive={ activeTab === TAB_MENTIONS } onClick={ () => setActiveTab(TAB_MENTIONS) }>
                     { LocalizeText('mentions.tab.title') }
                 </NitroCardTabsItemView>
             </NitroCardTabsView>

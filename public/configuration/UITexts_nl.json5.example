@@ -774,4 +774,13 @@
     'usersettings.success.password':                    "Wachtwoord succesvol bijgewerkt.",
     'usersettings.success.email':                       "E-mail succesvol bijgewerkt.",
     'usersettings.success.username':                    "Gebruikersnaam bijgewerkt. Log opnieuw in met je nieuwe naam.",
+
+    // ------------------------------------------------------------------------
+    // Mentions
+    // ------------------------------------------------------------------------
+    'mentions.window.title':    'Vermeldingen',
+    'mentions.window.empty':    'Geen vermeldingen',
+    'mentions.window.markall':  'Alles als gelezen markeren',
+    'mentions.tab.title':       'Vermeldingen',
+    'mentions.notification':    '%sender% heeft je genoemd in %room%',
 }

@@ -30,8 +30,6 @@ export const UserProfileView: FC<{}> = () =>
     {
         if(!userProfile) return;
 
-        // Open the navigator AND run the owner search (the composer alone never
-        // showed the navigator window, so the button looked dead).
         CreateLinkEvent(`navigator/search/hotel_view/owner:${ userProfile.username }`);
     };
 
@@ -100,12 +98,15 @@ export const UserProfileView: FC<{}> = () =>
 
     if(!userProfile) return null;
 
+    const cardBackgroundId = userProfile.cardBackgroundId ?? 0;
+    const cardBackgroundClass = cardBackgroundId ? `profile-card-background card-background-${ cardBackgroundId }` : '';
+
     return (
-        <NitroCard className="nitro-extended-profile-window w-[600px] h-[600px] max-w-[96vw] max-h-[92vh]" uniqueKey="nitro-user-profile">
+        <NitroCard className="nitro-extended-profile-window w-[640px] h-[720px] max-w-[96vw] max-h-[92vh]" uniqueKey="nitro-user-profile">
             <NitroCard.Header
                 headerText={ LocalizeText('extendedprofile.caption') }
                 onCloseClick={ onClose } />
-            <NitroCard.Content className="nitro-extended-profile-window__content overflow-hidden !p-0 flex flex-col">
+            <NitroCard.Content className={ `nitro-extended-profile-window__content overflow-hidden !p-0 flex flex-col ${ cardBackgroundClass }` }>
                 <div className="px-[10px] pt-[8px]">
                     <UserContainerView
                         userBadges={ userBadges }

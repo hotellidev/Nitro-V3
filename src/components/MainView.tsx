@@ -28,6 +28,7 @@ import { HousekeepingView } from './housekeeping/HousekeepingView';
 import { RareValuesView } from './rare-values/RareValuesView';
 import { FortuneWheelView } from './fortune-wheel/FortuneWheelView';
 import { SoundboardView } from './soundboard/SoundboardView';
+import { ThemeApplier } from './theme/ThemeApplier';
 import { RadioView } from './radio/RadioView';
 import { InventoryView } from './inventory/InventoryView';
 import { ModToolsView } from './mod-tools/ModToolsView';
@@ -134,6 +135,7 @@ export const MainView: FC<{}> = props =>
 
     return (
         <>
+            <ThemeApplier />
             <div className="hidden" data-localization-version={ localizationVersion } />
             <AnimatePresence>
                 { landingViewVisible &&

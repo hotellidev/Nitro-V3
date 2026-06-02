@@ -1,6 +1,6 @@
 import { CreateLinkEvent, GetSessionDataManager, RelationshipStatusInfoMessageParser, RequestFriendComposer, UserProfileParser } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useMemo, useState } from 'react';
-import { FriendlyTime, LocalizeText, SendMessageComposer } from '../../api';
+import { FriendlyTime, LocalizeText, SanitizeHtml, SendMessageComposer } from '../../api';
 import { LayoutAvatarImageView, LayoutBadgeImageView, Text, UserIdentityView } from '../../common';
 import { badgeEmblemDefault } from '../../assets/images/leaderboard_badge';
 import { level as profileLevelIcon, rooms as profileRoomsIcon } from '../../assets/images/user-profile';
@@ -61,10 +61,10 @@ export const UserContainerView: FC<UserContainerViewProps> = props =>
                                 username={ userProfile.username } />
                             <p className="nitro-extended-profile__motto">{ userProfile.motto || '\u00A0' }</p>
                             <p className="nitro-extended-profile__meta">
-                                <b>{ LocalizeText('extendedprofile.created').replace(/%\w+%/g, '').trim() }</b> { userProfile.registration }
+                                <span dangerouslySetInnerHTML={ { __html: SanitizeHtml(LocalizeText('extendedprofile.created').replace(/%\w+%/g, '').trim()) } } /> { userProfile.registration }
                             </p>
                             <p className="nitro-extended-profile__meta">
-                                <b>{ LocalizeText('extendedprofile.last.login').replace(/%\w+%/g, '').trim() }</b> { FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2) }
+                                <span dangerouslySetInnerHTML={ { __html: SanitizeHtml(LocalizeText('extendedprofile.last.login').replace(/%\w+%/g, '').trim()) } } /> { FriendlyTime.format(userProfile.secondsSinceLastVisit, '.ago', 2) }
                             </p>
                             <p className="nitro-extended-profile__meta nitro-extended-profile__meta--strong">
                                 <b>{ LocalizeText('extendedprofile.achievementscore') }</b> { userProfile.achievementPoints }
@@ -117,11 +117,11 @@ export const UserContainerView: FC<UserContainerViewProps> = props =>
                     <p
                         className="text-sm leading-none"
                         dangerouslySetInnerHTML={{
-                            __html: LocalizeText(
+                            __html: SanitizeHtml(LocalizeText(
                                 'extendedprofile.friends.count',
                                 ['count'],
                                 [userProfile.friendsCount.toString()]
-                            )
+                            ))
                         }}
                     />
                     <p className="nitro-extended-profile__relationships-label">{ LocalizeText('extendedprofile.relstatus') }</p>

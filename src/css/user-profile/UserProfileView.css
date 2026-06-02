@@ -46,11 +46,6 @@
   gap: 10px;
 }
 
-/* Mirror the room infostand exactly: a 68x135 flex column (= profile-background)
-   that centres the avatar horizontally and clips it; the stand/overlay sit on
-   top as absolute layers. The avatar keeps its component default classes
-   (relative w-[90px] h-[130px] left-[-2px]) so it lines up with bg + stand and
-   isn't crooked. Do NOT absolutely position or force width/height on it. */
 .nitro-extended-profile__avatar-shell {
   width: 68px;
   height: 135px;
@@ -256,19 +251,15 @@
   overflow: hidden;
 }
 
-/* Same proven recipe as the messenger head: clip a small box and centre a
-   54x54 avatar in it. `inset: auto` cancels the component's `inset-0` so the
-   width/position take effect (otherwise the head overflows huge). */
 .nitro-extended-profile__relationship-head .avatar-image {
   position: absolute !important;
-  inset: auto !important;
-  left: 50% !important;
-  top: 54% !important;
-  width: 50px !important;
-  height: 50px !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
   margin: 0 !important;
-  background-position: center center !important;
-  transform: translate(-50%, -50%) scale(.95) !important;
+  background-size: 60px auto !important;
+  background-position: -14px -21px !important;
+  transform: none !important;
 }
 
 .nitro-extended-profile__relationship-subcopy {
@@ -301,6 +292,7 @@
   border-right: 1px solid #afafaf;
   color: #111;
   font-size: 11px;
+  cursor: pointer;
 }
 
 .nitro-extended-profile__summary-button:first-child {
@@ -338,6 +330,10 @@
 
 .nitro-extended-profile-window__body {
   background: #ece8dc;
+}
+
+.nitro-extended-profile-window__content.profile-card-background .nitro-extended-profile-window__body {
+  background: transparent;
 }
 
 .nitro-extended-profile-window__body--groups {
@@ -387,10 +383,8 @@
 .nitro-extended-profile-groups__details {
   min-width: 0;
   min-height: 236px;
-  border: 1px solid #9e9e9e;
-  border-radius: 14px;
-  background: #bdbbbb;
-  padding: 11px;
+  max-height: 100%;
+  overflow-y: auto;
 }
 
 .nitro-extended-profile-group-info {
@@ -399,7 +393,7 @@
   gap: 12px;
   min-height: 100%;
   border: 1px solid #9f9f9f;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #efede4;
   padding: 12px 14px;
 }
@@ -417,6 +411,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .nitro-extended-profile-group-info__meta {
@@ -467,9 +462,14 @@
   margin-top: auto;
 }
 
-.nitro-extended-profile-group-info .group-badge .badge-image {
-  transform: scale(2.1);
-  transform-origin: center;
+.nitro-extended-profile-group-info__badge-wrap .group-badge {
+  width: 100% !important;
+  height: 100% !important;
+  transform: none !important;
+  background-size: contain !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  image-rendering: pixelated;
 }
 
 .nitro-extended-profile-window .layout-grid-item.active {
@@ -489,7 +489,94 @@
   justify-content: center;
 }
 
-.nitro-extended-profile-window .layout-grid-item .badge-image.group-badge {
-  width: auto !important;
-  height: auto !important;
+.nitro-extended-profile-groups__item {
+  overflow: hidden;
+}
+
+.nitro-extended-profile-groups__item .group-badge {
+  width: 40px !important;
+  height: 40px !important;
+  transform: none !important;
+  background-size: contain !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  image-rendering: pixelated;
+}
+
+@media (max-width: 575.98px) {
+  .nitro-extended-profile-window__content {
+    overflow-y: auto;
+  }
+
+  .nitro-extended-profile-window__body--groups {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .nitro-extended-profile-window__panel {
+    height: auto;
+  }
+
+  .nitro-extended-profile__top {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
+  }
+
+  .nitro-extended-profile__separator {
+    display: none;
+  }
+
+  .nitro-extended-profile-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: auto;
+    min-height: 0;
+  }
+
+  .nitro-extended-profile-groups__sidebar {
+    min-width: 0;
+    flex: 0 0 auto;
+  }
+
+  .nitro-extended-profile-groups__list {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 0;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
+  }
+
+  .nitro-extended-profile-groups__item {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+  }
+
+  .nitro-extended-profile-groups__details {
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .nitro-extended-profile-group-info {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .nitro-extended-profile-group-info__badge-wrap {
+    width: 64px;
+    height: 64px;
+  }
+
+  .nitro-extended-profile-group-info__button {
+    min-width: 0;
+    width: 100%;
+  }
 }

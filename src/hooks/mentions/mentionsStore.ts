@@ -40,4 +40,12 @@ export const markAllRead = (): void =>
     emit();
 };
 
+export const removeMention = (mentionId: number): void =>
+{
+    const next = mentions.filter(m => m.mentionId !== mentionId);
+    if(next.length === mentions.length) return;
+    mentions = next;
+    emit();
+};
+
 export const resetMentions = (): void => { mentions = []; emit(); };

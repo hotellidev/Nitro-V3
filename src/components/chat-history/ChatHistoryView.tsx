@@ -3,8 +3,9 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { ChatEntryType, LocalizeText } from '../../api';
 import { Flex, NitroCardContentView, NitroCardHeaderView, NitroCardTabsItemView, NitroCardTabsView, NitroCardView, Text } from '../../common';
 import { useChatHistory, useMentionsSnapshot, useOnClickChat } from '../../hooks';
+import { useUserDataSnapshot } from '../../hooks/session/useSessionSnapshots';
 import { NitroInput } from '../../layout';
-import { MentionRowView, useMentionRowClick } from '../mentions';
+import { MentionRowView, useMentionActions } from '../mentions';
 
 const TAB_CHAT = 'chat';
 const TAB_MENTIONS = 'mentions';
@@ -16,7 +17,8 @@ export const ChatHistoryView: FC<{}> = props =>
     const [activeTab, setActiveTab] = useState<string>(TAB_CHAT);
     const { chatHistory = [] } = useChatHistory();
     const { mentions, unreadCount } = useMentionsSnapshot();
-    const onMentionRowClick = useMentionRowClick();
+    const { userName: ownMentionUsername = '' } = useUserDataSnapshot();
+    const { open: onMentionOpen, goto: onMentionGoto, remove: onMentionRemove } = useMentionActions();
     const { onClickChat } = useOnClickChat();
     const elementRef = useRef<HTMLDivElement>(null);
     const isFirstRender = useRef(true);
@@ -108,7 +110,13 @@ export const ChatHistoryView: FC<{}> = props =>
                         { (mentions.length === 0)
                             ? <Text center variant="gray">{ LocalizeText('mentions.window.empty') }</Text>
                             : mentions.map(mention => (
-                                <MentionRowView key={ mention.mentionId } mention={ mention } onClick={ onMentionRowClick } />
+                                <MentionRowView
+                                    key={ mention.mentionId }
+                                    mention={ mention }
+                                    onGoto={ onMentionGoto }
+                                    onOpen={ onMentionOpen }
+                                    onRemove={ onMentionRemove }
+                                    ownUsername={ ownMentionUsername } />
                             )) }
                     </div>
                 ) : (

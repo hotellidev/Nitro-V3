@@ -56,6 +56,21 @@ const isMentionToken = (token: string, ownUsernameLower: string, aliases: Readon
     return aliases.has(nick);
 };
 
+/**
+ * Public predicate: does this raw whitespace-delimited token mention the given
+ * user or a room-broadcast alias? Mirrors the server's detection. Reusable by
+ * UI that renders mention previews as React nodes (e.g. the mentions box).
+ */
+export const tokenIsMention = (
+    token: string,
+    ownUsername: string,
+    aliases: ReadonlyArray<string> = MENTION_ROOM_ALIASES
+): boolean =>
+{
+    const ownUsernameLower = (ownUsername || '').replace(NON_NICK_CHARS, '').toLowerCase();
+    return isMentionToken(token, ownUsernameLower, new Set(aliases.map(a => a.toLowerCase())));
+};
+
 const HIGHLIGHT_OPEN = '<span class="mention-highlight">';
 const HIGHLIGHT_CLOSE = '</span>';
 

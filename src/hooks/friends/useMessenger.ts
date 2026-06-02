@@ -1,5 +1,5 @@
 import { ConsoleReadReceiptEvent, GetSessionDataManager, MarkConsoleReadComposer, NewConsoleMessageEvent, RoomInviteErrorEvent, RoomInviteEvent, SendMessageComposer as SendMessageComposerPacket } from '@nitrots/nitro-renderer';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useBetween } from 'use-between';
 import { CloneObject, LocalizeText, MessengerIconState, MessengerThread, MessengerThreadChat, NotificationAlertType, PlaySound, SendMessageComposer, SoundNames } from '../../api';
 import { useMessageEvent } from '../events';
@@ -16,6 +16,9 @@ const useMessengerState = () =>
     const { getFriend = null } = useFriends();
     const { simpleAlert = null } = useNotification();
     const { settings, translateIncoming } = useTranslation();
+
+    const messageThreadsRef = useRef(messageThreads);
+    messageThreadsRef.current = messageThreads;
 
     const visibleThreads = useMemo(() => messageThreads.filter(thread => (hiddenThreadIds.indexOf(thread.threadId) === -1)), [messageThreads, hiddenThreadIds]);
     const activeThread = useMemo(() => ((activeThreadId > 0) && visibleThreads.find(thread => (thread.threadId === activeThreadId) || null)), [activeThreadId, visibleThreads]);
@@ -200,7 +203,8 @@ const useMessengerState = () =>
     {
         if (activeThreadId <= 0) return;
 
-        let participantId = 0;
+        const activeThreadValue = messageThreadsRef.current.find(thread => (thread.threadId === activeThreadId));
+        const participantId = activeThreadValue?.participant?.id ?? 0;
 
         setMessageThreads(prevValue =>
         {
@@ -211,7 +215,6 @@ const useMessengerState = () =>
             {
                 newValue[index] = CloneObject(newValue[index]);
                 newValue[index].setRead();
-                participantId = newValue[index].participant?.id ?? 0;
             }
 
             return newValue;

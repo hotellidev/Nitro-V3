@@ -1,4 +1,4 @@
-import { GetSessionDataManager, NewConsoleMessageEvent, RoomInviteErrorEvent, RoomInviteEvent, SendMessageComposer as SendMessageComposerPacket } from '@nitrots/nitro-renderer';
+import { ConsoleReadReceiptEvent, GetSessionDataManager, MarkConsoleReadComposer, NewConsoleMessageEvent, RoomInviteErrorEvent, RoomInviteEvent, SendMessageComposer as SendMessageComposerPacket } from '@nitrots/nitro-renderer';
 import { useEffect, useMemo, useState } from 'react';
 import { useBetween } from 'use-between';
 import { CloneObject, LocalizeText, MessengerIconState, MessengerThread, MessengerThreadChat, NotificationAlertType, PlaySound, SendMessageComposer, SoundNames } from '../../api';
@@ -156,6 +156,7 @@ const useMessengerState = () =>
         if (!thread) return;
 
         sendMessage(thread, parser.senderId, parser.messageText, parser.secondsSinceSent, parser.extraData);
+        if ((thread.threadId === activeThreadId) && (parser.senderId > 0)) SendMessageComposer(new MarkConsoleReadComposer(parser.senderId));
     });
 
     useMessageEvent<RoomInviteEvent>(RoomInviteEvent, event =>
@@ -175,9 +176,31 @@ const useMessengerState = () =>
         simpleAlert(`Received room invite error: ${ parser.errorCode },recipients: ${ parser.failedRecipients.join(',') }`, NotificationAlertType.DEFAULT, null, null, LocalizeText('friendlist.alert.title'));
     });
 
+    useMessageEvent<ConsoleReadReceiptEvent>(ConsoleReadReceiptEvent, event =>
+    {
+        const parser = event.getParser();
+        const ownUserId = GetSessionDataManager().userId;
+
+        setMessageThreads(prevValue =>
+        {
+            const index = prevValue.findIndex(thread => (thread.participant && (thread.participant.id === parser.readerId)));
+
+            if (index === -1) return prevValue;
+
+            const newValue = [...prevValue];
+
+            newValue[index] = CloneObject(newValue[index]);
+            newValue[index].setMessagesReadFromUser(ownUserId);
+
+            return newValue;
+        });
+    });
+
     useEffect(() =>
     {
         if (activeThreadId <= 0) return;
+
+        let participantId = 0;
 
         setMessageThreads(prevValue =>
         {
@@ -187,12 +210,14 @@ const useMessengerState = () =>
             if (index >= 0)
             {
                 newValue[index] = CloneObject(newValue[index]);
-
                 newValue[index].setRead();
+                participantId = newValue[index].participant?.id ?? 0;
             }
 
             return newValue;
         });
+
+        if (participantId > 0) SendMessageComposer(new MarkConsoleReadComposer(participantId));
     }, [activeThreadId]);
 
     useEffect(() =>

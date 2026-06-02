@@ -1,4 +1,4 @@
-import { FC, MouseEvent, useState } from 'react';
+import { FC, MouseEvent, useEffect, useState } from 'react';
 import { FriendCategoryData } from '@nitrots/nitro-renderer';
 import { LocalizeText } from '../../../../api';
 import { Button, Column, Flex, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
@@ -17,6 +17,15 @@ export const FriendsCategoryManagerView: FC<FriendsCategoryManagerViewProps> = p
     const [ newName, setNewName ] = useState<string>('');
     const [ editingId, setEditingId ] = useState<number>(0);
     const [ editingName, setEditingName ] = useState<string>('');
+
+    useEffect(() =>
+    {
+        if(editingId && !categories.some(category => (category.id === editingId)))
+        {
+            setEditingId(0);
+            setEditingName('');
+        }
+    }, [ categories, editingId ]);
 
     const submitAdd = () =>
     {
@@ -47,7 +56,7 @@ export const FriendsCategoryManagerView: FC<FriendsCategoryManagerViewProps> = p
                         onChange={ event => setNewName(event.target.value) }
                         onKeyDown={ event => (event.key === 'Enter') && submitAdd() } />
                     <Button disabled={ !newName.trim().length || (categories.length >= 20) } onClick={ submitAdd }>
-                        { 'Create' }
+                        { LocalizeText('catalog.admin.create') }
                     </Button>
                 </Flex>
                 <Column gap={ 1 }>
@@ -64,7 +73,7 @@ export const FriendsCategoryManagerView: FC<FriendsCategoryManagerViewProps> = p
                                         onChange={ event => setEditingName(event.target.value) }
                                         onKeyDown={ event => (event.key === 'Enter') && submitRename() } />
                                     <Button onClick={ submitRename }>
-                                        { 'Save' }
+                                        { LocalizeText('catalog.admin.save') }
                                     </Button>
                                 </>
                                 :

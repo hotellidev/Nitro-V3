@@ -65,7 +65,13 @@ export const FriendsMessengerThreadGroup: FC<{ thread: MessengerThread, group: M
                     {
                         if(!chat.showTranslation)
                         {
-                            return <Base key={ index } className="text-break">{ chat.message }</Base>;
+                            return (
+                                <Base key={ index } className="text-break">
+                                    { chat.message }
+                                    { chat.offlineDelivered &&
+                                        <span className="messenger-offline-tag">{ LocalizeText('messenger.offline.delivered') }</span> }
+                                </Base>
+                            );
                         }
 
                         return (

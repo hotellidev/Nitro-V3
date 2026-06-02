@@ -265,5 +265,6 @@
     "loading.task.userdata": "loading user data...",
     "loading.task.rooms": "loading rooms...",
     "loading.task.engine": "loading graphics engine...",
-	"catalog.gift_wrapping.gift_sent": "Done!"
+	"catalog.gift_wrapping.gift_sent": "Done!",
+    "messenger.offline.delivered": "Sent while you were offline"
 }

@@ -894,3 +894,11 @@
     max-height: 220px;
     overflow-y: auto;
 }
+
+.messenger-offline-tag {
+    display: block;
+    margin-top: 2px;
+    font-size: 10px;
+    font-style: italic;
+    opacity: 0.6;
+}

@@ -3,9 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CommandDefinition, LocalizeText } from '../../../api';
 import { createNitroStore } from '../../../state/createNitroStore';
 import { useMessageEvent } from '../../events';
-import { getChatCommandQuery, getRankedCommandSuggestions } from './useChatCommandSelector.helpers';
-
-const MAX_VISIBLE_COMMANDS = 8;
 
 // Client-only commands are static; safe to keep at module scope. The
 // `descriptionKey` is a LocalizeText slot resolved at merge time so
@@ -65,7 +62,7 @@ const useChatCommandStore = createNitroStore<ChatCommandStore>()((set) => ({
     markListenerRegistered: () => set({ isListenerRegistered: true })
 }));
 
-export const ensureChatCommandListener = (): void =>
+const ensureGlobalListener = (): void =>
 {
     if(useChatCommandStore.getState().isListenerRegistered) return;
 
@@ -89,20 +86,20 @@ export const ensureChatCommandListener = (): void =>
 
 // Try once at module load so the server's response landing before any
 // React mount still hits the cache.
-ensureChatCommandListener();
+ensureGlobalListener();
 
 export const useChatCommandSelector = (chatValue: string) =>
 {
     const serverCommands = useChatCommandStore(s => s.serverCommands);
     const setServerCommands = useChatCommandStore(s => s.setServerCommands);
     const [ selectedIndex, setSelectedIndex ] = useState(0);
-    const [ dismissedQuery, setDismissedQuery ] = useState<string | null>(null);
+    const [ dismissed, setDismissed ] = useState(false);
 
     useEffect(() =>
     {
         // Cover the case where the module-level registration failed
         // because GetCommunication() wasn't ready at import time.
-        ensureChatCommandListener();
+        ensureGlobalListener();
     }, []);
 
     // Late updates (rank change, etc.) — go through the store so all
@@ -126,55 +123,61 @@ export const useChatCommandSelector = (chatValue: string) =>
         return merged.sort((a, b) => a.key.localeCompare(b.key));
     }, [ serverCommands ]);
 
-    const filterText = useMemo(() => getChatCommandQuery(chatValue), [ chatValue ]);
+    const filterText = useMemo(() =>
+    {
+        if(!chatValue.startsWith(':') || chatValue.includes(' ')) return '';
+
+        return chatValue.slice(1).toLowerCase();
+    }, [ chatValue ]);
 
     const filteredCommands = useMemo(() =>
     {
-        if(filterText === null) return [];
+        if(!filterText && !chatValue.startsWith(':')) return [];
 
-        return getRankedCommandSuggestions(allCommands, filterText, MAX_VISIBLE_COMMANDS);
-    }, [ allCommands, filterText ]);
+        return allCommands.filter(cmd => cmd.key.toLowerCase().startsWith(filterText));
+    }, [ allCommands, filterText, chatValue ]);
 
     const isVisible = useMemo(() =>
     {
-        return filterText !== null && filteredCommands.length > 0 && dismissedQuery !== filterText;
-    }, [ filterText, filteredCommands, dismissedQuery ]);
-
-    const boundedSelectedIndex = useMemo(() =>
-    {
-        if(!filteredCommands.length) return 0;
-
-        return Math.min(selectedIndex, filteredCommands.length - 1);
-    }, [ filteredCommands.length, selectedIndex ]);
+        return chatValue.startsWith(':') && !chatValue.includes(' ') && filteredCommands.length > 0 && !dismissed;
+    }, [ chatValue, filteredCommands, dismissed ]);
 
     const moveUp = useCallback(() =>
     {
-        if(!filteredCommands.length) return;
-
-        setSelectedIndex(prev => ((prev <= 0 || prev >= filteredCommands.length) ? filteredCommands.length - 1 : prev - 1));
+        setSelectedIndex(prev => (prev <= 0 ? filteredCommands.length - 1 : prev - 1));
     }, [ filteredCommands.length ]);
 
     const moveDown = useCallback(() =>
     {
-        if(!filteredCommands.length) return;
-
         setSelectedIndex(prev => (prev >= filteredCommands.length - 1 ? 0 : prev + 1));
     }, [ filteredCommands.length ]);
 
     const selectCurrent = useCallback((): CommandDefinition | null =>
     {
-        if(boundedSelectedIndex >= 0 && boundedSelectedIndex < filteredCommands.length)
+        if(selectedIndex >= 0 && selectedIndex < filteredCommands.length)
         {
-            return filteredCommands[boundedSelectedIndex];
+            return filteredCommands[selectedIndex];
         }
 
         return null;
-    }, [ boundedSelectedIndex, filteredCommands ]);
+    }, [ selectedIndex, filteredCommands ]);
 
     const close = useCallback(() =>
     {
-        setDismissedQuery(filterText);
+        setDismissed(true);
+    }, []);
+
+    // Reset dismissed when chatValue changes to a new command start
+    useEffect(() =>
+    {
+        if(chatValue === ':' || chatValue === '') setDismissed(false);
+    }, [ chatValue ]);
+
+    // Reset selectedIndex when filtered list changes
+    useEffect(() =>
+    {
+        setSelectedIndex(0);
     }, [ filterText ]);
 
-    return { isVisible, filteredCommands, selectedIndex: boundedSelectedIndex, setSelectedIndex, moveUp, moveDown, selectCurrent, close };
+    return { isVisible, filteredCommands, selectedIndex, setSelectedIndex, moveUp, moveDown, selectCurrent, close };
 };

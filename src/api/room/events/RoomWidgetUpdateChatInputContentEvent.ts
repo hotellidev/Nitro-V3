@@ -5,7 +5,6 @@ export class RoomWidgetUpdateChatInputContentEvent extends RoomWidgetUpdateEvent
     public static CHAT_INPUT_CONTENT: string = 'RWUCICE_CHAT_INPUT_CONTENT';
     public static WHISPER: string = 'whisper';
     public static SHOUT: string = 'shout';
-    public static TEXT: string = 'text';
 
     private _chatMode: string = '';
     private _userName: string = '';

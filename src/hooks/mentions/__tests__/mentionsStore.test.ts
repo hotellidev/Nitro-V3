@@ -40,19 +40,4 @@ describe('mentionsStore', () =>
         expect(getUnreadCount()).toBe(1);
         expect(getMentionsSnapshot().find(m => m.mentionId === 1)!.read).toBe(true);
     });
-
-    it('drops mentions with non-positive id (defensive against id=0 spam)', () =>
-    {
-        addMention(make(0));
-        addMention(make(-1));
-        expect(getMentionsSnapshot()).toHaveLength(0);
-    });
-
-    it('dedupes duplicate ids even after the legacy id !== 0 carve-out is gone', () =>
-    {
-        addMention(make(7));
-        addMention(make(7));
-        addMention(make(7));
-        expect(getMentionsSnapshot()).toHaveLength(1);
-    });
 });

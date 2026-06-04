@@ -10,15 +10,9 @@ import { ChatInputEmojiSelectorView } from './ChatInputEmojiSelectorView';
 import { ChatInputMentionSelectorView, MentionSuggestion } from './ChatInputMentionSelectorView';
 import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
 
-// RoomObjectUserType.AVATAR_TYPES: USER = 1, PET = 2, BOT = 3, RENTABLE_BOT = 4.
-// Only real users can be mentioned, so the @-autocomplete keeps just type 1.
 const USER_TYPE_REAL_USER = 1;
 const MAX_MENTION_SUGGESTIONS = 8;
 
-// Broadcast alias categories. The actual alias strings live in
-// ui-config.json (mentions_ui.aliases.everyone / .friends / .room) so an
-// admin can edit them without a rebuild and keep them in sync with the
-// gameserver's mentions.*.aliases config keys.
 type MentionAliasScope = 'everyone' | 'friends' | 'room';
 
 const MENTION_ALIAS_CONFIG_KEY: Record<MentionAliasScope, string> = {
@@ -33,18 +27,12 @@ const MENTION_ALIAS_DEFAULTS: Record<MentionAliasScope, string[]> = {
     room:     [ 'room', 'stanza' ]
 };
 
-// Localization keys for the description shown next to each alias in the
-// picker. The actual translations live in UITexts (see
-// text/UITexts_*.json5.example) so admins can localize without a rebuild.
 const MENTION_ALIAS_DESCRIPTION_KEY: Record<MentionAliasScope, string> = {
     everyone: 'mentions.alias.description.everyone',
     friends:  'mentions.alias.description.friends',
     room:     'mentions.alias.description.room'
 };
 
-// Coerces a configured value to a clean string[] - tolerates a missing
-// config key, a non-array value, and non-string entries (so a typo in
-// ui-config.json can't crash the picker).
 const sanitizeAliasList = (raw: unknown, fallback: string[]): string[] =>
 {
     if(!Array.isArray(raw)) return fallback;
@@ -71,13 +59,6 @@ export const ChatInputView: FC<{}> = props =>
     const roomUserList = useRoomUserListSnapshot();
     const [ mentionSelectedIndex, setMentionSelectedIndex ] = useState<number>(0);
 
-    /**
-     * Detect an open @-mention token at the input caret. Returns the active
-     * query (text after @) plus the offsets we'll replace on selection, or
-     * null when the caret is not inside an @-token. Triggers only when the
-     * @ is at the start of the input or follows whitespace, so an email-like
-     * "foo@bar" doesn't pop the picker.
-     */
     const mentionContext = useMemo(() =>
     {
         if(!chatValue) return null;
@@ -88,19 +69,14 @@ export const ChatInputView: FC<{}> = props =>
         const at = upToCaret.lastIndexOf('@');
         if(at < 0) return null;
 
-        // @ must be at start or follow whitespace.
         if(at > 0 && !/\s/.test(upToCaret.charAt(at - 1))) return null;
 
         const query = upToCaret.slice(at + 1);
-        // Bail if the query already contains whitespace - the token has ended.
         if(/\s/.test(query)) return null;
 
         return { atIndex: at, replaceFrom: at, replaceTo: caret, query };
     }, [ chatValue, commandSelectorVisible ]);
 
-    // Flattened, config-driven alias list. Each scope's aliases are loaded
-    // from ui-config.json (with a typed fallback in case the key is missing
-    // or corrupted) and stitched in with the per-scope description.
     const mentionAliases = useMemo<ReadonlyArray<{ key: string; scope: MentionAliasScope; description: string }>>(() =>
     {
         const out: { key: string; scope: MentionAliasScope; description: string }[] = [];
@@ -117,8 +93,7 @@ export const ChatInputView: FC<{}> = props =>
             for(const key of list)
             {
                 const lower = key.toLowerCase();
-                // First-wins dedupe so an alias accidentally listed in two
-                // scopes shows once - same precedence the gameserver uses.
+
                 if(seen.has(lower)) continue;
                 seen.add(lower);
 
@@ -136,8 +111,6 @@ export const ChatInputView: FC<{}> = props =>
         const query = mentionContext.query.toLowerCase();
         const out: MentionSuggestion[] = [];
 
-        // 1. Real users in the room. Pets, bots, rentable bots and monster
-        // plants are filtered out by type.
         for(const user of roomUserList)
         {
             if(!user || user.type !== USER_TYPE_REAL_USER) continue;
@@ -155,9 +128,6 @@ export const ChatInputView: FC<{}> = props =>
             if(out.length >= MAX_MENTION_SUGGESTIONS) break;
         }
 
-        // 2. Broadcast aliases. The server permission-gates these (sender needs
-        // acc_mention_everyone / acc_mention_friends to actually fire) - the
-        // picker just surfaces them.
         for(const alias of mentionAliases)
         {
             if(query.length > 0 && !alias.key.toLowerCase().startsWith(query)) continue;
@@ -178,8 +148,6 @@ export const ChatInputView: FC<{}> = props =>
 
     const mentionSelectorVisible = mentionSuggestions.length > 0;
 
-    // Reset / clamp the highlighted row whenever the suggestion list changes
-    // so arrow-up/down doesn't keep an index that's now out of range.
     useEffect(() =>
     {
         if(mentionSelectedIndex >= mentionSuggestions.length) setMentionSelectedIndex(0);
@@ -196,8 +164,6 @@ export const ChatInputView: FC<{}> = props =>
 
         setChatValue(next);
 
-        // Move the caret to right after the inserted mention so subsequent
-        // typing continues the message instead of editing the mention.
         requestAnimationFrame(() =>
         {
             if(!inputRef.current) return;
@@ -341,7 +307,6 @@ export const ChatInputView: FC<{}> = props =>
                     return;
                 case 'Tab':
                     event.preventDefault();
-                    // fall through
                 case 'NumpadEnter':
                 case 'Enter': {
                     const selected = selectCurrent();
@@ -389,8 +354,7 @@ export const ChatInputView: FC<{}> = props =>
                 case 'Escape':
                     event.preventDefault();
                     setMentionSelectedIndex(0);
-                    // Closing without picking: drop the bare "@<query>" so the
-                    // picker doesn't immediately reopen on next render.
+					
                     if(mentionContext)
                     {
                         const before = chatValue.slice(0, mentionContext.replaceFrom);

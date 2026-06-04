@@ -7,13 +7,9 @@ export interface MentionSuggestion
 {
     key: string;
     kind: MentionSuggestionKind;
-    /** Display name shown in the row (e.g. "DuckieTM" or "all"). */
     name: string;
-    /** Token that's actually inserted into the chat input (without the @). */
     insertToken: string;
-    /** Figure string for the avatar tile - only set for 'user' rows. */
     figure?: string;
-    /** Optional sub-label, e.g. for "Staff Chat". */
     description?: string;
 }
 
@@ -25,11 +21,6 @@ interface ChatInputMentionSelectorViewProps
     onHover: (index: number) => void;
 }
 
-/**
- * @-autocomplete popover. Suggestion list comes pre-filtered from the parent:
- * real users (RoomObjectUserType.USER = 1) only, never pets / bots / rentable
- * bots / monster plants, plus the configured broadcast aliases.
- */
 export const ChatInputMentionSelectorView: FC<ChatInputMentionSelectorViewProps> = props =>
 {
     const { suggestions = [], selectedIndex = 0, onSelect = null, onHover = null } = props;

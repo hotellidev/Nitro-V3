@@ -1,8 +1,8 @@
 import { ColorConverter } from '@nitrots/nitro-renderer';
 import { FC, useMemo, useState } from 'react';
-import { FaFillDrip } from 'react-icons/fa';
-import { IPurchasableOffer, SanitizeHtml } from '../../../../../api';
-import { AutoGrid, Button, Column, Grid, LayoutGridItem, Text } from '../../../../../common';
+import { FaExchangeAlt, FaFillDrip, FaSyncAlt } from 'react-icons/fa';
+import { IPurchasableOffer, ProductTypeEnum, SanitizeHtml } from '../../../../../api';
+import { AutoGrid, Button, Column, LayoutGridItem, Text } from '../../../../../common';
 import { useCatalogData, useCatalogUiState } from '../../../../../hooks';
 import { CatalogGridOfferView } from '../common/CatalogGridOfferView';
 import { CatalogAddOnBadgeWidgetView } from '../widgets/CatalogAddOnBadgeWidgetView';
@@ -22,7 +22,7 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
 {
     const { page = null } = props;
     const [ colorableItems, setColorableItems ] = useState<Map<string, number[]>>(new Map<string, number[]>());
-    const { currentOffer = null } = useCatalogData();
+    const { currentOffer = null, roomPreviewer = null } = useCatalogData();
     const { setCurrentOffer = null } = useCatalogUiState();
     const [ colorsShowing, setColorsShowing ] = useState<boolean>(false);
 
@@ -132,46 +132,59 @@ export const CatalogLayoutColorGroupingView: FC<CatalogLayoutColorGroupViewProps
     }, [ page.offers ]);
 
     return (
-        <Grid>
-            <Column overflow="hidden" size={ 7 }>
-                <AutoGrid columnCount={ 5 }>
-                    { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
-                        offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />)
-                    }
-                    { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&
-                        colorableItems.get(currentOffer.product.furnitureData.className).map((color, index) => <LayoutGridItem key={ index } itemHighlight className="clear-bg" itemActive={ (currentOffer.product.furnitureData.colorIndex === index) } itemColor={ ColorConverter.int2rgb(color) } onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) } />)
-                    }
-                </AutoGrid>
-            </Column>
-            <Column center={ !currentOffer } overflow="hidden" size={ 5 }>
-                { !currentOffer &&
-                    <>
-                        { !!page.localization.getImage(1) && <img alt="" src={ page.localization.getImage(1) } /> }
-                        <Text center dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
-                    </> }
-                { currentOffer &&
-                    <>
-                        <div className="relative overflow-hidden">
-                            <CatalogViewProductWidgetView />
-                            <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 inset-e-1" position="absolute" />
-                            { currentOffer.product.furnitureData.hasIndexedColor &&
-                                <Button className="bottom-1 inset-s-1" position="absolute" onClick={ event => setColorsShowing(prev => !prev) }>
-                                    <FaFillDrip className="fa-icon" />
-                                </Button> }
+        <Column overflow="hidden">
+            { /* Top: two visible rows of furni tiles. Tile is 70px tall
+               and the AutoGrid handles its own overflow if there are
+               more than two rows worth of offers. */ }
+            <div className="shrink-0" style={ { maxHeight: 154 } }>
+                { (!colorsShowing || !currentOffer || !colorableItems.has(currentOffer.product.furnitureData.className)) &&
+                    <AutoGrid columnCount={ 7 } columnMinHeight={ 70 } columnMinWidth={ 45 }>
+                        { offers.map((offer, index) => <CatalogGridOfferView key={ index } itemActive={ (currentOffer && (currentOffer.product.furnitureData.hasIndexedColor ? currentOffer.product.furnitureData.className === offer.product.furnitureData.className : currentOffer.offerId === offer.offerId)) } offer={ offer } selectOffer={ selectOffer } />) }
+                    </AutoGrid> }
+                { (colorsShowing && currentOffer && colorableItems.has(currentOffer.product.furnitureData.className)) &&
+                    <div className="nitro-catalog-classic-color-swatches flex flex-wrap gap-1 p-2 overflow-auto">
+                        { colorableItems.get(currentOffer.product.furnitureData.className).map((color, index) => <LayoutGridItem key={ index } itemHighlight className="clear-bg" itemActive={ (currentOffer.product.furnitureData.colorIndex === index) } itemColor={ ColorConverter.int2rgb(color) } onClick={ event => selectColor(index, currentOffer.product.furnitureData.className) } />) }
+                    </div> }
+            </div>
+
+            { /* Bottom: preview pane stacked under the grid. Mirrors the
+               default-3x3 split (preview on the left, offer info on the
+               right) so the rotate/state buttons and Buy/Gift actions
+               sit where the user expects. */ }
+            { !currentOffer &&
+                <Column center grow overflow="hidden">
+                    { !!page.localization.getImage(1) && <img alt="" src={ page.localization.getImage(1) } /> }
+                    <Text center dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
+                </Column> }
+            { currentOffer &&
+                <div className="nitro-catalog-classic-offer-panel flex flex-col items-center grow overflow-hidden gap-2">
+                    <div className="nitro-catalog-classic-offer-preview relative flex items-center justify-center overflow-hidden">
+                        { (currentOffer.product.productType !== ProductTypeEnum.BADGE) &&
+                            <>
+                                <button className="nitro-catalog-classic-preview-btn nitro-catalog-classic-preview-rotate" onClick={ () => roomPreviewer?.changeRoomObjectDirection() }>
+                                    <FaSyncAlt />
+                                </button>
+                                <button className="nitro-catalog-classic-preview-btn nitro-catalog-classic-preview-state" onClick={ () => roomPreviewer?.changeRoomObjectState() }>
+                                    <FaExchangeAlt />
+                                </button>
+                            </> }
+                        <CatalogViewProductWidgetView />
+                        <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-1 inset-e-1" position="absolute" />
+                        { currentOffer.product.furnitureData.hasIndexedColor &&
+                            <Button className="bottom-1 inset-s-1" position="absolute" onClick={ event => setColorsShowing(prev => !prev) }>
+                                <FaFillDrip className="fa-icon" />
+                            </Button> }
+                    </div>
+                    <div className="w-full max-w-[360px] flex flex-col gap-2 px-1">
+                        <CatalogLimitedItemWidgetView />
+                        <Text truncate>{ currentOffer.localizationName }</Text>
+                        <div className="flex justify-between items-center">
+                            <CatalogSpinnerWidgetView />
+                            <CatalogTotalPriceWidget alignItems="end" justifyContent="end" />
                         </div>
-                        <Column className="grow!" gap={ 1 }>
-                            <CatalogLimitedItemWidgetView />
-                            <Text truncate className="grow!">{ currentOffer.localizationName }</Text>
-                            <div className="flex justify-between">
-                                <div className="flex flex-col gap-1">
-                                    <CatalogSpinnerWidgetView />
-                                </div>
-                                <CatalogTotalPriceWidget alignItems="end" justifyContent="end" />
-                            </div>
-                            <CatalogPurchaseWidgetView />
-                        </Column>
-                    </> }
-            </Column>
-        </Grid>
+                        <CatalogPurchaseWidgetView />
+                    </div>
+                </div> }
+        </Column>
     );
 };

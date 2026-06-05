@@ -12,14 +12,6 @@
     --catalog-swf-select-outer: #82d1ed;
     --catalog-swf-bc: #ff8d00;
     --catalog-swf-bc-outer: #ffb53c;
-    --habbo-skin-ubuntu: url("../../assets/images/catalog/swf/skins/habbo_skin_ubuntu.png");
-    --habbo-skin-blue: url("../../assets/images/catalog/swf/skins/habbo_skin_blue.png");
-    --habbo-skin-illumina-light: url("../../assets/images/catalog/swf/skins/habbo_skin_illumina_light.png");
-    --habbo-skin-illumina-dark: url("../../assets/images/catalog/swf/skins/habbo_skin_illumina_dark.png");
-    --habbo-slice-frame: url("../../assets/images/catalog/swf/ubuntu_frame3_26x55.png");
-    --habbo-slice-tab-default: url("../../assets/images/catalog/swf/ubuntu_tab3_default_22x32.png");
-    --habbo-slice-tab-selected: url("../../assets/images/catalog/swf/ubuntu_tab3_selected_22x32.png");
-    --habbo-slice-tab-hover: url("../../assets/images/catalog/swf/ubuntu_tab3_hover_22x32.png");
     /* Light gray secondary button - cropped from catalog_skin1.png
        at (10, 190, 25x22). Drives the gift button "Cadeau", the
        preview-room control button and the generic .nitro-catalog-swf-
@@ -42,10 +34,6 @@
     --habbo-button-green-hover: url("../../assets/images/catalog/buttons/buy_hover.png");
     --habbo-button-green-pressed: url("../../assets/images/catalog/buttons/buy_pressed.png");
     --habbo-button-green-disabled: url("../../assets/images/catalog/buttons/buy_disabled.png");
-    --habbo-grid-default: url("../../assets/images/catalog/swf/habbo_grid.png");
-    --habbo-grid-hover: url("../../assets/images/catalog/swf/habbo_grid_hover.png");
-    --habbo-grid-selected: url("../../assets/images/catalog/swf/habbo_grid_selected.png");
-    --habbo-grid-selected-inactive: url("../../assets/images/catalog/swf/habbo_grid_selected_inactive.png");
     --habbo-close: url("../../assets/images/catalog/buttons/close.png");
     --habbo-close-hover: url("../../assets/images/catalog/buttons/close_hover.png");
     --habbo-close-pressed: url("../../assets/images/catalog/buttons/close_pressed.png");
@@ -782,12 +770,22 @@
 
 .nitro-catalog-classic-offer-preview {
     position: relative;
-    width: 360px;
-    min-width: 360px;
     height: 100%;
     padding: 0;
     overflow: hidden;
     background: #000;
+}
+
+/* The default-3x3 layout puts the preview next to .offer-info inside
+   .offer-panel and needs the 360px column. Scope the pin to that
+   context so other layouts (color-grouping, etc.) can put the same
+   preview class inside a flex/grid column and let it track the
+   container width. Without this scoping the absolute-positioned
+   rotate/state buttons sit past the column's right edge and get
+   clipped by overflow: hidden. */
+.nitro-catalog-classic-offer-panel > .nitro-catalog-classic-offer-preview {
+    width: 360px;
+    min-width: 360px;
 }
 
 .nitro-catalog-classic-preview-title {
@@ -892,10 +890,17 @@
     min-height: var(--nitro-grid-column-min-height, 70px) !important;
     border: 0 !important;
     border-radius: 0 !important;
-    background-color: transparent !important;
     background-image: none !important;
     box-shadow: none !important;
     overflow: visible !important;
+}
+
+/* Furni tiles drive their look from the icon image and need a clear
+   background. Color-grouping swatches use itemHighlight (.has-highlight)
+   to ask LayoutGridItem for a solid colour via inline backgroundColor -
+   keep the transparent override off those so the swatch is visible. */
+.nitro-catalog-classic-window .layout-grid-item:not(.has-highlight) {
+    background-color: transparent !important;
 }
 
 .nitro-catalog-classic-window .layout-grid-item:hover {
@@ -909,6 +914,42 @@
         inset 0 0 0 1px #63c5e9,
         inset 2px 2px 0 #ecece4,
         inset -2px -2px 0 #ecece4 !important;
+}
+
+/* Habbo-classic colour swatches: small chip with a 1px dark border
+   and a subtle inner highlight so light tones still read as buttons.
+   Hover lifts the border; the selected swatch is "pressed" with a
+   sunken inner shadow and a bright cyan ring matching the catalog
+   selection accent. The cream inset from the generic .is-active rule
+   above would wash out the swatch colour, so we replace it here. */
+.nitro-catalog-classic-window .layout-grid-item.has-highlight {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    margin: 1px !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.18) !important;
+    cursor: pointer !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item.has-highlight:hover {
+    border-color: #000 !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item.has-highlight.is-active {
+    border-color: #000 !important;
+    box-shadow:
+        inset 0 0 0 2px #ffffff,
+        inset 0 0 0 3px #000,
+        0 0 0 1px #63c5e9 !important;
 }
 
 .nitro-catalog-classic-grid-offer-icon {
@@ -1430,6 +1471,44 @@
 .nitro-catalog-classic-preview-state {
     top: 8px;
     right: 6px;
+}
+
+/* Bulletproof override for the rotate/state buttons. The shared SWF
+   button rule above lays a transparent body + border-image skin on
+   top, which works only when the catalog/buttons/btn_secondary*.png
+   sprites resolve - if they're missing the button renders 0x0
+   invisible. Pin the box and paint a visible gradient + outline so
+   the controls are always discoverable, and force z-index above the
+   room-previewer DIV so they sit on top of the rendered scene. */
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn {
+    width: 28px !important;
+    height: 26px !important;
+    min-width: 28px !important;
+    min-height: 26px !important;
+    padding: 0 !important;
+    border: 1px solid #2a2a2a !important;
+    border-image: none !important;
+    border-image-source: none !important;
+    border-radius: 3px !important;
+    background: linear-gradient(180deg, #f6f6f0 0%, #d3d3c8 100%) !important;
+    background-color: #ecece4 !important;
+    background-image: linear-gradient(180deg, #f6f6f0 0%, #d3d3c8 100%) !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.7),
+        0 1px 0 rgba(0, 0, 0, 0.35) !important;
+    z-index: 10 !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dedeD2 100%) !important;
+    background-image: linear-gradient(180deg, #ffffff 0%, #dedeD2 100%) !important;
+    border-color: #000 !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:active {
+    background: linear-gradient(180deg, #d3d3c8 0%, #f6f6f0 100%) !important;
+    background-image: linear-gradient(180deg, #d3d3c8 0%, #f6f6f0 100%) !important;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.18) !important;
 }
 
 .nitro-catalog-classic-window .nitro-catalog-classic-navigation-shell::-webkit-scrollbar,

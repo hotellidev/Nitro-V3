@@ -46,8 +46,6 @@ import './css/inventory/InventoryView.css';
 
 import './css/layout/LayoutTrophy.css';
 
-import './css/navigator/HabboNavigatorDesktop.css';
-
 
 import './css/nitrocard/NitroCardView.css';
 

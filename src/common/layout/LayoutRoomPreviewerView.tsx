@@ -1,4 +1,4 @@
-import { GetRenderer, GetTicker, NitroTicker, RoomPreviewer, TextureUtils } from '@nitrots/nitro-renderer';
+import { GetRenderer, GetTicker, NitroLogger, NitroTicker, RoomPreviewer, TextureUtils } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useEffect, useRef } from 'react';
 
 export const LayoutRoomPreviewerView: FC<{
@@ -8,6 +8,13 @@ export const LayoutRoomPreviewerView: FC<{
 {
     const { roomPreviewer = null, height = 0 } = props;
     const elementRef = useRef<HTMLDivElement>(null);
+    // Latch that disables further renders once Pixi throws inside this
+    // previewer. The crash (e.g. blackhole furni's filter chain that
+    // accesses .alphaMode on a null texture) repeats every animation
+    // frame as long as the ticker keeps firing, flooding the console
+    // and locking the catalog. One catch and we stop trying for the
+    // lifetime of this previewer instance.
+    const renderFailedRef = useRef(false);
 
     const onClick = (event: MouseEvent<HTMLDivElement>) =>
     {
@@ -21,37 +28,58 @@ export const LayoutRoomPreviewerView: FC<{
     {
         if(!elementRef) return;
 
+        renderFailedRef.current = false;
+
         const width = elementRef.current.parentElement.clientWidth;
         const texture = TextureUtils.createRenderTexture(width, height);
 
         const paintToDOM = () =>
         {
+            if(renderFailedRef.current) return;
             if(!roomPreviewer || !elementRef.current) return;
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 
             if(!renderingCanvas) return;
 
-            GetRenderer().render({
-                target: texture,
-                container: renderingCanvas.master,
-                clear: true
-            });
+            try
+            {
+                GetRenderer().render({
+                    target: texture,
+                    container: renderingCanvas.master,
+                    clear: true
+                });
 
-            const canvas = GetRenderer().texture.generateCanvas(texture);
-            const base64 = canvas.toDataURL('image/png');
+                const canvas = GetRenderer().texture.generateCanvas(texture);
+                const base64 = canvas.toDataURL('image/png');
 
-            canvas.width = 0;
-            canvas.height = 0;
+                canvas.width = 0;
+                canvas.height = 0;
 
-            elementRef.current.style.backgroundImage = `url(${ base64 })`;
+                elementRef.current.style.backgroundImage = `url(${ base64 })`;
+            }
+            catch(error)
+            {
+                renderFailedRef.current = true;
+                NitroLogger.error('LayoutRoomPreviewerView paint failed; disabling further renders for this preview', error);
+            }
         };
 
         const update = (ticker: NitroTicker) =>
         {
+            if(renderFailedRef.current) return;
             if(!roomPreviewer || !elementRef.current) return;
 
-            roomPreviewer.updatePreviewRoomView();
+            try
+            {
+                roomPreviewer.updatePreviewRoomView();
+            }
+            catch(error)
+            {
+                renderFailedRef.current = true;
+                NitroLogger.error('LayoutRoomPreviewerView update failed; disabling further renders for this preview', error);
+                return;
+            }
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 

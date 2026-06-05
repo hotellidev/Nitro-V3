@@ -1,8 +1,8 @@
 import { FC, useRef } from 'react';
-import ReactPlayer from 'react-player/youtube';
 import { LocalizeText, YoutubeVideoPlaybackStateEnum } from '../../../../api';
 import { AutoGrid, AutoGridProps, LayoutGridItem, NitroCardContentView, NitroCardHeaderView, NitroCardView } from '../../../../common';
 import { useFurnitureYoutubeWidget } from '../../../../hooks';
+import ReactPlayer from '../../../youtube/YoutubeReactPlayer';
 
 interface FurnitureYoutubeDisplayViewProps extends AutoGridProps
 {
@@ -12,7 +12,7 @@ interface FurnitureYoutubeDisplayViewProps extends AutoGridProps
 export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewProps =>
 {
     const { objectId = -1, videoId = null, videoStart = 0, videoEnd = 0, currentVideoState = null, selectedVideo = null, playlists = [], onClose = null, previous = null, next = null, pause = null, play = null, selectVideo = null } = useFurnitureYoutubeWidget();
-    const playerRef = useRef<ReactPlayer>(null);
+    const playerRef = useRef<HTMLVideoElement>(null);
 
     const handlePlay = () =>
     {
@@ -39,7 +39,7 @@ export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewPr
                         { (videoId && videoId.length > 0) &&
                             <ReactPlayer
                                 ref={ playerRef }
-                                url={ `https://www.youtube.com/watch?v=${ videoId }` }
+                                src={ `https://www.youtube.com/watch?v=${ videoId }` }
                                 width={ 500 }
                                 height={ 375 }
                                 playing={ playing }
@@ -47,12 +47,9 @@ export const FurnitureYoutubeDisplayView: FC<{}> = FurnitureYoutubeDisplayViewPr
                                 onPlay={ handlePlay }
                                 onPause={ handlePause }
                                 config={ {
-                                    playerVars: {
-                                        autoplay: 1,
+                                    youtube: {
                                         disablekb: 1,
-                                        controls: 0,
                                         origin: window.origin,
-                                        modestbranding: 1,
                                         start: videoStart,
                                         end: videoEnd
                                     }

@@ -1,110 +1,508 @@
 .nitro-catalog-classic-window {
-    --cat-blue: #4a7d8c;
-    --cat-blue-dark: #315863;
-    --cat-ink: #2c2c2a;
-    --cat-strip: #e2e0d6;
-    --cat-tab: #c7c5ba;
-    --cat-tab-border: #8f8f8b;
-    --cat-panel: #e8e7df;
-    --cat-sub: #dedcd2;
-    --cat-line: #8899a2;
-    --cat-canvas: #d8d8d2;
-    --cat-canvas-2: #ccccc4;
-    --cat-select: #4a7d8c;
-    --cat-select-bg: #f1efe6;
-    --cat-gold: #f7d673;
-    --cat-gold-border: #d4af37;
-    --cat-gold-ink: #4a3300;
-    --cat-buy: #5ca843;
+    --catalog-swf-bg: #ecece4;
+    --catalog-swf-panel: #f7f7f2;
+    --catalog-swf-panel-2: #e7e7df;
+    --catalog-swf-border: #9d9d96;
+    --catalog-swf-border-dark: #6f6f6a;
+    --catalog-swf-text: #222222;
+    --catalog-swf-muted: #666666;
+    --catalog-swf-blue: #2f8097;
+    --catalog-swf-blue-dark: #1c596c;
+    --catalog-swf-select: #63c5e9;
+    --catalog-swf-select-outer: #82d1ed;
+    --catalog-swf-bc: #ff8d00;
+    --catalog-swf-bc-outer: #ffb53c;
+    --habbo-slice-button-default: url("../../assets/images/catalog/buttons/btn_secondary.png");
+    --habbo-slice-button-hover: url("../../assets/images/catalog/buttons/btn_secondary_hover.png");
+    --habbo-slice-button-pressed: url("../../assets/images/catalog/buttons/btn_secondary_pressed.png");
+    --habbo-slice-button-disabled: url("../../assets/images/catalog/buttons/btn_secondary_disabled.png");
+    --habbo-slice-button-buy: url("../../assets/images/catalog/buttons/buy.png");
+    --habbo-slice-button-large: url("../../assets/images/catalog/buttons/buy.png");
+    --habbo-slice-button-large-hover: url("../../assets/images/catalog/buttons/buy_hover.png");
+    --habbo-slice-button-large-pressed: url("../../assets/images/catalog/buttons/buy_pressed.png");
+    --habbo-slice-button-large-disabled: url("../../assets/images/catalog/buttons/buy_disabled.png");
+    --habbo-button-green: url("../../assets/images/catalog/buttons/buy.png");
+    --habbo-button-green-hover: url("../../assets/images/catalog/buttons/buy_hover.png");
+    --habbo-button-green-pressed: url("../../assets/images/catalog/buttons/buy_pressed.png");
+    --habbo-button-green-disabled: url("../../assets/images/catalog/buttons/buy_disabled.png");
+    --habbo-close: url("../../assets/images/catalog/buttons/close.png");
+    --habbo-close-hover: url("../../assets/images/catalog/buttons/close_hover.png");
+    --habbo-close-pressed: url("../../assets/images/catalog/buttons/close_pressed.png");
+    --habbo-help: url("../../assets/images/catalog/buttons/help.png");
+    --habbo-help-hover: url("../../assets/images/catalog/buttons/help_hover.png");
+    --habbo-help-pressed: url("../../assets/images/catalog/buttons/help_pressed.png");
+    --habbo-stepper-plus: url("../../assets/images/catalog/buttons/plus.png");
+    --habbo-stepper-plus-hover: url("../../assets/images/catalog/buttons/plus_hover.png");
+    --habbo-stepper-plus-pressed: url("../../assets/images/catalog/buttons/plus_pressed.png");
+    --habbo-stepper-plus-disabled: url("../../assets/images/catalog/buttons/plus_disabled.png");
+    --habbo-stepper-minus: url("../../assets/images/catalog/buttons/minus.png");
+    --habbo-stepper-minus-hover: url("../../assets/images/catalog/buttons/minus_hover.png");
+    --habbo-stepper-minus-pressed: url("../../assets/images/catalog/buttons/minus_pressed.png");
+    --habbo-stepper-minus-disabled: url("../../assets/images/catalog/buttons/minus_disabled.png");
+    --habbo-scrollbar-up: url("../../assets/images/catalog/scrollbar/scroll_v_up.png");
+    --habbo-scrollbar-up-pressed: url("../../assets/images/catalog/scrollbar/scroll_v_up_pressed.png");
+    --habbo-scrollbar-down: url("../../assets/images/catalog/scrollbar/scroll_v_down.png");
+    --habbo-scrollbar-down-pressed: url("../../assets/images/catalog/scrollbar/scroll_v_down_pressed.png");
+    --habbo-scrollbar-thumb-v: url("../../assets/images/catalog/scrollbar/scroll_v_thumb.png");
+    --habbo-scrollbar-thumb-v-pressed: url("../../assets/images/catalog/scrollbar/scroll_v_thumb_pressed.png");
+    --habbo-scrollbar-h-left: url("../../assets/images/catalog/scrollbar/scroll_h_left.png");
+    --habbo-scrollbar-h-left-pressed: url("../../assets/images/catalog/scrollbar/scroll_h_left_pressed.png");
+    --habbo-scrollbar-h-right: url("../../assets/images/catalog/scrollbar/scroll_h_right.png");
+    --habbo-scrollbar-h-right-pressed: url("../../assets/images/catalog/scrollbar/scroll_h_right_pressed.png");
+    --habbo-scrollbar-thumb-h: url("../../assets/images/catalog/scrollbar/scroll_h_thumb.png");
+    --habbo-scrollbar-thumb-h-pressed: url("../../assets/images/catalog/scrollbar/scroll_h_thumb_pressed.png");
 
-    width: 640px !important;
-    height: 600px !important;
-    max-width: 640px !important;
-    min-width: 640px !important;
-    min-height: 600px !important;
-    max-height: 600px !important;
-    background: var(--cat-strip) !important;
-    border-radius: 10px !important;
+    width: 660px !important;
+    height: 720px !important;
+    min-width: 660px !important;
+    max-width: 660px !important;
+    min-height: 640px !important;
+    max-height: calc(100vh - 24px) !important;
+    position: relative;
+    color: var(--catalog-swf-text);
+    background: var(--catalog-swf-bg) !important;
+    border: 1px solid #000 !important;
+    border-radius: 7px 7px 0 0 !important;
+    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.35);
     overflow: hidden;
+    box-sizing: border-box;
 }
 
-.nitro-catalog-classic-window .nitro-card-title {
-    font-size: 18px;
-    letter-spacing: 0.2px;
+.draggable-window:has(> .nitro-catalog-classic-window) {
+    width: 660px !important;
+    height: 720px !important;
+    min-width: 660px !important;
+    max-width: 660px !important;
 }
 
-.nitro-catalog-classic-window .nitro-card-header-shell {
-    min-height: 38px;
-    max-height: 38px;
+.nitro-catalog-classic-window::before {
+    display: none;
+}
+
+.nitro-catalog-classic-window > * {
+    position: relative;
+    z-index: 4;
+}
+
+.nitro-catalog-classic-window,
+.nitro-catalog-classic-window * {
+    image-rendering: pixelated;
 }
 
 .nitro-catalog-classic-window .nitro-card-header {
-    background: var(--cat-blue);
-    border-color: var(--cat-blue);
-    border-bottom-color: var(--cat-blue);
-    box-shadow: inset 0 2px 0 #709da9, inset 0 -2px 0 var(--cat-blue-dark);
+    height: 35px;
+    min-height: 35px;
+    background: var(--catalog-swf-blue) !important;
+    border: 0 !important;
+    border-bottom: 1px solid #000 !important;
 }
 
-.nitro-catalog-classic-admin-banner {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.18);
-    background: linear-gradient(180deg, #f4d45d 0%, #d8b43e 100%);
+.nitro-catalog-classic-window .nitro-card-header-shell {
+    min-height: 35px;
+    max-height: 35px;
+}
+
+.nitro-catalog-classic-window .nitro-card-title {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 35px;
+    text-align: center;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.8);
+}
+
+.nitro-catalog-classic-window .nitro-card-close-button {
+    top: 7px !important;
+    right: 7px !important;
+    width: 19px !important;
+    min-width: 19px !important;
+    height: 20px !important;
+    min-height: 20px !important;
+    padding: 0 !important;
+    background-image: url("../../assets/images/catalog/buttons/close.png") !important;
+    background-color: transparent !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: 19px 20px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    image-rendering: pixelated !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+}
+
+.nitro-catalog-classic-window .nitro-card-close-button:hover {
+    background-image: url("../../assets/images/catalog/buttons/close_hover.png") !important;
+    filter: none;
+}
+
+.nitro-catalog-classic-window .nitro-card-close-button:active {
+    background-image: url("../../assets/images/catalog/buttons/close_pressed.png") !important;
+}
+
+.nitro-catalog-classic-mobile-header,
+.nitro-catalog-classic-admin-banner,
+.nitro-catalog-classic-layout-header-shell,
+.nitro-catalog-classic-layout-hero,
+.nitro-catalog-classic-window .nitro-catalog-header,
+.nitro-catalog-classic-window .builders-club-status-shell {
+    display: none !important;
+}
+
+/* Publish button: lives inside the catalog window, absolutely
+   positioned in the header just to the left of the close X. Renders
+   only when adminMode is true (see CatalogClassicView.tsx). Uses the
+   Habbo yellow buy-button skin so it matches the Koop button. */
+.nitro-catalog-classic-window .nitro-catalog-classic-header-publish {
+    position: absolute !important;
+    top: 5px !important;
+    right: 32px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 22px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    line-height: 22px !important;
+    z-index: 10 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-header-publish.has-pending {
+    animation: nitroPublishPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes nitroPublishPulse {
+    0%, 100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(140, 75, 0, 0.35), 0 0 0 rgba(255, 200, 0, 0); }
+    50%      { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 0 rgba(140, 75, 0, 0.35), 0 0 8px rgba(255, 200, 0, 0.75); }
+}
+
+/* Catalog default-layout admin row (Pagina bewerken / Nieuwe
+   aanbieding / Aanbieding bewerken). These are inline text buttons
+   but the .habbo-swf-window button + .habbo-swf-window
+   button[class*="success"] global rules were dressing them up as
+   SWF skin buttons (one yellow!) and forcing min-height: 22px which
+   broke the layout. Reset and re-skin as compact pill chips. */
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin {
+    /* Keep all admin buttons on one row so the product-view doesn't
+       get pushed down into the absolutely-positioned grid-shell. If
+       a future label makes them overflow, the row scrolls
+       horizontally instead of wrapping. */
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 4px !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+    scrollbar-width: thin;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin::-webkit-scrollbar {
+    height: 4px !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 10px !important;
+    border: 1px solid #6f8db5 !important;
+    border-image: none !important;
+    border-image-source: none !important;
+    border-radius: 4px !important;
+    background: linear-gradient(180deg, #ffffff 0%, #e7eef8 100%) !important;
+    background-image: linear-gradient(180deg, #ffffff 0%, #e7eef8 100%) !important;
+    color: #1a3a6b !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    text-shadow: none !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 1px 0 rgba(0, 0, 0, 0.12) !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #d6e2f3 100%) !important;
+    background-image: linear-gradient(180deg, #ffffff 0%, #d6e2f3 100%) !important;
+    color: #0b2347 !important;
+    border-color: #4a72b8 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button:active {
+    background: linear-gradient(180deg, #d6e2f3 0%, #ffffff 100%) !important;
+    background-image: linear-gradient(180deg, #d6e2f3 0%, #ffffff 100%) !important;
+    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.08), 0 0 0 rgba(0, 0, 0, 0) !important;
+}
+
+/* The "Nieuwe aanbieding" button uses text-success - give it the
+   habbo-yellow buy-button palette to mark it as the create action. */
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button.text-success,
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button[class*="success"] {
+    border-color: #8a5b00 !important;
+    background: linear-gradient(180deg, #ffe66b 0%, #ffc828 45%, #f0a318 100%) !important;
+    background-image: linear-gradient(180deg, #ffe66b 0%, #ffc828 45%, #f0a318 100%) !important;
+    color: #4a2b00 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button.text-success:hover,
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button[class*="success"]:hover {
+    background: linear-gradient(180deg, #fff080 0%, #ffd54d 45%, #f5ab1c 100%) !important;
+    background-image: linear-gradient(180deg, #fff080 0%, #ffd54d 45%, #f5ab1c 100%) !important;
+    color: #4a2b00 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button svg {
+    width: 11px !important;
+    height: 11px !important;
+    fill: currentColor !important;
+    flex-shrink: 0 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-default-admin button .font-mono {
+    color: #4a4a44 !important;
+    font-weight: 600 !important;
+    margin-left: 4px !important;
+}
+
+/* Admin cog tab at the end of the tab strip - only renders when the
+   user is a mod, so leaving it visible at all times is safe. Style
+   it as a compact square that sits flush with the other tabs
+   instead of stretching to flex: 1 like a category tab. */
+.nitro-catalog-classic-tabs-shell .nitro-card-tab-item.nitro-catalog-classic-admin-tab {
+    flex: 0 0 auto !important;
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    padding: 6px 4px 7px !important;
+    margin-left: 4px !important;
+}
+
+.nitro-catalog-classic-swf-header {
+    position: relative;
+    flex: 0 0 90px;
+    height: 90px;
+    margin: 0 1px;
+    border: 1px solid #376275;
+    background: #0e3f52;
+    overflow: hidden;
+}
+
+.nitro-catalog-classic-swf-header-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0.1;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background:
+        linear-gradient(135deg, transparent 0 46%, rgba(255, 255, 255, 0.35) 47% 49%, transparent 50%),
+        radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.55), transparent 18%),
+        linear-gradient(180deg, #60a6bd, #0e3f52);
+    filter: grayscale(1);
+}
+
+.nitro-catalog-classic-swf-header-icon {
+    position: absolute;
+    left: 24px;
+    top: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 35px;
+    transform: scale(2);
+    transform-origin: center;
+}
+
+.nitro-catalog-classic-swf-header-copy {
+    position: absolute;
+    left: 80px;
+    top: 11px;
+    right: 15px;
+    color: #fff;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.7);
+}
+
+.nitro-catalog-classic-swf-header-title {
+    min-height: 24px;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 24px;
+}
+
+.nitro-catalog-classic-swf-header-description {
+    margin-top: 5px;
+    font-size: 12px;
+    line-height: 15px;
 }
 
 .nitro-catalog-classic-tabs-shell {
-    flex-wrap: nowrap;
-    gap: 2px;
-    min-height: 32px;
-    max-height: 32px;
-    padding: 4px 6px 0;
+    /* Strip just tall enough to hold the 36px tab + 4px of breathing
+       room above. Trims the dead blue band between the header and
+       the tabs so the catalog body doesn't lose vertical space. */
+    flex: 0 0 40px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+    gap: 0;
+    padding: 4px 6px 0 !important;
+    align-items: flex-end;
+    /* Horizontal scroll so every category tab stays reachable when the
+       card is narrower than the total tab width. */
     overflow-x: auto;
     overflow-y: hidden;
-    align-items: end;
-    background: var(--cat-strip);
-    border-bottom: 2px solid var(--cat-ink);
+    flex-wrap: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: #8da3b3 transparent;
+    background: var(--catalog-swf-bg) !important;
+    border: 0 !important;
+    border-bottom: 1px solid #c8c8bf;
+}
+
+/* The tabs strip uses a slim 6px scrollbar - opt it out of the
+   17px Habbo-sprite scrollbar applied to the rest of the catalog. */
+.nitro-catalog-classic-tabs-shell::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+.nitro-catalog-classic-tabs-shell::-webkit-scrollbar-thumb {
+    background: #8da3b3 !important;
+    background-image: none !important;
+    border-radius: 3px !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+}
+
+.nitro-catalog-classic-tabs-shell::-webkit-scrollbar-track {
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.nitro-catalog-classic-tabs-shell::-webkit-scrollbar-button:single-button {
+    display: none !important;
 }
 
 .nitro-catalog-classic-tabs-shell .nitro-card-tab-item {
-    min-height: 28px;
-    padding: 5px 12px 4px;
-    border: 1px solid var(--cat-tab-border);
-    border-bottom: 0;
-    border-radius: 5px 5px 0 0;
-    background: var(--cat-tab);
-    color: var(--cat-ink);
-    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 36px;
+    min-width: 0;
+    /* Equal-width tabs that share the strip exactly - the right
+       edge of the last tab now lines up with the right edge of the
+       catalog window, no trailing gap. */
+    flex: 1 1 0;
+    max-width: none;
+    padding: 6px 6px 7px;
+    margin: 0 2px 0 0;
+    flex-shrink: 1;
+    /* Classic Habbo tab: gray rounded-top rectangle with a 1px black
+       outline. ubuntu_tab3_*.png isn't shipped, so we draw the
+       habbo-look ourselves instead of border-image-slicing a missing
+       sprite. */
+    border: 1px solid #000 !important;
+    border-bottom: 0 !important;
+    border-radius: 6px 6px 0 0 !important;
+    background:
+        linear-gradient(180deg, #d6d6cc 0%, #c1c1b7 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+    color: #2a2a2a !important;
+    font-size: 12px;
+    font-weight: 400;
     white-space: nowrap;
-    font-weight: 700;
+    overflow: hidden;
+    border-image-source: none !important;
+}
+
+/* Bring the last tab flush with whatever follows (admin cog, edge),
+   instead of leaving the negative right margin tugging on empty
+   space. */
+.nitro-catalog-classic-tabs-shell .nitro-card-tab-item:last-of-type {
+    margin-right: 0;
+}
+
+.nitro-catalog-classic-tabs-shell .nitro-card-tab-item > div {
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px;
+    min-width: 0;
+    width: auto;
+    height: 20px;
+    line-height: 17px;
+}
+
+/* Category icon that sits before the label. The blanket "hide every
+   img/svg inside a tab" rule is gone - we explicitly size the
+   classic tab icon and let everything else fall through. */
+.nitro-catalog-classic-tab-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    image-rendering: pixelated;
+    flex-shrink: 0;
 }
 
 .nitro-catalog-classic-tabs-shell .nitro-card-tab-item:hover {
-    background: #d2d0c6;
+    background: linear-gradient(180deg, #e3e3d9 0%, #d0d0c5 100%) !important;
+    color: #000 !important;
 }
 
 .nitro-catalog-classic-tabs-shell .nitro-card-tab-item-active {
-    background: #ffffff;
-    color: #000000;
-    position: relative;
-    top: 1px;
-    border-color: var(--cat-ink);
-    box-shadow: inset 0 -1px 0 #ffffff;
+    z-index: 2;
+    /* Active tab: the catalog-header habbo-blue with the cream catalog
+       body bleeding up into it. Drop the bottom border so the tab
+       "merges" with the panel below. */
+    background:
+        linear-gradient(180deg, #4fb3ff 0%, var(--catalog-swf-blue) 100%) !important;
+    color: #ffffff !important;
     font-weight: 700;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -2px 0 var(--catalog-swf-blue-dark) !important;
+}
+
+.nitro-catalog-classic-tab-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nitro-catalog-classic-content-shell {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 6px 8px 8px !important;
-    background: #ffffff !important;
+    background: var(--catalog-swf-bg) !important;
+    overflow: hidden;
 }
 
 .nitro-catalog-classic-stage {
     display: grid;
-    grid-template-columns: 196px minmax(0, 1fr);
+    /* Sidebar pinned at 184px; the layout column takes the rest of
+       the stage row so the right edge of the right column lines up
+       with the right edge of the catalog window instead of leaving a
+       wide cream strip. */
+    grid-template-columns: 184px 1fr;
     gap: 8px;
-    min-height: 0;
+    width: 100%;
     height: 100%;
+    min-height: 0;
 }
 
 .nitro-catalog-classic-stage.is-navigation-hidden {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: 1fr;
 }
 
 .nitro-catalog-classic-sidebar {
@@ -112,103 +510,159 @@
     flex-direction: column;
     gap: 4px;
     min-height: 0;
-    height: 100%;
+    overflow: hidden;
 }
 
 .nitro-catalog-classic-search-shell {
-    padding: 4px;
-    border: 1px solid var(--cat-line);
-    border-radius: 4px;
-    background: var(--cat-panel);
+    position: relative;
+    /* Use flex so the input vertically centers inside the 24px shell
+       regardless of the input's own intrinsic baseline. */
+    display: flex;
+    align-items: center;
+    height: 24px;
+    /* Outer padding 0, negative horizontal margin bleeds the shell a
+       couple of pixels past its sidebar column on each side without
+       touching the grid template - cheap way to look ~4px wider. */
+    padding: 0;
+    margin: -2px -1px 0 -1px;
+    border: 1px solid #b7b7ae;
+    border-radius: 3px;
+    background: #f7f7f2;
 }
 
+/* Clear the magnifying-glass on the left and the X-clear button on the
+   right. The shell's own outer padding is essentially zero, so the
+   input claims the full sidebar column width minus just enough to
+   keep the icons from overlapping the text. */
 .nitro-catalog-classic-search-shell input {
-    height: 20px;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    border-width: 1px !important;
-    border-color: var(--cat-tab-border) !important;
-    border-radius: 3px !important;
-    background: #fff !important;
-    box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.06);
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    line-height: 22px !important;
+    padding: 0 16px 0 18px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: var(--catalog-swf-muted) !important;
+    font-size: 11px !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+
+/* The wrapping div the React component renders is 100% wide so the
+   input fills the shell instead of shrinking to content. */
+.nitro-catalog-classic-search-shell > div {
+    width: 100% !important;
+    height: 100% !important;
 }
 
 .nitro-catalog-classic-search-shell svg {
-    color: #5b7080 !important;
+    color: #888 !important;
+    font-size: 11px !important;
+}
+
+/* The search icon ships with absolute + left-2; nudge it tight to the
+   shell edge so the input can keep its left padding small. */
+.nitro-catalog-classic-search-shell svg:first-child {
+    left: 4px !important;
+}
+
+/* X-clear button on the right edge - keep it tight too. */
+.nitro-catalog-classic-search-shell button {
+    right: 4px !important;
 }
 
 .nitro-catalog-classic-navigation-shell {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 4px 0;
-    border: 1px solid var(--cat-line);
-    border-radius: 4px;
-    background: var(--cat-panel);
+    padding: 5px 3px;
+    border: 1px solid #b4b4ae;
+    border-radius: 3px;
+    background: rgba(236, 236, 228, 0.5);
     overflow: auto;
 }
 
 .nitro-catalog-classic-navigation-list {
     display: flex;
     flex-direction: column;
-    gap: 0;
 }
 
-.nitro-catalog-classic-navigation-node.is-child .nitro-catalog-classic-navigation-item {
-    padding-left: 22px;
-    background: var(--cat-sub);
+.nitro-catalog-classic-navigation-node {
+    min-height: 21px;
 }
 
 .nitro-catalog-classic-navigation-item {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 6px;
-    min-height: 28px;
-    padding: 4px 10px;
-    border: 0;
-    border-left: 4px solid transparent;
-    border-radius: 0;
+    height: 21px;
+    min-height: 21px;
+    padding: 1px 18px 1px 0;
+    border: 0 !important;
+    border-radius: 0 !important;
     background: transparent;
-    color: var(--cat-ink);
+    color: var(--catalog-swf-muted);
+    font-size: 11px;
     font-weight: 700;
+    line-height: 17px;
     cursor: pointer;
-    transition: background-color 0.12s ease;
+    text-shadow: 0 1px 0 #b4b4ae;
 }
 
 .nitro-catalog-classic-navigation-node.is-child .nitro-catalog-classic-navigation-item {
-    font-weight: 400;
+    padding-left: 15px;
+    color: #52819a;
+    font-style: italic;
 }
 
-.nitro-catalog-classic-navigation-item:hover {
-    background: #dcdacf;
+.nitro-catalog-classic-navigation-item::before {
+    position: absolute;
+    inset: 0 1px 1px 1px;
+    z-index: 0;
+    display: none;
+    content: "";
+    border: 1px solid var(--catalog-swf-select-outer);
+    background: linear-gradient(180deg, var(--catalog-swf-select-outer) 0 2px, var(--catalog-swf-select) 2px calc(100% - 2px), var(--catalog-swf-select-outer) calc(100% - 2px));
 }
 
-.nitro-catalog-classic-navigation-item.is-active {
-    background: #ffffff;
-    border-left-color: var(--cat-blue);
-    color: #000000;
-    font-weight: 700;
+.nitro-catalog-classic-window .builders-club-card-header ~ .nitro-catalog-classic-tabs-shell,
+.nitro-catalog-classic-window:has(.builders-club-card-header) .nitro-catalog-classic-navigation-item::before {
+    --catalog-swf-select: var(--catalog-swf-bc);
+    --catalog-swf-select-outer: var(--catalog-swf-bc-outer);
 }
 
-.nitro-catalog-classic-navigation-item.is-drag-over {
-    outline: 2px solid rgba(74, 125, 140, 0.4);
-    outline-offset: -2px;
+.nitro-catalog-classic-navigation-item:hover::before,
+.nitro-catalog-classic-navigation-item.is-active::before {
+    display: block;
+}
+
+.nitro-catalog-classic-navigation-icon,
+.nitro-catalog-classic-navigation-label,
+.nitro-catalog-classic-navigation-caret,
+.nitro-catalog-classic-navigation-favorite,
+.nitro-catalog-classic-navigation-admin,
+.nitro-catalog-classic-navigation-drag {
+    position: relative;
+    z-index: 1;
 }
 
 .nitro-catalog-classic-navigation-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    min-width: 18px;
-    height: 18px;
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
 }
 
 .nitro-catalog-classic-navigation-icon img,
 .nitro-catalog-classic-navigation-icon canvas {
     width: auto;
     height: auto;
-    max-width: 18px;
-    max-height: 18px;
+    max-width: 20px;
+    max-height: 20px;
 }
 
 .nitro-catalog-classic-navigation-label {
@@ -217,19 +671,14 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 11px;
-    line-height: 1;
-}
-
-.nitro-catalog-classic-navigation-caret,
-.nitro-catalog-classic-navigation-favorite,
-.nitro-catalog-classic-navigation-admin,
-.nitro-catalog-classic-navigation-drag {
-    flex-shrink: 0;
 }
 
 .nitro-catalog-classic-navigation-caret {
-    color: #5b7080 !important;
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    color: #777 !important;
+    font-size: 9px;
 }
 
 .nitro-catalog-classic-layout-shell {
@@ -238,378 +687,906 @@
     min-width: 0;
     min-height: 0;
     height: 100%;
-    border: 1px solid var(--cat-line);
-    border-radius: 4px;
-    background: #ffffff;
+    background: transparent;
+    border: 0;
     overflow: hidden;
-}
-
-.nitro-catalog-classic-layout-header-shell {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex-shrink: 0;
-    min-height: 0;
-    padding: 6px 8px;
-    border-bottom: 1px solid var(--cat-line);
-    background: #ffffff;
-}
-
-.nitro-catalog-classic-layout-hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    min-height: 32px;
-    overflow: visible;
-}
-
-.nitro-catalog-classic-layout-hero img {
-    display: block;
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: none;
-    object-fit: contain;
 }
 
 .nitro-catalog-classic-layout-container {
     flex: 1 1 auto;
     min-height: 0;
-    padding: 6px;
-    background: #ffffff;
+    padding: 0;
+    background: transparent;
     overflow: hidden;
 }
 
 .nitro-catalog-classic-default-layout {
-    gap: 8px;
+    position: relative;
+    display: block !important;
+    /* Fill the layout container in both axes - the stage was
+       previously 552px wide and this column was pinned at 360px, but
+       now that the stage uses 1fr, hardcoding 360px would leave a
+       wide blank strip on the right of every default-layout catalog
+       page. */
+    width: 100%;
+    height: 100%;
+    min-height: 460px;
 }
 
-.nitro-catalog-classic-offer-panel,
-.nitro-catalog-classic-welcome {
-    border: 1px solid var(--cat-line);
-    border-radius: 6px;
-    background: #ffffff;
+/* The product-view, grid-shell, price-row and purchase-row inside
+   the default-layout were each pinned at 360px to match the old
+   stage width. Widen them in lockstep so they fill the new
+   1fr-sized container. */
+.nitro-catalog-classic-product-view,
+.nitro-catalog-classic-grid-shell,
+.nitro-catalog-classic-price-row,
+.nitro-catalog-classic-purchase-row {
+    width: 100% !important;
 }
 
-.nitro-catalog-classic-offer-panel {
-    min-height: 132px;
+.nitro-catalog-classic-product-view {
+    width: calc(100% + 3px) !important;
+}
+
+.nitro-catalog-classic-product-view,
+.nitro-catalog-classic-grid-shell {
+    border: 1px solid #b4b4ae;
+    border-radius: 5px;
+    background: var(--catalog-swf-panel);
+}
+
+.nitro-catalog-classic-product-view {
+    position: relative;
+    top: 0;
+    left: 0;
+    width: 363px;
+    height: 240px;
+    min-height: 0;
     overflow: hidden;
 }
 
+.nitro-catalog-classic-product-view::before {
+    display: none;
+}
+
+.nitro-catalog-classic-offer-panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+}
+
+/* Default-3x3 layout: .offer-info is rendered but hidden via the
+   display: none rule below, so the panel reserved the full width
+   while only the 360px preview was visible (empty strip on the
+   right). Center the preview inside the panel instead so the gap
+   becomes symmetric padding on both sides. Color-grouping doesn't
+   render .offer-info so its panel keeps the existing layout. */
+.nitro-catalog-classic-offer-panel:has(> .nitro-catalog-classic-offer-info) {
+    justify-content: center;
+}
+
 .nitro-catalog-classic-offer-preview {
-    width: 190px;
-    min-width: 190px;
-    padding: 8px;
-    border-right: 1px solid var(--cat-line);
-    background-color: var(--cat-canvas);
+    position: relative;
+    height: 100%;
+    padding: 0;
+    overflow: hidden;
+    background: #000;
+}
+
+/* The default-3x3 layout puts the preview next to .offer-info inside
+   .offer-panel and needs the 360px column. Scope the pin to that
+   context so other layouts (color-grouping, etc.) can put the same
+   preview class inside a flex/grid column and let it track the
+   container width. Without this scoping the absolute-positioned
+   rotate/state buttons sit past the column's right edge and get
+   clipped by overflow: hidden. */
+.nitro-catalog-classic-offer-panel > .nitro-catalog-classic-offer-preview {
+    width: 360px;
+    min-width: 360px;
+}
+
+.nitro-catalog-classic-preview-title {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 5;
+    color: #ffffff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 15px !important;
+    text-shadow: 0 1px 0 #000;
+}
+
+.nitro-catalog-classic-offer-preview .shadow-room-previewer,
+.nitro-catalog-classic-offer-preview canvas,
+.nitro-catalog-classic-offer-preview img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background-position: center bottom !important;
+    background-repeat: no-repeat !important;
+    background-size: contain !important;
 }
 
 .nitro-catalog-classic-offer-info {
-    padding: 10px;
+    display: none !important;
 }
 
-.nitro-catalog-classic-offer-actions {
-    justify-content: flex-end;
+.nitro-catalog-classic-offer-info .nitro-text,
+.nitro-catalog-classic-offer-info span,
+.nitro-catalog-classic-offer-info div {
+    color: inherit;
 }
 
-.nitro-catalog-classic-offer-info .rounded-full {
-    background: var(--cat-gold) !important;
-    border-color: var(--cat-gold-border) !important;
-}
-
-.nitro-catalog-classic-offer-info .rounded-full,
-.nitro-catalog-classic-offer-info .rounded-full * {
-    color: var(--cat-gold-ink) !important;
-}
 
 .nitro-catalog-classic-welcome {
-    min-height: 128px;
-    padding: 10px;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    padding: 18px;
+    color: var(--catalog-swf-muted);
+}
+
+.nitro-catalog-classic-welcome img {
+    width: auto !important;
+    height: auto !important;
+    max-width: 96px;
+    max-height: 120px;
+    border: 0;
+    background: transparent;
 }
 
 .nitro-catalog-classic-grid-shell {
-    min-height: 150px;
-    padding: 6px;
-    border: 1px solid var(--cat-line);
-    border-radius: 6px;
-    background: #ffffff;
-    height: auto;
-    flex: 1 1 auto;
+    position: absolute;
+    left: 0;
+    top: 245px;
+    /* Stretch down to just above the price + purchase rows so the
+       grid soaks up any extra height the bigger window gives us. */
+    bottom: 68px;
+    width: 360px;
+    min-height: 0;
+    padding: 3px 2px 3px 4px;
+    overflow: auto;
+}
+
+/* When the admin row is rendered above the product-view it adds
+   ~30px (22px button + flex gap) to the flex column, but the
+   grid-shell is absolutely positioned and doesn't shift on its own.
+   Push it (and the bottom-anchored price/purchase rows stay put)
+   down so the preview panel no longer bleeds into the grid. */
+.nitro-catalog-classic-default-layout:has(.nitro-catalog-classic-default-admin) .nitro-catalog-classic-grid-shell {
+    top: 280px !important;
 }
 
 .nitro-catalog-classic-grid {
-    gap: 6px !important;
+    /* Don't pin a fixed column track here - AutoGrid sets the inline
+       grid-template-columns from its columnMinWidth prop. The earlier
+       `repeat(6, 53px) !important` was clobbering that and freezing
+       the row at 6 tiles regardless of what the React layout passed. */
+    grid-auto-rows: var(--nitro-grid-column-min-height, 70px);
     align-content: start;
+    justify-content: start;
+    gap: 3px !important;
+    overflow: visible !important;
 }
 
 .nitro-catalog-classic-window .layout-grid-item {
-    height: 54px;
-    border: 1px solid var(--cat-line) !important;
-    border-radius: 4px !important;
-    background-color: #ffffff;
-    background-image: none;
-    box-shadow: none;
-    transition: background-color 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+    width: 100% !important;
+    height: var(--nitro-grid-column-min-height, 70px) !important;
+    min-width: 0 !important;
+    min-height: var(--nitro-grid-column-min-height, 70px) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item:not(.has-highlight) {
+    background-color: transparent !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-pet-breeds .layout-grid-item {
+    width: 84px !important;
+    min-width: 84px !important;
+    height: 74px !important;
+    min-height: 74px !important;
 }
 
 .nitro-catalog-classic-window .layout-grid-item:hover {
-    background-color: var(--cat-select-bg) !important;
-    border-color: var(--cat-select) !important;
-    box-shadow: 0 0 0 1px rgba(74, 125, 140, 0.2);
+    background-image: none !important;
+    box-shadow: inset 0 0 0 1px #a1a19b !important;
 }
 
 .nitro-catalog-classic-window .layout-grid-item.is-active {
-    background-color: var(--cat-select-bg) !important;
-    border-color: var(--cat-select) !important;
-    border-width: 2px !important;
-    box-shadow: 0 0 0 1px rgba(74, 125, 140, 0.35);
+    background-image: none !important;
+    box-shadow:
+        inset 0 0 0 1px #63c5e9,
+        inset 2px 2px 0 #ecece4,
+        inset -2px -2px 0 #ecece4 !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item.has-highlight {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    min-height: 26px !important;
+    margin: 1px !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.35),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.18) !important;
+    cursor: pointer !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item.has-highlight:hover {
+    border-color: #000 !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.5),
+        inset -1px -1px 0 rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(0, 0, 0, 0.45) !important;
+}
+
+.nitro-catalog-classic-window .layout-grid-item.has-highlight.is-active {
+    border-color: #000 !important;
+    box-shadow:
+        inset 0 0 0 2px #ffffff,
+        inset 0 0 0 3px #000,
+        0 0 0 1px #63c5e9 !important;
 }
 
 .nitro-catalog-classic-grid-offer-icon {
     position: absolute;
-    inset: 4px;
-    background-repeat: no-repeat;
-    background-position: center;
+    left: 50%;
+    top: 20px;
+    width: auto !important;
+    height: auto !important;
+    max-width: 36px;
+    max-height: 36px;
+    object-fit: contain;
+    transform: translate(-50%, -50%);
     pointer-events: none;
 }
 
-.nitro-catalog-classic-window .nitro-catalog-header {
-    display: none;
-}
-
-.nitro-catalog-classic-offer-info .bg-\[\#00800b\] {
-    background-color: var(--cat-buy) !important;
-    border-color: #007a00 !important;
-}
-
-.nitro-catalog-classic-breadcrumb {
+.nitro-catalog-classic-grid-price {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 36px;
+    bottom: auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 5px;
-    min-height: 16px;
-    overflow: hidden;
-    color: #5b7080;
-    font-size: 10px;
-    line-height: 1;
+    justify-content: flex-start;
+    gap: 0;
+    min-height: 24px;
+    color: #000;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 12px;
+    pointer-events: none;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.75);
+}
+
+.nitro-catalog-classic-grid .layout-grid-item:has(.avatar-image) .nitro-catalog-classic-grid-price,
+.nitro-catalog-classic-grid .layout-grid-item:has(> .avatar-image) > .nitro-catalog-classic-grid-price,
+.nitro-catalog-classic-grid .avatar-image ~ .nitro-catalog-classic-grid-price {
+    top: auto !important;
+    left: 50% !important;
+    right: auto !important;
+    bottom: 4px !important;
+    transform: translateX(-50%) !important;
+    width: auto !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 3px !important;
+    padding: 2px 6px !important;
+    min-height: 0 !important;
+    height: auto !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 5 !important;
+}
+
+.nitro-catalog-classic-grid .layout-grid-item:has(.avatar-image) .nitro-catalog-classic-grid-price-entry,
+.nitro-catalog-classic-grid .avatar-image ~ .nitro-catalog-classic-grid-price .nitro-catalog-classic-grid-price-entry {
+    height: auto !important;
+    line-height: 1 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+}
+
+.nitro-catalog-classic-grid .layout-grid-item:has(.avatar-image) .nitro-catalog-classic-grid-price-currency,
+.nitro-catalog-classic-grid .avatar-image ~ .nitro-catalog-classic-grid-price .nitro-catalog-classic-grid-price-currency {
+    width: 13px !important;
+    height: 13px !important;
+    object-fit: contain !important;
+    vertical-align: middle !important;
+    display: inline-block !important;
+}
+
+.nitro-catalog-classic-grid-price.is-single-price {
+    height: 19px;
+}
+
+.nitro-catalog-classic-grid-price.is-multi-price {
+    height: 38px;
+}
+
+.nitro-catalog-classic-grid-price-entry {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    height: 13px;
     white-space: nowrap;
 }
 
-.nitro-catalog-classic-breadcrumb-segment {
+.nitro-catalog-classic-grid-price-plus {
+    padding-right: 1px;
+}
+
+.nitro-catalog-classic-grid-price-currency {
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    object-fit: none !important;
+}
+
+.nitro-catalog-classic-price-row {
+    position: absolute;
+    left: 0;
+    bottom: 38px;
+    width: 360px;
+    height: 25px;
+    padding: 0;
+    overflow: visible;
+}
+
+.nitro-catalog-classic-spinner-slot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 200px;
+    height: 25px;
+}
+
+.nitro-catalog-classic-total-price-slot {
+    position: absolute;
+    right: 2px;
+    top: 0;
+    width: auto;
+    min-width: 180px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-right: 2px;
+}
+
+.nitro-catalog-classic-total-price-slot::before {
+    content: "Prezzo";
+    color: #666;
+    font-size: 11px;
+    line-height: 17px;
+}
+
+.nitro-catalog-classic-purchase-row {
+    position: absolute;
+    left: 0;
+    bottom: 4px;
+    width: 360px;
+    height: 30px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.nitro-catalog-classic-offer-actions {
+    display: flex !important;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px !important;
+    width: auto;
+    height: 24px;
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 0;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-button,
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 22px;
+    padding: 2px 12px !important;
+    border: 3px solid transparent !important;
+    border-radius: 0 !important;
+    border-image-source: var(--habbo-slice-button-default) !important;
+    border-image-slice: 3 3 3 3 fill !important;
+    border-image-width: 3px !important;
+    border-image-repeat: stretch !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #222 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+    box-shadow: none !important;
+    transition: none !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn *,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn svg {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-button:hover,
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button:hover,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:hover {
+    border-image-source: var(--habbo-slice-button-hover) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-button:active,
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button:active,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:active {
+    border-image-source: var(--habbo-slice-button-pressed) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-button.pointer-events-none,
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button:disabled,
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:disabled {
+    border-image-source: var(--habbo-slice-button-disabled) !important;
+    color: #888 !important;
+    opacity: 1 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-buy-button {
+    width: 160px !important;
+    min-width: 160px !important;
+    height: 24px !important;
+    padding: 0 8px !important;
+    border: 1px solid #000 !important;
+    border-radius: 4px !important;
+    border-image: none !important;
+    border-image-source: none !important;
+    background:
+        linear-gradient(180deg, #ffe66b 0%, #ffc828 45%, #f0a318 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.65),
+        inset 0 -2px 0 rgba(140, 75, 0, 0.35) !important;
+    color: #4a2b00 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+    font-weight: 700 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-buy-button:hover {
+    background:
+        linear-gradient(180deg, #fff080 0%, #ffd54d 45%, #f5ab1c 100%) !important;
+    filter: brightness(1.04);
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-buy-button:active {
+    background:
+        linear-gradient(180deg, #f0a318 0%, #d98c0a 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 2px 0 rgba(140, 75, 0, 0.45) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-buy-button.pointer-events-none,
+.nitro-catalog-classic-window .nitro-catalog-swf-buy-button:disabled {
+    background:
+        linear-gradient(180deg, #ffe66b 0%, #ffc828 45%, #f0a318 100%) !important;
+    color: #4a2b00 !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+    opacity: 0.55 !important;
+    cursor: not-allowed !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-gift-button {
+    width: 160px !important;
+    min-width: 160px !important;
+    height: 22px !important;
+    padding: 0 8px !important;
+    border: 1px solid #000 !important;
+    border-radius: 4px !important;
+    border-image: none !important;
+    border-image-source: none !important;
+    background:
+        linear-gradient(180deg, #ececec 0%, #cfcfc4 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+    color: #2a2a2a !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) !important;
+    font-weight: 700 !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-gift-button:hover {
+    background:
+        linear-gradient(180deg, #f4f4ed 0%, #dcdcd0 100%) !important;
+    filter: brightness(1.02);
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-gift-button:active {
+    background:
+        linear-gradient(180deg, #c0c0b6 0%, #aaaaa0 100%) !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 2px 0 rgba(0, 0, 0, 0.25) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-swf-gift-button.pointer-events-none,
+.nitro-catalog-classic-window .nitro-catalog-swf-gift-button:disabled {
+    background:
+        linear-gradient(180deg, #e3e3dc 0%, #c5c5bb 100%) !important;
+    color: #6a6a64 !important;
+    text-shadow: none !important;
+}
+
+.nitro-catalog-classic-pet-card .nitro-catalog-swf-buy-button {
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 14px !important;
+}
+
+.nitro-catalog-classic-window .layout-grid,
+.nitro-catalog-classic-window [class*="grid-cols-["] {
+    overflow-x: hidden !important;
+}
+
+.nitro-catalog-swf-spinner {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    height: 25px;
+    color: #666;
+    font-size: 11px;
+}
+
+.nitro-catalog-swf-spinner-label {
+    max-width: 62px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.nitro-catalog-swf-spinner-control {
+    display: grid;
+    grid-template-columns: 22px 34px 22px;
+    align-items: center;
+    height: 25px;
+    gap: 2px;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button {
+    width: 22px !important;
+    min-width: 22px !important;
+    height: 22px !important;
+    min-height: 22px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    border-image: none !important;
+    background-color: transparent !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: auto !important;
+    box-shadow: none !important;
+    image-rendering: pixelated !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button svg {
+    display: none !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-less {
+    background-image: var(--habbo-stepper-minus) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-less:hover {
+    background-image: var(--habbo-stepper-minus-hover) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-less:active {
+    background-image: var(--habbo-stepper-minus-pressed) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-less:disabled {
+    background-image: var(--habbo-stepper-minus-disabled) !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-more {
+    background-image: var(--habbo-stepper-plus) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-more:hover {
+    background-image: var(--habbo-stepper-plus-hover) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-more:active {
+    background-image: var(--habbo-stepper-plus-pressed) !important;
+}
+.nitro-catalog-classic-window button.nitro-catalog-swf-spinner-button-more:disabled {
+    background-image: var(--habbo-stepper-plus-disabled) !important;
+}
+
+.nitro-catalog-swf-spinner-input {
+    width: 30px !important;
+    height: 25px !important;
+    padding: 4px 2px !important;
+    border: 1px solid #9d9d96 !important;
+    border-radius: 0 !important;
+    background: #fff !important;
+    color: #222 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 15px !important;
+    text-align: center !important;
+    outline: none !important;
+    appearance: textfield;
+}
+
+.nitro-catalog-swf-spinner-input::-webkit-outer-spin-button,
+.nitro-catalog-swf-spinner-input::-webkit-inner-spin-button {
+    appearance: none;
+    margin: 0;
+}
+
+.nitro-catalog-swf-price-display {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3px;
+    min-height: 24px;
+    color: #222;
+    font-size: 11px;
+}
+
+.nitro-catalog-swf-price-pill {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    min-width: 0;
+    gap: 2px;
+    height: 22px;
+    min-width: 34px;
+    padding: 0 2px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
 }
 
-.nitro-catalog-classic-breadcrumb-separator {
-    color: #94a7b3;
+.nitro-catalog-swf-price-text {
+    color: #222 !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 17px !important;
 }
 
-.nitro-catalog-classic-navigation-shell::-webkit-scrollbar,
-.nitro-catalog-classic-layout-container :is(.overflow-auto, .nitro-card-content-shell, .nitro-catalog-classic-grid-shell)::-webkit-scrollbar {
-    width: 12px;
-}
-
-.nitro-catalog-classic-navigation-shell::-webkit-scrollbar-track,
-.nitro-catalog-classic-layout-container :is(.overflow-auto, .nitro-card-content-shell, .nitro-catalog-classic-grid-shell)::-webkit-scrollbar-track {
-    border-left: 1px solid var(--cat-line);
-    background: var(--cat-panel);
-}
-
-.nitro-catalog-classic-navigation-shell::-webkit-scrollbar-thumb,
-.nitro-catalog-classic-layout-container :is(.overflow-auto, .nitro-card-content-shell, .nitro-catalog-classic-grid-shell)::-webkit-scrollbar-thumb {
-    border: 1px solid var(--cat-tab-border);
-    border-radius: 6px;
-    background: linear-gradient(180deg, #a9bcc9 0%, #89a0ae 100%);
-}
-
-.nitro-catalog-classic-navigation-shell::-webkit-scrollbar-button:single-button:vertical:decrement,
-.nitro-catalog-classic-layout-container :is(.overflow-auto, .nitro-card-content-shell, .nitro-catalog-classic-grid-shell)::-webkit-scrollbar-button:single-button:vertical:decrement {
-    height: 12px;
-    background: var(--cat-panel);
-}
-
-.nitro-catalog-classic-navigation-shell::-webkit-scrollbar-button:single-button:vertical:increment,
-.nitro-catalog-classic-layout-container :is(.overflow-auto, .nitro-card-content-shell, .nitro-catalog-classic-grid-shell)::-webkit-scrollbar-button:single-button:vertical:increment {
-    height: 12px;
-    background: var(--cat-panel);
-}
-
-@media (max-width: 1024px) and (min-width: 641px) {
-    .nitro-catalog-classic-window {
-        width: min(calc(100vw - 24px), 720px) !important;
-        min-width: 0 !important;
-        max-width: calc(100vw - 24px) !important;
-        height: min(calc(100vh - 24px), 720px) !important;
-        min-height: 0 !important;
-        max-height: calc(100vh - 24px) !important;
-    }
-
-    .nitro-catalog-classic-stage {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .nitro-catalog-classic-sidebar {
-        max-height: 200px;
-    }
-}
-
-.nitro-catalog-classic-mobile-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 5;
-    display: flex;
-    align-items: center;
-    height: 38px;
-    padding: 0 44px 0 8px;
-    pointer-events: none;
-}
-
-.nitro-catalog-classic-mobile-burger {
-    position: relative;
-    pointer-events: auto;
-}
-
-.nitro-catalog-classic-burger-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border: 0;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.2);
-    color: #fff;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.nitro-catalog-classic-burger-btn:hover {
-    background: rgba(0, 0, 0, 0.3);
-}
-
-.nitro-catalog-classic-burger-btn:active {
-    background: rgba(0, 0, 0, 0.36);
-}
-
-.nitro-catalog-classic-burger-menu {
-    position: absolute;
-    top: 32px;
-    left: 0;
-    z-index: 60;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 150px;
-    padding: 6px;
-    border: 1px solid var(--cat-line);
-    border-radius: 6px;
-    background: #fff;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
-}
-
-.nitro-catalog-classic-burger-menu button {
-    padding: 8px 10px;
-    border: 0;
-    border-radius: 4px;
-    background: var(--cat-strip);
-    color: var(--cat-ink);
-    font-weight: 700;
-    text-align: left;
-    cursor: pointer;
-}
-
-.nitro-catalog-classic-burger-menu button:disabled {
-    opacity: 0.6;
-}
-
-.nitro-catalog-classic-mobile-currency {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    pointer-events: auto;
-}
-
-.nitro-catalog-classic-coin {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    padding: 3px 7px;
-    border-radius: 11px;
-    background: rgba(0, 0, 0, 0.25);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.nitro-catalog-classic-coin span {
-    color: #fff;
-}
-
-.nitro-catalog-classic-admin-tab {
-    display: none !important;
+.nitro-catalog-swf-price-plus {
+    width: 7px;
+    height: 7px;
+    color: #666;
 }
 
 .nitro-catalog-classic-preview-btn {
     position: absolute;
-    top: 8px;
     z-index: 4;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 5px 10px;
-    border: 1px solid #555;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
+    width: 25px;
+    height: 24px;
+    min-width: 25px;
+    padding: 0 !important;
+    overflow: hidden;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-.nitro-catalog-classic-preview-btn:hover {
-    background: rgba(0, 0, 0, 0.82);
-}
-
-.nitro-catalog-classic-preview-btn:active {
-    background: rgba(0, 0, 0, 0.9);
+.nitro-catalog-classic-preview-btn svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: #111 !important;
+    fill: #111 !important;
+    flex-shrink: 0 !important;
+    display: block !important;
 }
 
 .nitro-catalog-classic-preview-rotate {
-    left: 8px;
+    top: 8px;
+    right: 35px;
 }
 
 .nitro-catalog-classic-preview-state {
-    right: 8px;
+    top: 8px;
+    right: 6px;
 }
 
-@media (max-width: 640px) {
-    .nitro-catalog-classic-window {
-        --cat-blue: #4b7a94;
-        --cat-blue-dark: #385d73;
-        --cat-ink: #233a47;
-        --cat-strip: #d9e2e8;
-        --cat-tab: #b7c7d1;
-        --cat-tab-border: #7a9cb0;
-        --cat-panel: #eef2f5;
-        --cat-sub: #e1e7ec;
-        --cat-line: #b7c7d1;
-        --cat-select: #3a82a7;
-        --cat-select-bg: #f0f5f8;
-        --cat-buy: #009900;
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn {
+    width: 28px !important;
+    height: 26px !important;
+    min-width: 28px !important;
+    min-height: 26px !important;
+    padding: 0 !important;
+    border: 1px solid #2a2a2a !important;
+    border-image: none !important;
+    border-image-source: none !important;
+    border-radius: 3px !important;
+    background: linear-gradient(180deg, #f6f6f0 0%, #d3d3c8 100%) !important;
+    background-color: #ecece4 !important;
+    background-image: linear-gradient(180deg, #f6f6f0 0%, #d3d3c8 100%) !important;
+    box-shadow:
+        inset 1px 1px 0 rgba(255, 255, 255, 0.7),
+        0 1px 0 rgba(0, 0, 0, 0.35) !important;
+    z-index: 10 !important;
+}
 
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:hover {
+    background: linear-gradient(180deg, #ffffff 0%, #dedeD2 100%) !important;
+    background-image: linear-gradient(180deg, #ffffff 0%, #dedeD2 100%) !important;
+    border-color: #000 !important;
+}
+
+.nitro-catalog-classic-window button.nitro-catalog-classic-preview-btn:active {
+    background: linear-gradient(180deg, #d3d3c8 0%, #f6f6f0 100%) !important;
+    background-image: linear-gradient(180deg, #d3d3c8 0%, #f6f6f0 100%) !important;
+    box-shadow: inset 1px 1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+
+.nitro-catalog-classic-window .nitro-catalog-classic-navigation-shell::-webkit-scrollbar,
+.nitro-catalog-classic-window .nitro-catalog-classic-navigation-list::-webkit-scrollbar,
+.nitro-catalog-classic-window .nitro-catalog-classic-grid-shell::-webkit-scrollbar,
+.nitro-catalog-classic-window .nitro-catalog-classic-grid::-webkit-scrollbar,
+.nitro-catalog-classic-window .nitro-catalog-classic-layout-container::-webkit-scrollbar {
+    width: 17px;
+    height: 17px;
+}
+
+.nitro-catalog-classic-window * {
+    scrollbar-color: auto !important;
+    scrollbar-width: auto;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar {
+    width: 17px !important;
+    height: 17px !important;
+    background-color: #e7e5d8 !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-track {
+    background-image: none !important;
+    background-color: #e7e5d8 !important;
+    box-shadow: inset 1px 0 0 #b9b6a5, inset -1px 0 0 #ffffff !important;
+    border: 0 !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-thumb {
+    min-height: 28px !important;
+    border: 1px solid #2a2a26 !important;
+    border-radius: 2px !important;
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='9'><line x1='1' y1='1' x2='9' y2='1' stroke='%23dcdcd2' stroke-width='1'/><line x1='1' y1='3' x2='9' y2='3' stroke='%235e5e58' stroke-width='1'/><line x1='1' y1='5' x2='9' y2='5' stroke='%23dcdcd2' stroke-width='1'/><line x1='1' y1='7' x2='9' y2='7' stroke='%235e5e58' stroke-width='1'/></svg>") center center / 10px 9px no-repeat,
+        linear-gradient(180deg, #d6d6cc 0%, #b4b4aa 30%, #9a9a90 50%, #b4b4aa 70%, #d6d6cc 100%) !important;
+    background-color: #a8a89e !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.55),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-thumb:hover {
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='9'><line x1='1' y1='1' x2='9' y2='1' stroke='%23ececea' stroke-width='1'/><line x1='1' y1='3' x2='9' y2='3' stroke='%235e5e58' stroke-width='1'/><line x1='1' y1='5' x2='9' y2='5' stroke='%23ececea' stroke-width='1'/><line x1='1' y1='7' x2='9' y2='7' stroke='%235e5e58' stroke-width='1'/></svg>") center center / 10px 9px no-repeat,
+        linear-gradient(180deg, #e0e0d6 0%, #bebeb4 30%, #a4a49a 50%, #bebeb4 70%, #e0e0d6 100%) !important;
+    background-color: #b2b2a8 !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-thumb:active {
+    background:
+        linear-gradient(180deg, #c6c6bc 0%, #a4a49a 30%, #8a8a82 50%, #a4a49a 70%, #c6c6bc 100%) !important;
+    background-color: #9a9a90 !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:vertical:decrement {
+    display: block !important;
+    width: 17px !important;
+    height: 16px !important;
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6'><polygon points='4.5,0 9,6 0,6' fill='%23142536'/></svg>") center center / 9px 6px no-repeat,
+        linear-gradient(180deg, #f3f1e6 0%, #d8d6c8 100%) !important;
+    background-color: #e7e5d8 !important;
+    border: 1px solid #0b2d3a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:vertical:decrement:active {
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6'><polygon points='4.5,0 9,6 0,6' fill='%23000'/></svg>") center center / 9px 6px no-repeat,
+        linear-gradient(180deg, #c7c5b8 0%, #aeaca0 100%) !important;
+    background-color: #c7c5b8 !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:vertical:increment {
+    display: block !important;
+    width: 17px !important;
+    height: 16px !important;
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6'><polygon points='0,0 9,0 4.5,6' fill='%23142536'/></svg>") center center / 9px 6px no-repeat,
+        linear-gradient(180deg, #f3f1e6 0%, #d8d6c8 100%) !important;
+    background-color: #e7e5d8 !important;
+    border: 1px solid #0b2d3a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:vertical:increment:active {
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='9' height='6'><polygon points='0,0 9,0 4.5,6' fill='%23000'/></svg>") center center / 9px 6px no-repeat,
+        linear-gradient(180deg, #c7c5b8 0%, #aeaca0 100%) !important;
+    background-color: #c7c5b8 !important;
+}
+
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:horizontal:decrement {
+    display: block !important;
+    width: 16px !important;
+    height: 17px !important;
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='9'><polygon points='0,4.5 6,0 6,9' fill='%23142536'/></svg>") center center / 6px 9px no-repeat,
+        linear-gradient(180deg, #f3f1e6 0%, #d8d6c8 100%) !important;
+    background-color: #e7e5d8 !important;
+    border: 1px solid #0b2d3a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+.nitro-catalog-classic-window *::-webkit-scrollbar-button:single-button:horizontal:increment {
+    display: block !important;
+    width: 16px !important;
+    height: 17px !important;
+    background:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='9'><polygon points='6,4.5 0,0 0,9' fill='%23142536'/></svg>") center center / 6px 9px no-repeat,
+        linear-gradient(180deg, #f3f1e6 0%, #d8d6c8 100%) !important;
+    background-color: #e7e5d8 !important;
+    border: 1px solid #0b2d3a !important;
+    border-radius: 2px !important;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.18) !important;
+}
+
+.nitro-catalog-classic-breadcrumb {
+    display: none;
+}
+
+@media (max-width: 640px), (orientation: landscape) and (max-height: 520px) {
+    .nitro-catalog-classic-window {
         width: 100vw !important;
         min-width: 0 !important;
         max-width: 100vw !important;
         height: 100vh !important;
         min-height: 0 !important;
         max-height: 100vh !important;
-        border-radius: 10px !important;
+        border-radius: 0 !important;
     }
 
     .draggable-window:has(> .nitro-catalog-classic-window) {
@@ -618,131 +1595,52 @@
         top: 0 !important;
     }
 
-    .nitro-catalog-classic-window .nitro-card-title {
-        display: block;
-    }
-
-    .nitro-catalog-classic-window .nitro-card-header {
-        border-bottom-color: transparent;
-        box-shadow: none;
-    }
-
-    .nitro-catalog-classic-mobile-currency {
-        position: absolute;
-        top: 38px;
-        left: 0;
-        right: 0;
-        height: 30px;
-        margin: 0;
-        transform: none;
-        justify-content: center;
-        gap: 6px;
-        background: #30728c;
-        z-index: 5;
-    }
-
     .nitro-catalog-classic-tabs-shell {
-        margin-top: 30px;
-        min-height: 56px;
-        max-height: 56px;
-        padding: 4px 4px 0;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .nitro-catalog-classic-tabs-shell .nitro-card-tab-item {
-        min-height: 52px;
-        padding: 5px 8px;
-        justify-content: center;
-    }
-
-    .nitro-catalog-classic-tabs-shell .nitro-card-tab-item div:has(> .nitro-catalog-classic-tab-label) {
-        flex-direction: column;
-        gap: 2px;
-    }
-
-    .nitro-catalog-classic-tab-label {
-        font-size: 9px;
-        line-height: 1;
+        overflow-x: auto;
+        overflow-y: hidden;
     }
 
     .nitro-catalog-classic-content-shell {
         padding: 6px !important;
     }
 
-    .nitro-catalog-classic-layout-hero {
-        display: none;
+    /* Mobile: drop the per-page welcome row (image + localization
+       blurb shown when no offer is selected). On a narrow viewport
+       it eats most of the visible space and pushes the actual grid
+       off-screen. Hide it and also collapse the surrounding
+       product-view (otherwise its 240px height reservation stays
+       and leaves a blank strip above the grid). */
+    .nitro-catalog-classic-welcome {
+        display: none !important;
     }
 
-    .nitro-catalog-classic-offer-panel {
-        flex-direction: column;
+    .nitro-catalog-classic-product-view:has(> .nitro-catalog-classic-welcome) {
+        display: none !important;
     }
 
-    .nitro-catalog-classic-offer-preview {
-        width: 100%;
-        min-width: 0;
-        border-right: 0;
-        border-bottom: 1px solid var(--cat-line);
-    }
-
-    .nitro-catalog-classic-stage {
+    .nitro-catalog-classic-stage,
+    .nitro-catalog-classic-stage.is-navigation-hidden {
         grid-template-columns: minmax(0, 1fr);
-        gap: 6px;
+        grid-template-rows: auto minmax(0, 1fr);
+        width: 100%;
     }
 
     .nitro-catalog-classic-sidebar {
-        max-height: 33vh;
+        max-height: 34vh;
     }
 
-    .nitro-catalog-classic-search-shell input {
-        height: 28px;
-        font-size: 13px;
-    }
-
-    .nitro-catalog-classic-navigation-item {
-        min-height: 40px;
-        padding: 6px 12px;
-    }
-
-    .nitro-catalog-classic-navigation-label {
-        font-size: 13px;
-    }
-
-    .nitro-catalog-classic-window .layout-grid-item {
-        height: 64px;
-    }
-
-    .nitro-catalog-classic-window .nitro-card-header-shell,
-    .nitro-catalog-classic-window .nitro-card-content-shell {
-        border-radius: 0 !important;
-    }
-}
-
-@media (max-height: 480px) {
-    .nitro-catalog-classic-window {
-        height: 100vh !important;
-        max-height: 100vh !important;
-    }
-
-    .nitro-catalog-classic-window .nitro-card-header-shell {
-        min-height: 32px;
-        max-height: 32px;
-    }
-
-    .nitro-catalog-classic-tabs-shell {
-        min-height: 38px;
-        max-height: 38px;
-    }
-
-    .nitro-catalog-classic-layout-header-shell {
+    .nitro-catalog-classic-layout-shell,
+    .nitro-catalog-classic-default-layout {
+        width: 100%;
+        height: 100%;
         min-height: 0;
-        padding: 3px 6px;
     }
 
-    .nitro-catalog-classic-layout-hero {
-        display: none;
+    .nitro-catalog-classic-default-layout {
+        grid-template-rows: minmax(150px, 1fr) minmax(120px, 38vh) 30px;
     }
 
-    .nitro-catalog-classic-sidebar {
-        max-height: 26vh;
+    .nitro-catalog-classic-grid {
+        grid-template-columns: repeat(auto-fill, minmax(47px, 47px)) !important;
     }
 }

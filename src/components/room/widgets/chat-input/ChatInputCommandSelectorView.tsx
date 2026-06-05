@@ -1,18 +1,31 @@
 import { FC, useEffect, useRef } from 'react';
-import type { CommandDefinition } from '../../../../api';
-import type { RankedCommandDefinition } from '../../../../hooks/rooms/widgets/useChatCommandSelector.helpers';
+import { CommandDefinition } from '../../../../api';
 
 interface ChatInputCommandSelectorViewProps
 {
-    commands: RankedCommandDefinition[];
+    commands: CommandDefinition[];
     selectedIndex: number;
     onSelect: (command: CommandDefinition) => void;
     onHover: (index: number) => void;
+    /**
+     * When true, render the flat minimalist look (gray list, dark-blue
+     * selection). When false / undefined (default) the picker wears the
+     * Habbo NitroCard chrome with the green :command header strip.
+     */
+    newStyle?: boolean;
 }
 
+/**
+ * :command autocomplete popover. Two visual modes, both driven by the
+ * "New style" toggle in user settings (memenu.settings.other.catalog.classic.style):
+ *
+ *   - newStyle = false (default): cream cardstock, habbo-green header,
+ *     UbuntuCondensed names, green ":" tile, custom Habbo scrollbar.
+ *   - newStyle = true: flat gray list, dark-blue selection, plain text rows.
+ */
 export const ChatInputCommandSelectorView: FC<ChatInputCommandSelectorViewProps> = props =>
 {
-    const { commands = [], selectedIndex = 0, onSelect = null, onHover = null } = props;
+    const { commands = [], selectedIndex = 0, onSelect = null, onHover = null, newStyle = false } = props;
     const listRef = useRef<HTMLDivElement>(null);
 
     useEffect(() =>
@@ -24,20 +37,57 @@ export const ChatInputCommandSelectorView: FC<ChatInputCommandSelectorViewProps>
         if(selected) selected.scrollIntoView({ block: 'nearest' });
     }, [ selectedIndex ]);
 
+    if(newStyle)
+    {
+        return (
+            <div ref={ listRef } className="absolute bottom-full left-0 w-full bg-[#e8e8e8] border-2 border-black border-b-0 rounded-t-lg max-h-[240px] overflow-y-auto z-[1070]">
+                { commands.map((cmd, index) => (
+                    <div
+                        key={ cmd.key }
+                        className={ `px-3 py-1.5 cursor-pointer text-sm flex items-center gap-2 ${ index === selectedIndex ? 'bg-[#283F5D] text-white' : 'hover:bg-gray-300' }` }
+                        onClick={ () => onSelect(cmd) }
+                        onMouseEnter={ () => onHover(index) }
+                    >
+                        <span className="font-bold">:{ cmd.key }</span>
+                        <span className={ `text-xs ${ index === selectedIndex ? 'text-gray-300' : 'text-gray-500' }` }>{ cmd.description }</span>
+                    </div>
+                )) }
+            </div>
+        );
+    }
+
     return (
-        <div ref={ listRef } className="absolute bottom-full left-0 z-[1070] max-h-[238px] w-full overflow-y-auto rounded-t-[8px] border-2 border-b-0 border-black bg-[#f2f2eb] shadow-[0_-4px_14px_rgba(0,0,0,0.22)]">
-            { commands.map((cmd, index) => (
-                <button
-                    key={ cmd.key }
-                    className={ `flex min-h-[34px] w-full cursor-pointer items-center gap-2 border-b border-[#c6c6bd] px-3 py-1.5 text-left last:border-b-0 ${ index === selectedIndex ? 'bg-[#255d72] text-white' : 'text-black hover:bg-[#dceaf0]' }` }
-                    type="button"
-                    onClick={ () => onSelect(cmd) }
-                    onMouseEnter={ () => onHover(index) }
-                >
-                    <span className={ `shrink-0 rounded-[4px] border px-1.5 py-[1px] font-bold ${ index === selectedIndex ? 'border-white/60 bg-white/15' : 'border-[#8ca6b1] bg-white text-[#123b4c]' }` }>:{ cmd.key }</span>
-                    <span className={ `min-w-0 flex-1 truncate text-[12px] ${ index === selectedIndex ? 'text-white/85' : 'text-[#525252]' }` }>{ cmd.description }</span>
-                </button>
-            )) }
+        <div className="chat-input-command-popover">
+            <div className="chat-input-command-popover-header">
+                <span className="chat-input-command-popover-header-dot" aria-hidden />
+                <span>: Command</span>
+            </div>
+            <div ref={ listRef } className="chat-input-command-popover-list">
+                { commands.map((cmd, index) =>
+                {
+                    const isSelected = (index === selectedIndex);
+                    const rowClass = [
+                        'chat-input-command-row',
+                        isSelected ? 'is-selected' : ''
+                    ].filter(Boolean).join(' ');
+
+                    return (
+                        <div
+                            key={ cmd.key }
+                            className={ rowClass }
+                            onClick={ () => onSelect(cmd) }
+                            onMouseEnter={ () => onHover(index) }
+                        >
+                            <div className="chat-input-command-row-tile">:</div>
+                            <div className="chat-input-command-row-body">
+                                <span className="chat-input-command-row-name">:{ cmd.key }</span>
+                                { cmd.description &&
+                                    <span className="chat-input-command-row-desc">{ cmd.description }</span> }
+                            </div>
+                        </div>
+                    );
+                }) }
+            </div>
         </div>
     );
 };

@@ -1,9 +1,9 @@
 import { ControlYoutubeDisplayPlaybackMessageComposer, YouTubeRoomBroadcastEvent, YouTubeRoomPlayComposer, YouTubeRoomSettingsEvent, YouTubeRoomWatchersEvent, YouTubeRoomWatchingComposer } from '@nitrots/nitro-renderer';
 import { FC, useEffect, useRef, useState } from 'react';
-import ReactPlayer from 'react-player/youtube';
 import { GetRoomSession, getYoutubeRoomEnabled, LocalizeText, SendMessageComposer, YoutubeVideoPlaybackStateEnum } from '../../api';
 import { NitroCardContentView, NitroCardHeaderView, NitroCardView, LayoutAvatarImageView } from '../../common';
 import { useFurnitureYoutubeWidget, useHasPermission, useMessageEvent } from '../../hooks';
+import ReactPlayer from '../youtube/YoutubeReactPlayer';
 
 const CONTROL_COMMAND_PREVIOUS_VIDEO = 0;
 const CONTROL_COMMAND_NEXT_VIDEO = 1;
@@ -38,7 +38,7 @@ export const YouTubePlayerView: FC<{}> = () =>
     const [playlist, setPlaylist] = useState<string[]>([]);
     const [history, setHistory] = useState<string[]>([]);
     const [showVolumeSlider, setShowVolumeSlider] = useState(true);
-    const playerRef = useRef<ReactPlayer | null>(null);
+    const playerRef = useRef<HTMLVideoElement | null>(null);
     const { objectId: youtubeObjectId, videoId: roomVideoId, currentVideoState, hasControl } = useFurnitureYoutubeWidget();
     const [spectators, setSpectators] = useState< { id: number; name: string; look: string }[] >([]);
     const [broadcastVideo, setBroadcastVideo] = useState('');
@@ -380,7 +380,7 @@ export const YouTubePlayerView: FC<{}> = () =>
                                 {
                                     playerRef.current = ref;
                                 }}
-                                url={`https://www.youtube.com/watch?v=${videoId}`}
+                                src={`https://www.youtube.com/watch?v=${videoId}`}
                                 width="100%"
                                 height={isFullscreen ? '100%' : 280}
                                 playing
@@ -388,10 +388,7 @@ export const YouTubePlayerView: FC<{}> = () =>
                                 loop={isLooping}
                                 volume={Math.max(0, Math.min(1, volume / 100))}
                                 config={{
-                                    playerVars: {
-                                        autoplay: 1,
-                                        loop: isLooping ? 1 : 0,
-                                    },
+                                    youtube: {},
                                 }}
                                 onReady={() => addToHistory(videoId)}
                             />

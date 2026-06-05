@@ -162,6 +162,9 @@ export default defineConfig({
         chunkSizeWarningLimit: 200000,
         manifest: true,
         rollupOptions: {
+            checks: {
+                pluginTimings: false
+            },
             output: {
                 assetFileNames: 'src/assets/[name]-[hash].[ext]',
                 // Granular chunking: split the monolithic vendor / nitro-renderer

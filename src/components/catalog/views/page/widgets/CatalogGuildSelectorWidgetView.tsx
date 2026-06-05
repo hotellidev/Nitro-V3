@@ -47,7 +47,7 @@ export const CatalogGuildSelectorWidgetView: FC<{}> = props =>
         return (
             <div className="bg-muted rounded p-1 text-black text-center">
                 { LocalizeText('catalog.guild_selector.members_only') }
-                <Button className="mt-1">
+                <Button fullWidth classNames={ [ 'mt-1', 'nitro-catalog-swf-button', 'nitro-catalog-swf-buy-button', 'whitespace-normal!', 'text-[10px]!', 'leading-tight!', 'py-1!' ] }>
                     { LocalizeText('catalog.guild_selector.find_groups') }
                 </Button>
             </div>

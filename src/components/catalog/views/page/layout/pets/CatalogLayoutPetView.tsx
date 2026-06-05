@@ -206,7 +206,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                 </div> }
 
             { /* Top card: preview + name + purchase */ }
-            <div className="flex gap-3 p-2.5 bg-white rounded border-2 border-card-grid-item-border">
+            <div className="nitro-catalog-classic-pet-card flex gap-3 p-2.5 bg-white rounded border-2 border-card-grid-item-border">
                 { /* Pet preview */ }
                 <div className="w-[160px] min-w-[160px] h-[140px] rounded overflow-hidden bg-card-grid-item relative flex items-center justify-center border border-card-grid-item-border">
                     <CatalogViewProductWidgetView />
@@ -240,12 +240,12 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                                 <span className="text-[8px] font-mono text-white bg-primary px-1 py-px rounded">Offer: { currentOffer.offerId }</span>
                             </div> }
                         { !!page.localization.getText(0) &&
-                            <p className="text-[10px] text-muted mt-0.5" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } /> }
+                            <p className="text-[10px] text-dark mt-0.5" dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } /> }
                     </div>
 
                     { /* Name input */ }
                     <div className="flex flex-col gap-1 mt-2">
-                        <label className="text-[9px] text-muted uppercase font-bold">{ LocalizeText('widgets.petpackage.name.title') }</label>
+                        <label className="text-[9px] text-dark uppercase font-bold">{ LocalizeText('widgets.petpackage.name.title') }</label>
                         <div className="relative">
                             <input
                                 className={ `w-full text-[11px] border-2 rounded px-2 py-1.5 focus:outline-none transition-colors ${ approvalResult > 0 ? 'border-danger bg-danger/5' : approvalResult === 0 ? 'border-success bg-success/5' : 'border-card-grid-item-border focus:border-primary bg-white' }` }
@@ -267,7 +267,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                     <div className="flex items-center justify-between mt-2">
                         <CatalogTotalPriceWidget />
                         <button
-                            className="px-3 py-1 rounded text-[11px] font-bold bg-primary text-white hover:bg-secondary transition-colors cursor-pointer disabled:opacity-50"
+                            className="nitro-catalog-swf-button nitro-catalog-swf-buy-button"
                             disabled={ !petName.length || (approvalResult > 0) }
                             onClick={ purchasePet }
                         >
@@ -280,7 +280,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
             { /* Breed/Color grid */ }
             <div className="flex-1 overflow-auto min-h-0">
                 <div className="flex items-center gap-1.5 mb-1.5">
-                    <span className="text-[10px] font-bold text-muted uppercase tracking-wide">
+                    <span className="text-[10px] font-bold text-dark uppercase tracking-wide">
                         { colorsShowing ? LocalizeText('catalog.pets.choose.color') : LocalizeText('catalog.pets.choose.breed') }
                     </span>
                     { colorsShowing &&
@@ -291,7 +291,7 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                             { LocalizeText('catalog.pets.back.breeds') }
                         </button> }
                 </div>
-                <div className="grid grid-cols-6 gap-1">
+                <div className={ colorsShowing ? 'nitro-catalog-classic-color-swatches flex flex-wrap gap-1 p-2 overflow-auto' : 'nitro-catalog-classic-pet-breeds flex flex-wrap gap-1 p-1 overflow-auto' }>
                     { !colorsShowing && (sellablePalettes.length > 0) && sellablePalettes.map((palette, index) => (
                         <LayoutGridItem
                             key={ index }
@@ -303,10 +303,12 @@ export const CatalogLayoutPetView: FC<CatalogLayoutProps> = props =>
                         </LayoutGridItem>
                     )) }
                     { colorsShowing && (sellableColors.length > 0) && sellableColors.map((colorSet, index) => (
-                        <div
+                        <LayoutGridItem
                             key={ index }
-                            className={ `w-full aspect-square rounded border-2 cursor-pointer transition-all ${ selectedColorIndex === index ? 'border-primary scale-110 shadow-md' : 'border-card-grid-item-border hover:border-primary/50' }` }
-                            style={ { backgroundColor: `#${ ColorConverter.int2rgb(colorSet[0]) }` } }
+                            itemHighlight
+                            className="clear-bg"
+                            itemActive={ (selectedColorIndex === index) }
+                            itemColor={ ColorConverter.int2rgb(colorSet[0]) }
                             onClick={ () => setSelectedColorIndex(index) }
                         />
                     )) }

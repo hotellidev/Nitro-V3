@@ -1,3 +1,5 @@
+import './pixiPatch';
+
 import { GetConfiguration } from '@nitrots/nitro-renderer';
 import JSON5 from 'json5';
 import { configFileUrl, getClientMode, installSecureFetch } from './secure-assets';

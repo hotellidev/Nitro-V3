@@ -28,7 +28,7 @@ export const CatalogLayoutSingleBundleView: FC<CatalogLayoutProps> = props =>
                         <Text center small overflow="auto">{ page.localization.getText(1) }</Text> }
                     <Column grow gap={ 0 } overflow="hidden" position="relative">
                         { !!page.localization.getImage(1) &&
-                            <img alt="" className="grow!" src={ page.localization.getImage(1) } /> }
+                            <img alt="" className="grow! min-h-0 w-full h-full object-contain object-center" src={ page.localization.getImage(1) } /> }
                         <CatalogAddOnBadgeWidgetView className="bg-muted rounded bottom-0 inset-s-0" position="absolute" />
                         <CatalogSimplePriceWidgetView />
                     </Column>

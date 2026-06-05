@@ -23,6 +23,10 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
     const isFav = node ? isFavoritePage(node.pageId) : false;
     const [ isDragOver, setIsDragOver ] = useState(false);
     const dragRef = useRef<HTMLDivElement>(null);
+    // Strip SWF-style suffixes like "(BC)" or "(Hot)" but keep the
+    // pageId hint the gameserver appends when the viewer has
+    // ACC_CATALOG_IDS - that's a pure-numeric "(6)" trailer.
+    const swfLabel = (node?.localization || '').replace(/\s*\(\D[^)]*\)\s*$/g, '').trim();
 
     const handleDragStart = useCallback((e: React.DragEvent) =>
     {
@@ -90,7 +94,7 @@ export const CatalogNavigationItemView: FC<CatalogNavigationItemViewProps> = pro
                 <div className="nitro-catalog-classic-navigation-icon">
                     <CatalogIconView icon={ node.iconId } />
                 </div>
-                <span className="nitro-catalog-classic-navigation-label" title={ adminMode ? `Page ID: ${ node.pageId }` : undefined }>{ node.localization }</span>
+                <span className="nitro-catalog-classic-navigation-label" title={ adminMode ? `Page ID: ${ node.pageId }` : undefined }>{ swfLabel }</span>
                 { adminMode &&
                     <div className="nitro-catalog-classic-navigation-admin flex items-center gap-1 opacity-0 group-hover/nav:opacity-100 transition-opacity">
                         <FaPlus

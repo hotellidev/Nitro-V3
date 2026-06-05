@@ -34,26 +34,26 @@ export const CatalogSpinnerWidgetView: FC<{}> = props =>
     if(!currentOffer || !currentOffer.bundlePurchaseAllowed) return null;
 
     return (
-        <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-muted whitespace-nowrap">{ LocalizeText('catalog.bundlewidget.spinner.select.amount') }</span>
-            <div className="flex items-center rounded overflow-hidden border-2 border-card-grid-item-border">
+        <div className="nitro-catalog-swf-spinner">
+            <span className="nitro-catalog-swf-spinner-label">{ LocalizeText('catalog.bundlewidget.quantity') }</span>
+            <div className="nitro-catalog-swf-spinner-control">
                 <button
-                    className="w-[24px] h-[24px] flex items-center justify-center bg-card-grid-item hover:bg-card-grid-item-active transition-colors cursor-pointer border-r border-card-grid-item-border"
+                    className="nitro-catalog-swf-spinner-button nitro-catalog-swf-spinner-button-less"
                     onClick={ event => updateQuantity(quantity - 1) }
                 >
-                    <FaMinus className="text-[7px] text-dark" />
+                    <FaMinus />
                 </button>
                 <input
-                    className="w-[40px] h-[24px] text-center text-[11px] font-bold bg-white border-x border-card-grid-item-border [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none focus:outline-none"
+                    className="nitro-catalog-swf-spinner-input"
                     type="number"
                     value={ quantity }
                     onChange={ event => updateQuantity(event.target.valueAsNumber) }
                 />
                 <button
-                    className="w-[24px] h-[24px] flex items-center justify-center bg-card-grid-item hover:bg-card-grid-item-active transition-colors cursor-pointer border-l border-card-grid-item-border"
+                    className="nitro-catalog-swf-spinner-button nitro-catalog-swf-spinner-button-more"
                     onClick={ event => updateQuantity(quantity + 1) }
                 >
-                    <FaPlus className="text-[7px] text-dark" />
+                    <FaPlus />
                 </button>
             </div>
         </div>

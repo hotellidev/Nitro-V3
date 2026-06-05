@@ -230,22 +230,31 @@ const useChatWidgetState = () =>
 
             return newValue;
         });
-        const chatEntryId = addChatEntry({
-            id: -1,
-            webId: userData.webID,
-            entityId: userData.roomIndex,
-            name: username,
-            imageUrl,
-            style: styleId,
-            chatType: chatType,
-            entityType: userData.type,
-            message: formattedText,
-            timestamp: ChatHistoryCurrentDate(),
-            type: ChatEntryType.TYPE_CHAT,
-            roomId: roomSession.roomId,
-            color,
-            ...(outgoingTranslation ? buildTranslatedEntryPatch(outgoingTranslation.originalText, outgoingTranslation.translatedText, outgoingTranslation.detectedLanguage, outgoingTranslation.targetLanguage) : {})
-        });
+
+        // Pet, Bot and Rentable Bot chat is fire-and-forget ("UDP-style"):
+        // the live bubble already rendered above, but we deliberately skip
+        // addChatEntry so the entry never lands in localStorage. A pet-heavy
+        // room used to push 30+ KB per message (base64 head data URL) into
+        // the chat history, exhausting the localStorage quota in minutes.
+        // Real users still go through the full persisted path.
+        const chatEntryId = (userType === RoomObjectType.USER)
+            ? addChatEntry({
+                id: -1,
+                webId: userData.webID,
+                entityId: userData.roomIndex,
+                name: username,
+                imageUrl,
+                style: styleId,
+                chatType: chatType,
+                entityType: userData.type,
+                message: formattedText,
+                timestamp: ChatHistoryCurrentDate(),
+                type: ChatEntryType.TYPE_CHAT,
+                roomId: roomSession.roomId,
+                color,
+                ...(outgoingTranslation ? buildTranslatedEntryPatch(outgoingTranslation.originalText, outgoingTranslation.translatedText, outgoingTranslation.detectedLanguage, outgoingTranslation.targetLanguage) : {})
+            })
+            : -1;
 
         if(!settings.enabled || outgoingTranslation || !isTranslatableChatType || !text.trim().length) return;
 

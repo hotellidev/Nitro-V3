@@ -1,4 +1,4 @@
-import { GetRenderer, GetTicker, NitroTicker, RoomPreviewer, TextureUtils } from '@nitrots/nitro-renderer';
+import { GetRenderer, GetTicker, NitroLogger, NitroTicker, RoomPreviewer, TextureUtils } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useEffect, useRef } from 'react';
 
 export const LayoutRoomPreviewerView: FC<{
@@ -8,6 +8,8 @@ export const LayoutRoomPreviewerView: FC<{
 {
     const { roomPreviewer = null, height = 0 } = props;
     const elementRef = useRef<HTMLDivElement>(null);
+    const renderFailuresRef = useRef(0);
+    const MAX_RENDER_FAILURES = 6;
 
     const onClick = (event: MouseEvent<HTMLDivElement>) =>
     {
@@ -21,37 +23,67 @@ export const LayoutRoomPreviewerView: FC<{
     {
         if(!elementRef) return;
 
+        renderFailuresRef.current = 0;
+
         const width = elementRef.current.parentElement.clientWidth;
         const texture = TextureUtils.createRenderTexture(width, height);
 
+        const noteFailure = (label: string, error: unknown) =>
+        {
+            renderFailuresRef.current += 1;
+
+            if(renderFailuresRef.current >= MAX_RENDER_FAILURES)
+            {
+                NitroLogger.error(`LayoutRoomPreviewerView ${ label } failed ${ renderFailuresRef.current } times; disabling further renders for this preview`, error);
+            }
+        };
+
         const paintToDOM = () =>
         {
+            if(renderFailuresRef.current >= MAX_RENDER_FAILURES) return;
             if(!roomPreviewer || !elementRef.current) return;
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 
             if(!renderingCanvas) return;
 
-            GetRenderer().render({
-                target: texture,
-                container: renderingCanvas.master,
-                clear: true
-            });
+            try
+            {
+                GetRenderer().render({
+                    target: texture,
+                    container: renderingCanvas.master,
+                    clear: true
+                });
 
-            const canvas = GetRenderer().texture.generateCanvas(texture);
-            const base64 = canvas.toDataURL('image/png');
+                const canvas = GetRenderer().texture.generateCanvas(texture);
+                const base64 = canvas.toDataURL('image/png');
 
-            canvas.width = 0;
-            canvas.height = 0;
+                canvas.width = 0;
+                canvas.height = 0;
 
-            elementRef.current.style.backgroundImage = `url(${ base64 })`;
+                elementRef.current.style.backgroundImage = `url(${ base64 })`;
+                renderFailuresRef.current = 0;
+            }
+            catch(error)
+            {
+                noteFailure('paint', error);
+            }
         };
 
         const update = (ticker: NitroTicker) =>
         {
+            if(renderFailuresRef.current >= MAX_RENDER_FAILURES) return;
             if(!roomPreviewer || !elementRef.current) return;
 
-            roomPreviewer.updatePreviewRoomView();
+            try
+            {
+                roomPreviewer.updatePreviewRoomView();
+            }
+            catch(error)
+            {
+                noteFailure('update', error);
+                return;
+            }
 
             const renderingCanvas = roomPreviewer.getRenderingCanvas();
 

@@ -20,6 +20,7 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
     const { categories } = useNavigatorData();
     const { setIsVisible = null } = useCatalogUiState();
     const { promoteInformation, isExtended, setIsExtended } = useRoomPromote();
+    const promoteData = promoteInformation?.data ?? null;
 
     const { data: availableRooms = [] } = useNitroQuery<RoomAdPurchaseInfoEvent, RoomEntryData[]>({
         key: [ 'nitro', 'catalog', 'room-ad-purchase-info' ],
@@ -31,17 +32,17 @@ export const CatalogLayoutRoomAdsView: FC<CatalogLayoutProps> = props =>
 
     useEffect(() =>
     {
-        if(isExtended)
+        if(isExtended && promoteData)
         {
-            setRoomId(promoteInformation.data.flatId);
-            setEventName(promoteInformation.data.eventName);
-            setEventDesc(promoteInformation.data.eventDescription);
-            setCategoryId(promoteInformation.data.categoryId);
+            setRoomId(promoteData.flatId);
+            setEventName(promoteData.eventName);
+            setEventDesc(promoteData.eventDescription);
+            setCategoryId(promoteData.categoryId);
             setExtended(isExtended); // This is for sending to packet
             setIsExtended(false); // This is from hook useRoomPromotte
         }
 
-    }, [ isExtended, eventName, eventDesc, categoryId, promoteInformation.data, setIsExtended ]);
+    }, [ isExtended, promoteData, setIsExtended ]);
 
     const resetData = () =>
     {

@@ -12,11 +12,27 @@ const MESSENGER_HISTORY_MAX = 1000;
 let CHAT_HISTORY_COUNTER: number = 0;
 let MESSENGER_HISTORY_COUNTER: number = 0;
 
+/**
+ * Project a list of chat entries to the slim shape we want to persist in
+ * localStorage. `imageUrl` is a base64 data URL of the avatar / pet head
+ * (10-50 KB each) - keeping it in storage blows past the browser quota
+ * inside minutes in a pet-heavy room. The avatar can always be re-rendered
+ * from `look` via ChatBubbleUtilities.getUserImage(), and pet images are
+ * regenerated from the bubble flow when needed; we just don't restore
+ * head thumbnails for entries loaded from a previous session.
+ *
+ * `style` / `chatType` / `color` are kept because they're tiny but
+ * meaningful for re-rendering the bubble. Translation fields are kept
+ * because they're already text.
+ */
+const slimChatEntriesForStorage = (entries: IChatEntry[]): IChatEntry[] =>
+    entries.map(entry => entry.imageUrl ? { ...entry, imageUrl: undefined } : entry);
+
 const useChatHistoryState = () =>
 {
-    const [ chatHistory, setChatHistory ] = useLocalStorage<IChatEntry[]>('chatHistory', []);
+    const [ chatHistory, setChatHistory ] = useLocalStorage<IChatEntry[]>('chatHistory', [], { toStorage: slimChatEntriesForStorage });
     const [ roomHistory, setRoomHistory ] = useLocalStorage<IRoomHistoryEntry[]>('roomHistory', []);
-    const [ messengerHistory, setMessengerHistory ] = useLocalStorage<IChatEntry[]>('messengerHistory', []);
+    const [ messengerHistory, setMessengerHistory ] = useLocalStorage<IChatEntry[]>('messengerHistory', [], { toStorage: slimChatEntriesForStorage });
     const [ needsRoomInsert, setNeedsRoomInsert ] = useLocalStorage('needsRoomInsert', false);
 
     const addChatEntry = (entry: IChatEntry) =>

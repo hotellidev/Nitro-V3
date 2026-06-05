@@ -10,6 +10,7 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
     const { currentPage = null } = useCatalogData();
     const catalogAdmin = useCatalogAdmin();
     const editingOffer = catalogAdmin?.editingOffer ?? null;
+    const editingOfferDetails = catalogAdmin?.editingOfferDetails ?? null;
     const setEditingOffer = catalogAdmin?.setEditingOffer;
     const saveOffer = catalogAdmin?.saveOffer;
     const deleteOffer = catalogAdmin?.deleteOffer;
@@ -62,11 +63,20 @@ export const CatalogAdminOfferEditView: FC<{}> = () =>
             setClubOnly(editingOffer.clubLevel > 0 ? '1' : '0');
             setExtradata(editingOffer.product?.extraParam || '');
             setHaveOffer(editingOffer.haveOffer ? '1' : '0');
-            setOfferIdGroup(editingOffer.offerId || -1);
+            setOfferIdGroup(0);
             setLimitedStack(0);
             setOrderNumber(0);
         }
     }, [ editingOffer ]);
+
+    useEffect(() =>
+    {
+        if(!editingOfferDetails) return;
+
+        setOfferIdGroup(editingOfferDetails.offerIdGroup);
+        setLimitedStack(editingOfferDetails.limitedStack);
+        setOrderNumber(editingOfferDetails.orderNumber);
+    }, [ editingOfferDetails ]);
 
     if(!editingOffer) return null;
 

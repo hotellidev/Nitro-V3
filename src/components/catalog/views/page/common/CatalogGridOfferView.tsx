@@ -1,7 +1,7 @@
 import { MouseEventType } from '@nitrots/nitro-renderer';
 import { FC, MouseEvent, useMemo, useState } from 'react';
 import { FaHeart } from 'react-icons/fa';
-import { CatalogType, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
+import { CatalogType, GetConfigurationValue, IPurchasableOffer, Offer, ProductTypeEnum } from '../../../../../api';
 import { LayoutAvatarImageView, LayoutGridItem, LayoutGridItemProps } from '../../../../../common';
 import { useCatalogActions, useCatalogFavorites, useCatalogUiState, useInventoryFurni } from '../../../../../hooks';
 
@@ -30,8 +30,49 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
             return null;
         }
 
-        return offer.product?.getIconUrl(offer) ?? null;
+        const product = offer.product;
+
+        if(!product) return null;
+
+        if((product.productType === ProductTypeEnum.FLOOR) || (product.productType === ProductTypeEnum.WALL))
+        {
+            const className = product.furnitureData?.className;
+
+            if(className?.length)
+            {
+                const param = (product.productType === ProductTypeEnum.WALL && product.extraParam?.length) ? `_${ product.extraParam }` : '';
+                const configuredIconUrl = GetConfigurationValue<string>('furni.asset.icon.url', '');
+
+                if(configuredIconUrl?.length)
+                {
+                    return configuredIconUrl
+                        .replace('%libname%', className)
+                        .replace('%param%', param);
+                }
+            }
+        }
+
+        return product.getIconUrl(offer) ?? null;
     }, [ offer ]);
+
+    const prices = useMemo(() =>
+    {
+        if(!offer) return [];
+
+        const values: { amount: number; type: number }[] = [];
+
+        if(offer.priceInCredits > 0) values.push({ amount: offer.priceInCredits, type: -1 });
+        if(offer.priceInActivityPoints > 0) values.push({ amount: offer.priceInActivityPoints, type: offer.activityPointType });
+
+        return values;
+    }, [ offer ]);
+
+    const getCurrencyIconUrl = (type: number) =>
+    {
+        const configuredCurrencyUrl = GetConfigurationValue<string>('currency.asset.icon.url', '');
+
+        return configuredCurrencyUrl.replace('%type%', type.toString());
+    };
 
     const onMouseEvent = (event: MouseEvent) =>
     {
@@ -74,9 +115,30 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
             { ...rest }
         >
             { iconUrl && !(offer.product.productType === ProductTypeEnum.ROBOT) &&
-                <div className="nitro-catalog-classic-grid-offer-icon" style={ { backgroundImage: `url(${ iconUrl })` } } /> }
+                <img
+                    className="nitro-catalog-classic-grid-offer-icon"
+                    src={ iconUrl }
+                    draggable={ false }
+                    onError={ event =>
+                    {
+                        const fallbackIconUrl = product.getIconUrl(offer);
+
+                        if(fallbackIconUrl && (event.currentTarget.src !== fallbackIconUrl)) event.currentTarget.src = fallbackIconUrl;
+                    } } /> }
             { (offer.product.productType === ProductTypeEnum.ROBOT) &&
                 <LayoutAvatarImageView direction={ 2 } figure={ offer.product.extraParam } fit /> }
+            { (prices.length > 0) &&
+                <span className={ `nitro-catalog-classic-grid-price ${ prices.length > 1 ? 'is-multi-price' : 'is-single-price' }` }>
+                    { prices.map((price, index) =>
+                        <span key={ `${ price.type }-${ index }` } className="nitro-catalog-classic-grid-price-entry">
+                            { index > 0 && <span className="nitro-catalog-classic-grid-price-plus">+</span> }
+                            <span className="nitro-catalog-classic-grid-price-amount">{ price.amount }</span>
+                            <img
+                                className="nitro-catalog-classic-grid-price-currency"
+                                src={ getCurrencyIconUrl(price.type) }
+                                draggable={ false } />
+                        </span>) }
+                </span> }
             <div
                 className={ `absolute top-0 right-0 z-10 p-0.5 cursor-pointer transition-opacity duration-100 ${ isFav ? 'opacity-100' : 'opacity-0 group-hover/tile:opacity-100' }` }
                 onClick={ e =>

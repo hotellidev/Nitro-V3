@@ -7,7 +7,6 @@ import { LoginView } from './components/login/LoginView';
 import { MainView } from './components/MainView';
 import { ReconnectView } from './components/reconnect/ReconnectView';
 import { useMessageEvent, useNitroEvent } from './hooks';
-import { ensureChatCommandListener } from './hooks/rooms/widgets/useChatCommandSelector';
 
 NitroVersion.UI_VERSION = GetUIVersion();
 
@@ -563,9 +562,7 @@ export const App: FC<{}> = props =>
                         bumpProgress(85, taskLabel('loading.task.rooms', 'Loading rooms...'));
                         await GetRoomEngine().init();
                         bumpProgress(92, taskLabel('loading.task.engine', 'Loading graphics engine...'));
-                        ensureChatCommandListener();
                         await GetCommunication().init();
-                        ensureChatCommandListener();
                         bumpProgress(98, taskLabel('generic.reconnecting', 'Connecting to server...'));
                     })();
                 }

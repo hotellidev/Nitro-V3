@@ -1190,7 +1190,7 @@
     overflow-x: hidden;
     padding-right: 4px;
     margin-top: 2px;
-    scrollbar-width: thin;
+    scrollbar-width: auto;
 }
 
 .nitro-login-card .room-template-option {

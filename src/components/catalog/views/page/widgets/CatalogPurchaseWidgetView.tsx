@@ -171,6 +171,8 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
 
     const PurchaseButton = () =>
     {
+        const swfButtonClassNames = [ 'nitro-catalog-swf-button' ];
+
         if(isBuildersClubPlaceable)
         {
             const hasMissingExtraParam = (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length));
@@ -198,10 +200,10 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
             return (
                 <div className="flex flex-col gap-1.5 items-start">
                     <div className="flex gap-1.5 flex-wrap">
-                        <Button disabled={ isDisabled } onClick={ () => startBuilderPlacement(true) }>
+                        <Button classNames={ swfButtonClassNames } disabled={ isDisabled } onClick={ () => startBuilderPlacement(true) }>
                             { LocalizeText('builder.placement_widget.place_many') }
                         </Button>
-                        <Button disabled={ isDisabled } onClick={ () => startBuilderPlacement(false) } style={ buildersClubPlaceOneButtonStyle }>
+                        <Button classNames={ swfButtonClassNames } disabled={ isDisabled } onClick={ () => startBuilderPlacement(false) } style={ buildersClubPlaceOneButtonStyle }>
                             { LocalizeText('builder.placement_widget.place_one') }
                         </Button>
                     </div>
@@ -220,37 +222,37 @@ export const CatalogPurchaseWidgetView: FC<CatalogPurchaseWidgetViewProps> = pro
         const priceCredits = (currentOffer.priceInCredits * purchaseOptions.quantity);
         const pricePoints = (currentOffer.priceInActivityPoints * purchaseOptions.quantity);
 
-        if(GetClubMemberLevel() < currentOffer.clubLevel) return <Button disabled variant="danger">{ LocalizeText('catalog.alert.hc.required') }</Button>;
+        if(GetClubMemberLevel() < currentOffer.clubLevel) return <Button classNames={ swfButtonClassNames } disabled variant="danger">{ LocalizeText('catalog.alert.hc.required') }</Button>;
 
-        if(isLimitedSoldOut) return <Button disabled variant="danger">{ LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
+        if(isLimitedSoldOut) return <Button classNames={ swfButtonClassNames } disabled variant="danger">{ LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
 
-        if(priceCredits > getCurrencyAmount(-1)) return <Button disabled variant="danger">{ LocalizeText('catalog.alert.notenough.title') }</Button>;
+        if(priceCredits > getCurrencyAmount(-1)) return <Button classNames={ swfButtonClassNames } disabled variant="danger">{ LocalizeText('catalog.alert.notenough.title') }</Button>;
 
-        if(pricePoints > getCurrencyAmount(currentOffer.activityPointType)) return <Button disabled variant="danger">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + currentOffer.activityPointType) }</Button>;
+        if(pricePoints > getCurrencyAmount(currentOffer.activityPointType)) return <Button classNames={ swfButtonClassNames } disabled variant="danger">{ LocalizeText('catalog.alert.notenough.activitypoints.title.' + currentOffer.activityPointType) }</Button>;
 
         switch(purchaseState)
         {
             case CatalogPurchaseState.CONFIRM:
-                return <Button variant="warning" onClick={ event => purchase() }>{ LocalizeText('catalog.marketplace.confirm_title') }</Button>;
+                return <Button classNames={ swfButtonClassNames } variant="warning" onClick={ event => purchase() }>{ LocalizeText('catalog.marketplace.confirm_title') }</Button>;
             case CatalogPurchaseState.PURCHASE:
-                return <Button disabled><LayoutLoadingSpinnerView /></Button>;
+                return <Button classNames={ swfButtonClassNames } disabled><LayoutLoadingSpinnerView /></Button>;
             case CatalogPurchaseState.FAILED:
-                return <Button variant="danger">{ LocalizeText('generic.failed') }</Button>;
+                return <Button classNames={ swfButtonClassNames } variant="danger">{ LocalizeText('generic.failed') }</Button>;
             case CatalogPurchaseState.SOLD_OUT:
-                return <Button variant="danger">{ LocalizeText('generic.failed') + ' - ' + LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
+                return <Button classNames={ swfButtonClassNames } variant="danger">{ LocalizeText('generic.failed') + ' - ' + LocalizeText('catalog.alert.limited_edition_sold_out.title') }</Button>;
             case CatalogPurchaseState.NONE:
             default:
-                return <Button variant="success" disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) } onClick={ event => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('catalog.purchase_confirmation.' + (currentOffer.isRentOffer ? 'rent' : 'buy')) }</Button>;
+                return <Button classNames={ [ ...swfButtonClassNames, 'nitro-catalog-swf-buy-button' ] } variant="success" disabled={ (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length)) } onClick={ event => setPurchaseState(CatalogPurchaseState.CONFIRM) }>{ LocalizeText('catalog.purchase_confirmation.' + (currentOffer.isRentOffer ? 'rent' : 'buy')) }</Button>;
         }
     };
 
     return (
         <>
-            <PurchaseButton />
             { (!isBuildersClubOffer && !noGiftOption && !currentOffer.isRentOffer) &&
-                <Button disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) } onClick={ event => purchase(true) }>
+                <Button classNames={ [ 'nitro-catalog-swf-button', 'nitro-catalog-swf-gift-button' ] } disabled={ ((purchaseOptions.quantity > 1) || !currentOffer.giftable || isLimitedSoldOut || (purchaseOptions.extraParamRequired && (!purchaseOptions.extraData || !purchaseOptions.extraData.length))) } onClick={ event => purchase(true) }>
                     { LocalizeText('catalog.purchase_confirmation.gift') }
                 </Button> }
+            <PurchaseButton />
         </>
     );
 };

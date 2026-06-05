@@ -3,7 +3,7 @@ import { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { ChatMessageTypeEnum, GetClubMemberLevel, GetConfigurationValue, LocalizeText, RoomWidgetUpdateChatInputContentEvent } from '../../../../api';
 import { Text } from '../../../../common';
-import { useChatCommandSelector, useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
+import { useCatalogClassicStyle, useChatCommandSelector, useChatInputWidget, useRoom, useSessionInfo, useUiEvent } from '../../../../hooks';
 import { useRoomUserListSnapshot } from '../../../../hooks/session/useSessionSnapshots';
 import { ChatInputCommandSelectorView } from './ChatInputCommandSelectorView';
 import { ChatInputEmojiSelectorView } from './ChatInputEmojiSelectorView';
@@ -12,15 +12,40 @@ import { ChatInputStyleSelectorView } from './ChatInputStyleSelectorView';
 
 const USER_TYPE_REAL_USER = 1;
 const MAX_MENTION_SUGGESTIONS = 8;
-const MENTION_ALIASES: ReadonlyArray<{ key: string; label: string; description?: string }> = [
-    { key: 'all', label: 'all', description: 'Everyone in the hotel' },
-    { key: 'everyone', label: 'everyone', description: 'Everyone in the hotel' },
-    { key: 'tutti', label: 'tutti', description: 'Everyone in the hotel' },
-    { key: 'friends', label: 'friends', description: 'Your online friends' },
-    { key: 'amici', label: 'amici', description: 'Your online friends' },
-    { key: 'room', label: 'room', description: 'Everyone in this room' },
-    { key: 'stanza', label: 'stanza', description: 'Everyone in this room' }
-];
+
+type MentionAliasScope = 'everyone' | 'friends' | 'room';
+
+const MENTION_ALIAS_CONFIG_KEY: Record<MentionAliasScope, string> = {
+    everyone: 'mentions_ui.aliases.everyone',
+    friends:  'mentions_ui.aliases.friends',
+    room:     'mentions_ui.aliases.room'
+};
+
+const MENTION_ALIAS_DEFAULTS: Record<MentionAliasScope, string[]> = {
+    everyone: [ 'all', 'everyone', 'tutti' ],
+    friends:  [ 'friends', 'amici' ],
+    room:     [ 'room', 'stanza' ]
+};
+
+const MENTION_ALIAS_DESCRIPTION_KEY: Record<MentionAliasScope, string> = {
+    everyone: 'mentions.alias.description.everyone',
+    friends:  'mentions.alias.description.friends',
+    room:     'mentions.alias.description.room'
+};
+
+const sanitizeAliasList = (raw: unknown, fallback: string[]): string[] =>
+{
+    if(!Array.isArray(raw)) return fallback;
+    const out: string[] = [];
+    for(const entry of raw)
+    {
+        if(typeof entry !== 'string') continue;
+        const trimmed = entry.trim();
+        if(!trimmed) continue;
+        out.push(trimmed);
+    }
+    return out;
+};
 
 export const ChatInputView: FC<{}> = props =>
 {
@@ -30,8 +55,14 @@ export const ChatInputView: FC<{}> = props =>
     const { roomSession = null } = useRoom();
     const inputRef = useRef<HTMLInputElement>(null);
     const { isVisible: commandSelectorVisible, filteredCommands, selectedIndex, setSelectedIndex, moveUp, moveDown, selectCurrent, close: closeCommandSelector } = useChatCommandSelector(chatValue);
+
     const roomUserList = useRoomUserListSnapshot();
     const [ mentionSelectedIndex, setMentionSelectedIndex ] = useState<number>(0);
+    // The "New style" user-setting (memenu.settings.other.catalog.classic.style)
+    // drives BOTH the catalog layout and the mention-picker chrome:
+    //   false (default) = Habbo old-school NitroCard cardstock look
+    //   true            = flat minimalist gray look
+    const [ newStyle ] = useCatalogClassicStyle();
 
     const mentionContext = useMemo(() =>
     {
@@ -46,11 +77,37 @@ export const ChatInputView: FC<{}> = props =>
         if(at > 0 && !/\s/.test(upToCaret.charAt(at - 1))) return null;
 
         const query = upToCaret.slice(at + 1);
-
         if(/\s/.test(query)) return null;
 
         return { atIndex: at, replaceFrom: at, replaceTo: caret, query };
     }, [ chatValue, commandSelectorVisible ]);
+
+    const mentionAliases = useMemo<ReadonlyArray<{ key: string; scope: MentionAliasScope; description: string }>>(() =>
+    {
+        const out: { key: string; scope: MentionAliasScope; description: string }[] = [];
+        const seen = new Set<string>();
+
+        const scopes: MentionAliasScope[] = [ 'everyone', 'friends', 'room' ];
+        for(const scope of scopes)
+        {
+            const list = sanitizeAliasList(
+                GetConfigurationValue<unknown>(MENTION_ALIAS_CONFIG_KEY[scope], MENTION_ALIAS_DEFAULTS[scope]),
+                MENTION_ALIAS_DEFAULTS[scope]
+            );
+
+            for(const key of list)
+            {
+                const lower = key.toLowerCase();
+
+                if(seen.has(lower)) continue;
+                seen.add(lower);
+
+                out.push({ key, scope, description: LocalizeText(MENTION_ALIAS_DESCRIPTION_KEY[scope]) });
+            }
+        }
+
+        return out;
+    }, []);
 
     const mentionSuggestions = useMemo<MentionSuggestion[]>(() =>
     {
@@ -76,14 +133,14 @@ export const ChatInputView: FC<{}> = props =>
             if(out.length >= MAX_MENTION_SUGGESTIONS) break;
         }
 
-        for(const alias of MENTION_ALIASES)
+        for(const alias of mentionAliases)
         {
             if(query.length > 0 && !alias.key.toLowerCase().startsWith(query)) continue;
 
             out.push({
                 key: `alias:${ alias.key }`,
                 kind: 'alias',
-                name: alias.label,
+                name: alias.key,
                 insertToken: alias.key,
                 description: alias.description
             });
@@ -92,7 +149,7 @@ export const ChatInputView: FC<{}> = props =>
         }
 
         return out;
-    }, [ mentionContext, roomUserList ]);
+    }, [ mentionContext, roomUserList, mentionAliases ]);
 
     const mentionSelectorVisible = mentionSuggestions.length > 0;
 
@@ -147,23 +204,6 @@ export const ChatInputView: FC<{}> = props =>
 
         inputRef.current.setSelectionRange((inputRef.current.value.length * 2), (inputRef.current.value.length * 2));
     }, [ inputRef ]);
-
-    const setChatInputValue = useCallback((value: string, markTyping: boolean = true) =>
-    {
-        setChatValue(value);
-
-        if(markTyping)
-        {
-            setIsTyping(!!value.length);
-            setIsIdle(!!value.length);
-        }
-
-        requestAnimationFrame(() =>
-        {
-            inputRef.current?.focus();
-            inputRef.current?.setSelectionRange(value.length, value.length);
-        });
-    }, [ setIsTyping, setIsIdle ]);
 
     const checkSpecialKeywordForInput = useCallback(() =>
     {
@@ -279,7 +319,7 @@ export const ChatInputView: FC<{}> = props =>
                     if(selected)
                     {
                         event.preventDefault();
-                        setChatInputValue(':' + selected.key + ' ');
+                        setChatValue(':' + selected.key + ' ');
                         return;
                     }
                     break;
@@ -319,7 +359,7 @@ export const ChatInputView: FC<{}> = props =>
                 case 'Escape':
                     event.preventDefault();
                     setMentionSelectedIndex(0);
-
+					
                     if(mentionContext)
                     {
                         const before = chatValue.slice(0, mentionContext.replaceFrom);
@@ -361,9 +401,6 @@ export const ChatInputView: FC<{}> = props =>
     {
         switch(event.chatMode)
         {
-            case RoomWidgetUpdateChatInputContentEvent.TEXT:
-                setChatInputValue(event.userName);
-                return;
             case RoomWidgetUpdateChatInputContentEvent.WHISPER: {
                 setChatValue(`${ chatModeIdWhisper } ${ event.userName } `);
                 return;
@@ -450,9 +487,10 @@ export const ChatInputView: FC<{}> = props =>
                         selectedIndex={ selectedIndex }
                         onSelect={ (cmd) =>
                         {
-                            setChatInputValue(':' + cmd.key + ' ');
+                            setChatValue(':' + cmd.key + ' '); inputRef.current?.focus();
                         } }
                         onHover={ setSelectedIndex }
+                        newStyle={ newStyle }
                     /> }
                 { mentionSelectorVisible && !commandSelectorVisible &&
                     <ChatInputMentionSelectorView
@@ -460,6 +498,7 @@ export const ChatInputView: FC<{}> = props =>
                         selectedIndex={ mentionSelectedIndex }
                         onSelect={ applyMentionSuggestion }
                         onHover={ setMentionSelectedIndex }
+                        newStyle={ newStyle }
                     /> }
                 <div className="flex-1 items-center input-sizer">
                     { !floodBlocked &&

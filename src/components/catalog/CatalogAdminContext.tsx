@@ -1,4 +1,4 @@
-import { CatalogAdminCreateOfferComposer, CatalogAdminCreatePageComposer, CatalogAdminDeleteOfferComposer, CatalogAdminDeletePageComposer, CatalogAdminMoveOfferComposer, CatalogAdminMovePageComposer, CatalogAdminPublishComposer, CatalogAdminResultEvent, CatalogAdminSaveOfferComposer, CatalogAdminSavePageComposer } from '@nitrots/nitro-renderer';
+import { CatalogAdminCreateOfferComposer, CatalogAdminCreatePageComposer, CatalogAdminDeleteOfferComposer, CatalogAdminDeletePageComposer, CatalogAdminLoadOfferComposer, CatalogAdminLoadPageComposer, CatalogAdminMoveOfferComposer, CatalogAdminMovePageComposer, CatalogAdminOfferDetailsEvent, CatalogAdminPageDetailsEvent, CatalogAdminPublishComposer, CatalogAdminResultEvent, CatalogAdminSaveOfferComposer, CatalogAdminSavePageComposer } from '@nitrots/nitro-renderer';
 import { createContext, FC, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ICatalogNode, IPurchasableOffer, NotificationAlertType, SendMessageComposer } from '../../api';
 import { useCatalogUiState, useMessageEvent, useNotification } from '../../hooks';
@@ -44,12 +44,34 @@ export interface IOfferEditData
     orderNumber: number;
 }
 
+export interface IEditingOfferDetails
+{
+    offerId: number;
+    offerIdGroup: number;
+    limitedStack: number;
+    orderNumber: number;
+}
+
+export interface IEditingPageDetails
+{
+    pageId: number;
+    caption: string;
+    captionSave: string;
+    minRank: number;
+    orderNum: number;
+    visible: boolean;
+    enabled: boolean;
+}
+
 interface ICatalogAdminContext
 {
     adminMode: boolean;
     setAdminMode: (value: boolean) => void;
     editingOffer: IPurchasableOffer | null;
     setEditingOffer: (offer: IPurchasableOffer | null) => void;
+    editingOfferDetails: IEditingOfferDetails | null;
+    editingPageDetails: IEditingPageDetails | null;
+    requestPageDetails: (pageId: number) => void;
     editingPageData: boolean;
     setEditingPageData: (value: boolean) => void;
     editingRootPage: boolean;
@@ -80,7 +102,9 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
 {
     const { currentType } = useCatalogUiState();
     const [ adminMode, setAdminMode ] = useState(false);
-    const [ editingOffer, setEditingOffer ] = useState<IPurchasableOffer | null>(null);
+    const [ editingOffer, setEditingOfferState ] = useState<IPurchasableOffer | null>(null);
+    const [ editingOfferDetails, setEditingOfferDetails ] = useState<IEditingOfferDetails | null>(null);
+    const [ editingPageDetails, setEditingPageDetails ] = useState<IEditingPageDetails | null>(null);
     const [ editingPageData, setEditingPageData ] = useState(false);
     const [ editingRootPage, setEditingRootPage ] = useState(false);
     const [ editingPageNode, setEditingPageNode ] = useState<ICatalogNode | null>(null);
@@ -89,6 +113,51 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
     const [ hasPendingChanges, setHasPendingChanges ] = useState(false);
     const pendingActionRef = useRef<string | null>(null);
     const { simpleAlert = null } = useNotification();
+
+    const setEditingOffer = useCallback((offer: IPurchasableOffer | null) =>
+    {
+        setEditingOfferState(offer);
+        setEditingOfferDetails(null);
+
+        if(offer && offer.offerId !== -1)
+        {
+            SendMessageComposer(new CatalogAdminLoadOfferComposer(offer.offerId, currentType));
+        }
+    }, [ currentType ]);
+
+    useMessageEvent(CatalogAdminOfferDetailsEvent, (event: CatalogAdminOfferDetailsEvent) =>
+    {
+        const parser = event.getParser();
+
+        setEditingOfferDetails({
+            offerId: parser.offerId,
+            offerIdGroup: parser.offerIdGroup,
+            limitedStack: parser.limitedStack,
+            orderNumber: parser.orderNumber
+        });
+    });
+
+    useMessageEvent(CatalogAdminPageDetailsEvent, (event: CatalogAdminPageDetailsEvent) =>
+    {
+        const parser = event.getParser();
+
+        setEditingPageDetails({
+            pageId: parser.pageId,
+            caption: parser.caption,
+            captionSave: parser.captionSave,
+            minRank: parser.minRank,
+            orderNum: parser.orderNum,
+            visible: parser.visible,
+            enabled: parser.enabled
+        });
+    });
+
+    const requestPageDetails = useCallback((pageId: number) =>
+    {
+        setEditingPageDetails(null);
+        if(pageId == null || pageId < 0) return;
+        SendMessageComposer(new CatalogAdminLoadPageComposer(pageId, currentType));
+    }, [ currentType ]);
 
     useEffect(() =>
     {
@@ -288,7 +357,8 @@ export const CatalogAdminProvider: FC<{ children: ReactNode }> = ({ children }) 
     return (
         <CatalogAdminContext value={ {
             adminMode, setAdminMode,
-            editingOffer, setEditingOffer,
+            editingOffer, setEditingOffer, editingOfferDetails,
+            editingPageDetails, requestPageDetails,
             editingPageData, setEditingPageData,
             editingRootPage, setEditingRootPage,
             editingPageNode, setEditingPageNode,

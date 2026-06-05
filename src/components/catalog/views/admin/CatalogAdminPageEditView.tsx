@@ -28,6 +28,8 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
     const editingPageData = catalogAdmin?.editingPageData ?? false;
     const editingRootPage = catalogAdmin?.editingRootPage ?? false;
     const editingPageNode = catalogAdmin?.editingPageNode ?? null;
+    const editingPageDetails = catalogAdmin?.editingPageDetails ?? null;
+    const requestPageDetails = catalogAdmin?.requestPageDetails;
     const loading = catalogAdmin?.loading ?? false;
 
     const [ caption, setCaption ] = useState('');
@@ -67,21 +69,22 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
     {
         if(!editingPageData || !targetNode) return;
 
-        // The server appends " (pageId)" to the caption for mods/admins (see
-        // CatalogPagesListComposer). Strip that exact suffix before seeding the
-        // edit field, otherwise saving folds the id back into the stored
-        // caption and it multiplies on every edit ("Wired (1114) (1114) ...").
-        const rawCaption = (targetNode.localization || '').replace(new RegExp(`\\s*\\(${ targetNode.pageId }\\)\\s*$`), '');
+        // Don't read the decorated caption out of the catalog index -
+        // the gameserver appends " (id)" when ACC_CATALOG_IDS is on and
+        // we don't want that round-tripping back into the DB. Wait for
+        // the admin page-details event to land instead; it carries the
+        // raw caption / caption_save / min_rank / order_num / enabled.
+        setCaption('');
+        setCaptionSave('');
+        setMinRank(1);
+        setOrderNum(0);
+        setEnabled('1');
 
-        setCaption(rawCaption);
-        setCaptionSave(targetNode.pageName || rawCaption);
         setCatalogMode(currentType === CatalogType.BUILDER ? 'BUILDER' : 'NORMAL');
         setPageLayout(currentPage?.layoutCode || 'default_3x3');
         setIconImage(targetNode.iconId ?? 0);
         setVisible(targetNode.isVisible ? '1' : '0');
-        setEnabled('1');
-        setMinRank(1);
-        setOrderNum(0);
+
         const matchesLoadedPage = currentPage && targetPageId === currentPage.pageId;
         const existingText1 = matchesLoadedPage && currentPage.localization
             ? currentPage.localization.getText(0)
@@ -94,7 +97,22 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
         setParentId(typeof wireParentId === 'number' && wireParentId !== -1
             ? wireParentId
             : (targetNode.parent ? targetNode.parent.pageId : -1));
-    }, [ editingPageData, targetNode, currentPage, currentType ]);
+
+        if(targetPageId != null && targetPageId >= 0) requestPageDetails?.(targetPageId);
+    }, [ editingPageData, targetNode, currentPage, currentType, targetPageId, requestPageDetails ]);
+
+    useEffect(() =>
+    {
+        if(!editingPageDetails) return;
+        if(targetPageId != null && editingPageDetails.pageId !== targetPageId) return;
+
+        setCaption(editingPageDetails.caption);
+        setCaptionSave(editingPageDetails.captionSave);
+        setMinRank(editingPageDetails.minRank);
+        setOrderNum(editingPageDetails.orderNum);
+        setVisible(editingPageDetails.visible ? '1' : '0');
+        setEnabled(editingPageDetails.enabled ? '1' : '0');
+    }, [ editingPageDetails, targetPageId ]);
 
     if(!editingPageData || !targetNode) return null;
 
@@ -168,7 +186,7 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
     const handleDelete = async () =>
     {
         if(!catalogAdmin?.deletePage || isRoot) return;
-        if(!confirm(LocalizeText('catalog.admin.delete.page.confirm', [ 'name' ], [ targetNode.localization ]))) return;
+        if(!confirm(LocalizeText('catalog.admin.delete.page.confirm', [ 'name' ], [ editingPageDetails?.caption ?? '' ]))) return;
 
         catalogAdmin.deletePage(targetPageId);
 
@@ -179,7 +197,7 @@ export const CatalogAdminPageEditView: FC<{}> = () =>
         <div className="bg-white rounded border-2 border-card-grid-item-border p-2.5 mb-2">
             <div className="flex items-center justify-between mb-2">
                 <span className="text-[11px] font-bold text-primary uppercase tracking-wide">
-                    { isRoot ? LocalizeText('catalog.admin.edit.root') : `${ LocalizeText('catalog.admin.edit') } ${ targetNode.localization }` }
+                    { isRoot ? LocalizeText('catalog.admin.edit.root') : `${ LocalizeText('catalog.admin.edit') } ${ editingPageDetails?.caption ?? '' }` }
                 </span>
                 <FaTimes className="text-muted cursor-pointer hover:text-danger text-[10px]" onClick={ closeForm } />
             </div>

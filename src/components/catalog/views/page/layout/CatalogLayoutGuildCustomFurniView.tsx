@@ -17,14 +17,14 @@ export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = props =>
 
     return (
         <Grid>
-            <Column overflow="hidden" size={ 7 }>
-                <CatalogItemGridWidgetView />
+            <Column overflow="hidden" size={ 8 }>
+                <CatalogItemGridWidgetView columnMinWidth={ 36 } />
             </Column>
-            <Column center={ !currentOffer } overflow="hidden" size={ 5 }>
+            <Column center={ !currentOffer } overflow="hidden" size={ 4 }>
                 { !currentOffer &&
                     <>
-                        { !!page.localization.getImage(1) && <img alt="" src={ page.localization.getImage(1) } /> }
-                        <Text center dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
+                        { !!page.localization.getImage(1) && <img alt="" className="max-w-full object-contain" src={ page.localization.getImage(1) } /> }
+                        <Text center bold dangerouslySetInnerHTML={ { __html: SanitizeHtml(page.localization.getText(0)) } } />
                     </> }
                 { currentOffer &&
                     <>
@@ -33,7 +33,7 @@ export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = props =>
                             <CatalogGuildBadgeWidgetView className="bottom-1 inset-e-1" position="absolute" />
                         </div>
                         <Column grow gap={ 1 }>
-                            <Text truncate>{ currentOffer.localizationName }</Text>
+                            <Text bold className="leading-tight">{ currentOffer.localizationName }</Text>
                             <div className="grow!">
                                 <CatalogGuildSelectorWidgetView />
                             </div>

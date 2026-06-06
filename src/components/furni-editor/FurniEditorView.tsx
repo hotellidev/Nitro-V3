@@ -18,7 +18,8 @@ export const FurniEditorView: FC<{}> = () =>
         items, total, page, loading, error, clearError,
         selectedItem, setSelectedItem, furniDataEntry,
         interactions,
-        searchItems, loadDetail, loadBySpriteId, updateItem, deleteItem, loadInteractions
+        searchItems, loadDetail, loadBySpriteId, updateItem, deleteItem, loadInteractions,
+        updateFurnidata, revertFurnidata
     } = useFurniEditor();
 
     const isMod = useHasPermission('acc_catalogfurni');
@@ -155,6 +156,8 @@ export const FurniEditorView: FC<{}> = () =>
                         onUpdate={ updateItem }
                         onDelete={ deleteItem }
                         onBack={ handleBack }
+                        onUpdateFurnidata={ updateFurnidata }
+                        onRevertFurnidata={ revertFurnidata }
                     />
                 }
 

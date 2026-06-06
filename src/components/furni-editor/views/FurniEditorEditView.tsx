@@ -11,6 +11,8 @@ interface FurniEditorEditViewProps
     onUpdate: (id: number, fields: Record<string, unknown>) => void;
     onDelete: (id: number) => void;
     onBack: () => void;
+    onUpdateFurnidata: (id: number, name: string, description: string) => void;
+    onRevertFurnidata: (id: number) => void;
 }
 
 const FIELD_TIPS: Record<string, string> = {
@@ -65,7 +67,7 @@ const Tip: FC<{ field: string }> = ({ field }) =>
 
 export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
 {
-    const { item, furniDataEntry, interactions, loading, onUpdate, onDelete, onBack } = props;
+    const { item, furniDataEntry, interactions, loading, onUpdate, onDelete, onBack, onUpdateFurnidata, onRevertFurnidata } = props;
     const saveRef = useRef<() => void>(null);
 
     const [ form, setForm ] = useState({
@@ -91,6 +93,9 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
     });
 
     const [ showDeleteDialog, setShowDeleteDialog ] = useState(false);
+    const [ furniName, setFurniName ] = useState('');
+    const [ furniDescription, setFurniDescription ] = useState('');
+    const [ confirmFurnidata, setConfirmFurnidata ] = useState(false);
 
     useEffect(() =>
     {
@@ -119,7 +124,10 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
         });
 
         setShowDeleteDialog(false);
-    }, [ item ]);
+        setFurniName(String(furniDataEntry?.name ?? ''));
+        setFurniDescription(String(furniDataEntry?.description ?? ''));
+        setConfirmFurnidata(false);
+    }, [ item, furniDataEntry ]);
 
     const setField = useCallback((key: string, value: unknown) =>
     {
@@ -209,6 +217,7 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
     const inputClass = (field?: string) =>
         `w-full px-2 py-1 text-xs leading-normal rounded-sm border border-[#ccc] min-h-[calc(1.5em+0.5rem+2px)] ${ field && validation[field] ? 'border-red-500 bg-red-50' : '' }`;
     const labelClass = 'text-[11px] font-bold text-[#333] mb-0 flex items-center gap-0.5';
+    const readonlyClass = 'w-full px-2 py-1 text-sm font-mono rounded-sm border border-[#ddd] bg-[#f2f2eb] text-[#555] select-all';
 
     return (
         <Column gap={ 1 } className="h-full overflow-auto">
@@ -232,14 +241,12 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
             <Section title="Basic Info">
                 <div className="grid grid-cols-2 gap-2">
                     <div>
-                        <label className={ labelClass }>Item Name</label>
-                        <input className={ inputClass('itemName') } value={ form.itemName } onChange={ e => setField('itemName', e.target.value) } />
-                        { validation.itemName && <span className="text-[9px] text-red-500">{ validation.itemName }</span> }
+                        <label className={ labelClass }>Classname</label>
+                        <div className={ readonlyClass }>{ form.itemName }</div>
                     </div>
                     <div>
-                        <label className={ labelClass }>Public Name</label>
-                        <input className={ inputClass('publicName') } value={ form.publicName } onChange={ e => setField('publicName', e.target.value) } />
-                        { validation.publicName && <span className="text-[9px] text-red-500">{ validation.publicName }</span> }
+                        <label className={ labelClass }>Public Name (DB fallback)</label>
+                        <div className={ readonlyClass }>{ form.publicName }</div>
                     </div>
                     <div>
                         <label className={ labelClass }>Sprite ID</label>
@@ -320,18 +327,24 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
                 </div>
             </Section>
 
-            { furniDataEntry &&
-                <Section title="FurniData.json" defaultOpen={ false }>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 text-[10px]">
-                        { Object.entries(furniDataEntry).map(([ key, value ]) => (
-                            <div key={ key } className="flex justify-between bg-[#f5f5f5] px-2 py-0.5 rounded">
-                                <span className="font-bold text-[#555]">{ key }</span>
-                                <span className="text-[#333] truncate ml-1 max-w-[120px] text-right">{ String(value ?? '') }</span>
-                            </div>
-                        )) }
+            <Section title="Furnidata (display name)" defaultOpen={ true }>
+                <Column gap={ 1 }>
+                    <div>
+                        <label className={ labelClass }>Display Name</label>
+                        <input className={ inputClass() } value={ furniName } onChange={ e => setFurniName(e.target.value) } maxLength={ 256 } />
                     </div>
-                </Section>
-            }
+                    <div>
+                        <label className={ labelClass }>Description</label>
+                        <textarea className={ inputClass() } rows={ 3 } value={ furniDescription } onChange={ e => setFurniDescription(e.target.value) } maxLength={ 256 } />
+                    </div>
+                    { (furniName !== String(furniDataEntry?.name ?? '') || furniDescription !== String(furniDataEntry?.description ?? '')) &&
+                        <span className="text-[10px] text-orange-500 font-bold">Unsaved furnidata changes</span> }
+                    <Flex gap={ 1 }>
+                        <Button variant="success" disabled={ loading } onClick={ () => setConfirmFurnidata(true) }>Save name/desc</Button>
+                        <Button variant="secondary" disabled={ loading } onClick={ () => onRevertFurnidata(item.id) }>Revert</Button>
+                    </Flex>
+                </Column>
+            </Section>
 
             { /* Actions */ }
             <Flex gap={ 1 } justifyContent="between" alignItems="center" className="mt-1">
@@ -362,6 +375,21 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
                         <Flex gap={ 1 } justifyContent="end">
                             <Button variant="secondary" onClick={ () => setShowDeleteDialog(false) }>Cancel</Button>
                             <Button variant="danger" onClick={ handleDeleteConfirm }>Delete</Button>
+                        </Flex>
+                    </div>
+                </div>
+            }
+
+            { /* Furnidata Confirmation Dialog */ }
+            { confirmFurnidata &&
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={ () => setConfirmFurnidata(false) }>
+                    <div className="bg-white rounded-lg shadow-xl p-4 w-[320px]" onClick={ e => e.stopPropagation() }>
+                        <Text bold className="text-[14px] mb-2 block">Apply furnidata change to ALL clients?</Text>
+                        <div className="text-xs mb-1"><b>Name:</b> { String(furniDataEntry?.name ?? '') } → { furniName }</div>
+                        <div className="text-xs mb-3"><b>Desc:</b> { String(furniDataEntry?.description ?? '') } → { furniDescription }</div>
+                        <Flex gap={ 1 } justifyContent="end">
+                            <Button variant="secondary" onClick={ () => setConfirmFurnidata(false) }>Cancel</Button>
+                            <Button variant="success" onClick={ () => { onUpdateFurnidata(item.id, furniName, furniDescription); setConfirmFurnidata(false); } }>Confirm</Button>
                         </Flex>
                     </div>
                 </div>

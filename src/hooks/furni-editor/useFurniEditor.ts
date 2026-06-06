@@ -249,6 +249,10 @@ export const useFurniEditor = () =>
     const updateFurnidata = useCallback((id: number, name: string, description: string) =>
     {
         pendingActionRef.current = { action: 'update', itemId: id };
+        // Optimistic: the server now mirrors the furnidata display name into
+        // items_base.public_name, so reflect it immediately in the read-only
+        // "Public Name" field. The auto re-fetch that follows will agree (no flicker).
+        setSelectedItem(prev => (prev && prev.id === id ? { ...prev, publicName: name } : prev));
         setLoading(true);
         SendMessageComposer(new FurniEditorUpdateFurnidataComposer(id, JSON.stringify({ name, description })));
     }, []);

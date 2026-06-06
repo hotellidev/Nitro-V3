@@ -65,6 +65,31 @@ const Tip: FC<{ field: string }> = ({ field }) =>
     );
 };
 
+const CopyValue: FC<{ value: string | number }> = ({ value }) =>
+{
+    const [ copied, setCopied ] = useState(false);
+
+    const copy = useCallback(() =>
+    {
+        const text = String(value);
+        const done = () => { setCopied(true); window.setTimeout(() => setCopied(false), 1000); };
+        if(navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done).catch(() => done());
+        else done();
+    }, [ value ]);
+
+    return (
+        <div
+            role="button"
+            title="Click to copy"
+            onClick={ copy }
+            className={ `group relative cursor-pointer w-full px-3 py-1.5 text-sm font-mono rounded-lg border transition ${ copied ? 'border-primary/50 bg-primary/5 text-primary' : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100' }` }
+        >
+            <span className="block truncate pr-12">{ String(value) }</span>
+            <span className={ `absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-semibold uppercase tracking-wide pointer-events-none ${ copied ? 'text-primary' : 'text-slate-300 group-hover:text-slate-400' }` }>{ copied ? 'copied!' : 'copy' }</span>
+        </div>
+    );
+};
+
 export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
 {
     const { item, furniDataEntry, interactions, loading, onUpdate, onDelete, onBack, onUpdateFurnidata, onRevertFurnidata } = props;
@@ -217,7 +242,6 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
     const inputClass = (field?: string) =>
         `w-full px-3 py-1.5 text-sm leading-normal rounded-lg border border-slate-300 bg-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 transition${ field && validation[field] ? ' border-red-400 bg-red-50' : '' }`;
     const labelClass = 'text-[11px] font-medium text-slate-500 mb-1 flex items-center gap-0.5';
-    const readonlyClass = 'w-full px-3 py-1.5 text-sm font-mono rounded-lg border border-slate-200 bg-slate-50 text-slate-500 select-all';
 
     return (
         <Column gap={ 1 }>
@@ -267,19 +291,19 @@ export const FurniEditorEditView: FC<FurniEditorEditViewProps> = props =>
                 <div className="grid grid-cols-2 gap-2">
                     <div>
                         <label className={ labelClass }>Classname</label>
-                        <div className={ readonlyClass }>{ form.itemName }</div>
+                        <CopyValue value={ form.itemName } />
                     </div>
                     <div>
                         <label className={ labelClass }>Public Name (DB fallback)</label>
-                        <div className={ readonlyClass }>{ form.publicName }</div>
+                        <CopyValue value={ form.publicName } />
                     </div>
                     <div>
                         <label className={ labelClass }>Sprite ID</label>
-                        <div className={ readonlyClass }>{ form.spriteId }</div>
+                        <CopyValue value={ form.spriteId } />
                     </div>
                     <div>
                         <label className={ labelClass }>Type</label>
-                        <div className={ readonlyClass }>{ form.type === 's' ? 'Floor (s)' : 'Wall (i)' }</div>
+                        <CopyValue value={ form.type === 's' ? 'Floor (s)' : 'Wall (i)' } />
                     </div>
                 </div>
             </Section>

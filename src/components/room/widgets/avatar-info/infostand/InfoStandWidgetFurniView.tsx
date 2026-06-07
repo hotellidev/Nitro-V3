@@ -78,6 +78,9 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
     const rareValue = useMemo(() => (avatarInfo ? getRareValue(avatarInfo.spriteId) : null), [ avatarInfo, getRareValue ]);
     const descriptionsEnabled = GetConfigurationValue<boolean>('furni.descriptions.enabled', true);
     const itemLocationEnabled = GetConfigurationValue<boolean>('furni.location.enabled', true);
+    const itemLocationRequireAccess = GetConfigurationValue<boolean>('furni.location.require.access', true);
+    const isValidController = (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST);
+    const hasAccess = (isValidController || avatarInfo.isOwner || avatarInfo.isRoomOwner || avatarInfo.isAnyRoomController)
     const [ pickupMode, setPickupMode ] = useState(0);
     const [ canMove, setCanMove ] = useState(false);
     const [ canRotate, setCanRotate ] = useState(false);
@@ -209,13 +212,10 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
             setFurniLocationZ(location.z);
         }
 
-        const isValidController = (avatarInfo.roomControllerLevel >= RoomControllerLevel.GUEST);
-
-        if(isValidController || avatarInfo.isOwner || avatarInfo.isRoomOwner || avatarInfo.isAnyRoomController)
+        if(hasAccess)
         {
             canMove = true;
             canRotate = !avatarInfo.isWallItem;
-
             if(avatarInfo.roomControllerLevel >= RoomControllerLevel.MODERATOR) godMode = true;
         }
 
@@ -607,7 +607,7 @@ export const InfoStandWidgetFurniView: FC<InfoStandWidgetFurniViewProps> = props
                                     <Text underline variant="white">{ groupName }</Text>
                                 </Flex>
                             </> }
-                        { ((itemLocation.x > -1) && itemLocationEnabled) &&
+                        { ((itemLocation.x > -1) && itemLocationEnabled && (!itemLocationRequireAccess || hasAccess)) &&
                             <>
                                 <hr className="m-0 bg-[#0003] border-0 opacity-[.5] h-px" />
                                 <div className="flex items-center gap-1 min-w-0">

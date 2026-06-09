@@ -637,19 +637,19 @@
         & .message-avatar {
             position: relative;
             flex-shrink: 0;
-            overflow: visible;
+            overflow: hidden;
             width: 36px;
             height: 36px;
 
             & .avatar-image {
-            position: absolute;
-            left: 50%;
-                top: 56%;
-                width: 54px;
-                height: 54px;
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
                 margin: 0;
-                background-position: center center !important;
-                transform: translate(-50%, -50%) scale(.95);
+                background-size: 74px auto !important;
+                background-position: -18px -24px !important;
+                transform: none;
             }
         }
 

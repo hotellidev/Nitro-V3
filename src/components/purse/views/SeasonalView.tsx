@@ -21,9 +21,6 @@ export const SeasonalView: FC<SeasonalViewProps> = props =>
             className={`nitro-purse-seasonal-currency nitro-notification ${seasonalColor}`}
         >
             <Flex fullWidth className="seasonal-row">
-                <Flex className="nitro-seasonal-box seasonal-image-padding">
-                    <img src={ iconUrl } alt="" className="seasonal-image" />
-                </Flex>
                 <Text truncate fullWidth variant="white" className="seasonal-text-padding seasonal-text">
                     {LocalizeText(`purse.seasonal.currency.${type}`)}
                 </Text>
@@ -34,6 +31,9 @@ export const SeasonalView: FC<SeasonalViewProps> = props =>
                 >
                     {formattedAmount}
                 </Text>
+                <Flex className="nitro-seasonal-box seasonal-image-padding">
+                    <img src={ iconUrl } alt="" className="seasonal-image" />
+                </Flex>
             </Flex>
         </Flex>
     );

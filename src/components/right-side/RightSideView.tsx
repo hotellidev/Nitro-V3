@@ -10,7 +10,7 @@ import { RoomPromotesWidgetView } from '../room/widgets/room-promotes/RoomPromot
 export const RightSideView: FC<{}> = props =>
 {
     return (
-        <div className="absolute top-0 right-[8px] z-10 w-[min(188px,calc(100vw-16px))] sm:right-[10px] sm:w-[min(188px,calc(100vw-20px))] h-[calc(100%-55px)] pointer-events-none">
+        <div className="absolute top-0 right-0 z-10 w-[min(234px,calc(100vw-16px))] sm:w-[min(234px,calc(100vw-20px))] h-[calc(100%-55px)] pointer-events-none">
             <Column gap={ 1 } position="relative" className="w-full">
                 <PurseView />
                 <GroupRoomInformationView />

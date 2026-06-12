@@ -1,9 +1,11 @@
-import { FC } from 'react';
+import { StringDataType } from '@nitrots/nitro-renderer';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { FaExchangeAlt, FaSyncAlt } from 'react-icons/fa';
 import { Column } from '../../../../../common';
-import { useCatalogData, useUserGroups } from '../../../../../hooks';
+import { useCatalogData, useCatalogUiState, useUserGroups } from '../../../../../hooks';
 import { CatalogFirstProductSelectorWidgetView } from '../widgets/CatalogFirstProductSelectorWidgetView';
 import { CatalogGuildBadgeWidgetView } from '../widgets/CatalogGuildBadgeWidgetView';
+import { CatalogGuildFurniRecolorFilter } from '../widgets/CatalogGuildFurniRecolorFilter';
 import { CatalogGuildSelectorWidgetView } from '../widgets/CatalogGuildSelectorWidgetView';
 import { CatalogItemGridWidgetView } from '../widgets/CatalogItemGridWidgetView';
 import { CatalogPurchaseWidgetView } from '../widgets/CatalogPurchaseWidgetView';
@@ -14,11 +16,43 @@ import { CatalogLayoutProps } from './CatalogLayout.types';
 export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = () =>
 {
     const { currentOffer = null, roomPreviewer = null } = useCatalogData();
+    const { purchaseOptions = null } = useCatalogUiState();
     const { data: groups = null } = useUserGroups();
     const hasGroups = !!(groups && groups.length);
+    const [ groupColors, setGroupColors ] = useState<{ colorA: string; colorB: string } | null>(null);
+
+    useEffect(() =>
+    {
+        const previewStuffData = purchaseOptions?.previewStuffData ?? null;
+
+        if(!previewStuffData) return;
+
+        const colorA = (previewStuffData as StringDataType).getValue(3);
+        const colorB = (previewStuffData as StringDataType).getValue(4);
+
+        if(!colorA || !colorA.length) return;
+
+        const next = { colorA, colorB: (colorB && colorB.length) ? colorB : colorA };
+
+        setGroupColors(prev => (prev && (prev.colorA === next.colorA) && (prev.colorB === next.colorB)) ? prev : next);
+    }, [ purchaseOptions ]);
+
+
+    const tintColor = useMemo(() =>
+    {
+        if(!groupColors) return null;
+
+        const { colorA, colorB } = groupColors;
+
+        if(colorB && (colorB !== colorA)) return `linear-gradient(90deg, #${ colorA } 0 50%, #${ colorB } 50% 100%)`;
+
+        return `#${ colorA }`;
+    }, [ groupColors ]);
 
     return (
         <>
+            { !!groupColors &&
+                <CatalogGuildFurniRecolorFilter colorA={ groupColors.colorA } colorB={ groupColors.colorB } /> }
             <CatalogFirstProductSelectorWidgetView />
             <Column fullHeight gap={ 1 } overflow="hidden">
                 { !!currentOffer &&
@@ -38,7 +72,7 @@ export const CatalogLayouGuildCustomFurniView: FC<CatalogLayoutProps> = () =>
                         </div>
                     </div> }
                 <div className="grow! min-h-0 overflow-auto">
-                    <CatalogItemGridWidgetView columnCount={ 5 } columnMinWidth={ 36 } />
+                    <CatalogItemGridWidgetView className="nitro-catalog-classic-grid" columnCount={ 6 } columnMinHeight={ 80 } columnMinWidth={ 55 } tintColor={ tintColor } />
                 </div>
                 { !!currentOffer &&
                     <div className="flex shrink-0 flex-col gap-1">

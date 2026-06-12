@@ -9,11 +9,12 @@ interface CatalogGridOfferViewProps extends LayoutGridItemProps
 {
     offer: IPurchasableOffer;
     selectOffer: (offer: IPurchasableOffer) => void;
+    tintColor?: string;
 }
 
 export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
 {
-    const { offer = null, selectOffer = null, itemActive = false, ...rest } = props;
+    const { offer = null, selectOffer = null, itemActive = false, tintColor = null, ...rest } = props;
     const [ isMouseDown, setMouseDown ] = useState(false);
     const { requestOfferToMover = null } = useCatalogActions();
     const { currentType = CatalogType.NORMAL } = useCatalogUiState();
@@ -130,6 +131,7 @@ export const CatalogGridOfferView: FC<CatalogGridOfferViewProps> = props =>
                     className="nitro-catalog-classic-grid-offer-icon"
                     src={ iconUrl }
                     draggable={ false }
+                    style={ tintColor ? { filter: 'url(#guild-furni-recolor)', transform: 'translateZ(0)' } : undefined }
                     onError={ event =>
                     {
                         const fallbackIconUrl = product.getIconUrl(offer);
